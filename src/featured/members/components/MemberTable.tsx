@@ -62,7 +62,6 @@ export function MemberTable({ members }: MemberTableProps) {
             {members.map((member, i) => (
               <motion.tr
                 key={member.id}
-                layout
                 className="group transition-colors hover:bg-muted/30"
               >
                 <td className="px-4 py-3 font-medium">{member.nickname}</td>

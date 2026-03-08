@@ -5,8 +5,8 @@ export default function MembersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="회원 관리"
-        description="가입된 회원 목록을 조회하고 제재를 관리합니다."
+        title="유저 관리"
+        description="가입된 유저 목록을 조회하고 상세 정보를 확인합니다."
       />
       <MembersClient />
     </div>

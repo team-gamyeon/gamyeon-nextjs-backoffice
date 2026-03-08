@@ -1,49 +1,49 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { UserPlus, CheckCircle, AlertTriangle, Flag } from "lucide-react";
+import { UserPlus, StopCircle, Bell, FileBarChart2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 
 const activities = [
   {
     id: "1",
     type: "join",
-    message: "새 회원 김민준님이 가입했습니다",
+    message: "새 유저 한지호님이 가입했습니다",
     time: "방금 전",
     icon: UserPlus,
     color: "text-primary bg-primary/10",
   },
   {
     id: "2",
-    type: "session_complete",
-    message: "이서연님이 백엔드 개발자 면접을 완료했습니다",
-    time: "3분 전",
+    type: "report_done",
+    message: "최유진님의 PM 면접 리포트 분석이 완료되었습니다",
+    time: "5분 전",
     icon: CheckCircle,
     color: "text-green-600 bg-green-50 dark:bg-green-500/10",
   },
   {
     id: "3",
-    type: "sanction",
-    message: "박준혁님에게 경고 처분이 내려졌습니다",
-    time: "12분 전",
-    icon: AlertTriangle,
+    type: "abandoned",
+    message: "윤하은님이 면접을 중단했습니다 (2/5 진행)",
+    time: "18분 전",
+    icon: StopCircle,
     color: "text-amber-600 bg-amber-50 dark:bg-amber-500/10",
   },
   {
     id: "4",
-    type: "session_complete",
-    message: "최유진님이 PM 면접을 완료했습니다",
-    time: "28분 전",
-    icon: CheckCircle,
-    color: "text-green-600 bg-green-50 dark:bg-green-500/10",
+    type: "notice",
+    message: "공지사항 '서비스 이용약관 개정 안내'가 등록되었습니다",
+    time: "1시간 전",
+    icon: Bell,
+    color: "text-primary bg-primary/10",
   },
   {
     id: "5",
-    type: "report",
-    message: "이상 세션이 감지되었습니다 (session_id: 4821)",
-    time: "1시간 전",
-    icon: Flag,
-    color: "text-destructive bg-destructive/10",
+    type: "report_analyzing",
+    message: "강도윤님의 백엔드 면접 리포트 분석이 시작되었습니다",
+    time: "2시간 전",
+    icon: FileBarChart2,
+    color: "text-primary bg-primary/10",
   },
 ];
 
@@ -53,6 +53,7 @@ export function RecentActivity() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.35 }}
+      suppressHydrationWarning
     >
       <Card className="border-border/60">
         <CardHeader className="pb-3">

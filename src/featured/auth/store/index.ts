@@ -24,6 +24,7 @@ export const useAdminStore = create<AdminStore>()(
     }),
     {
       name: "admin-auth",
+      skipHydration: true,
     }
   )
 );

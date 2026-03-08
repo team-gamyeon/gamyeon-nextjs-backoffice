@@ -7,60 +7,36 @@
 const TOC = [
   { id: "login", index: "01", label: "로그인", src: "/login" },
   { id: "dashboard", index: "02", label: "대시보드", src: "/dashboard" },
-  { id: "members", index: "03", label: "회원 관리", src: "/members" },
+  { id: "members", index: "03", label: "유저 관리", src: "/members" },
   {
     id: "member-detail",
     index: "04",
-    label: "회원 상세",
+    label: "유저 상세",
     src: "/members/usr_001",
   },
   {
-    id: "sessions",
-    index: "05",
-    label: "면접 세션 관리",
-    src: "/sessions",
-  },
-  {
     id: "questions",
-    index: "06",
+    index: "05",
     label: "공통 질문 관리",
     src: "/questions",
   },
   {
-    id: "question-bank",
+    id: "notices",
+    index: "06",
+    label: "공지사항 관리",
+    src: "/notices",
+  },
+  {
+    id: "interviews",
     index: "07",
-    label: "질문 뱅크 관리",
-    src: "/question-bank",
+    label: "면접 관리",
+    src: "/interviews",
   },
   {
-    id: "ai-feedback",
+    id: "reports",
     index: "08",
-    label: "AI 피드백 품질",
-    src: "/ai-feedback",
-  },
-  {
-    id: "prompts",
-    index: "09",
-    label: "프롬프트 버전 관리",
-    src: "/prompts",
-  },
-  {
-    id: "statistics",
-    index: "10",
-    label: "직군별 통계",
-    src: "/statistics",
-  },
-  {
-    id: "anomaly",
-    index: "11",
-    label: "이상 세션 감지",
-    src: "/anomaly",
-  },
-  {
-    id: "stt-monitoring",
-    index: "12",
-    label: "STT 오류율 모니터링",
-    src: "/stt-monitoring",
+    label: "리포트 관리",
+    src: "/reports",
   },
 ];
 
@@ -80,8 +56,8 @@ function Section({
       <p className="mb-3 px-8 text-xs font-semibold uppercase tracking-widest text-neutral-400">
         {index} — {label}
       </p>
-      <div className="overflow-x-auto">
-        <div className="overflow-hidden rounded-xl border border-neutral-200 shadow-lg">
+      <div className="overflow-x-auto text-center">
+        <div className="mx-auto w-max overflow-hidden rounded-xl border border-neutral-200 shadow-lg text-left">
           <iframe
             src={src}
             width={1920}
