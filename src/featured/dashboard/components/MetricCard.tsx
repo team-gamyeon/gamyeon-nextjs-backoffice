@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowUpRight } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { cn } from "@/shared/lib/utils";
 
@@ -11,6 +12,7 @@ interface MetricCardProps {
   change: number;
   changeLabel: string;
   icon: React.ReactNode;
+  href?: string;
   index?: number;
 }
 
@@ -20,6 +22,7 @@ export function MetricCard({
   change,
   changeLabel,
   icon,
+  href,
   index = 0,
 }: MetricCardProps) {
   const isPositive = change >= 0;
@@ -29,8 +32,17 @@ export function MetricCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
+      suppressHydrationWarning
     >
-      <Card className="border-border/60 transition-shadow hover:shadow-md">
+      <Card className="group relative border-border/60 transition-shadow hover:shadow-md">
+        {href && (
+          <Link
+            href={href}
+            className="absolute right-3 top-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground/40 opacity-0 transition-all group-hover:opacity-100 hover:bg-accent hover:text-primary"
+          >
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        )}
         <CardContent className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -41,7 +53,7 @@ export function MetricCard({
                 "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
                 isPositive
                   ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
-                  : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+                  : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
               )}
             >
               {isPositive ? (

@@ -1,22 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
-import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
+import { Pencil, Trash2 } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 import { QuestionDialog } from "./QuestionDialog";
-import type { CommonQuestion, QuestionCategory } from "@/featured/questions/types";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  자기소개: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
-  "지원 동기": "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20",
-  "강점/약점": "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
-  경험: "bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20",
-  기술: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20",
-  행동: "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/20",
-  상황: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
-};
+import type { CommonQuestion } from "@/featured/questions/types";
 
 interface QuestionTableProps {
   questions: CommonQuestion[];
@@ -38,40 +27,31 @@ export function QuestionTable({
           <thead className="bg-muted/40">
             <tr>
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                카테고리
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                 질문 내용
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <th className="w-28 px-4 py-3 text-left font-medium text-muted-foreground">
                 상태
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                사용 횟수
+              <th className="w-32 px-4 py-3 text-left font-medium text-muted-foreground">
+                생성일시
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <th className="w-32 px-4 py-3 text-left font-medium text-muted-foreground">
                 수정일
               </th>
-              <th className="px-4 py-3" />
+              <th className="w-20 px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 bg-background">
-            {questions.map((question, i) => (
+            <AnimatePresence initial={false}>
+            {questions.map((question) => (
               <motion.tr
                 key={question.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
                 className="group transition-colors hover:bg-muted/30"
               >
-                <td className="px-4 py-3">
-                  <Badge
-                    variant="outline"
-                    className={CATEGORY_COLORS[question.category] ?? ""}
-                  >
-                    {question.category}
-                  </Badge>
-                </td>
                 <td className="max-w-md px-4 py-3">
                   <p className="line-clamp-2 leading-relaxed">{question.content}</p>
                 </td>
@@ -80,49 +60,43 @@ export function QuestionTable({
                     onClick={() =>
                       onUpdate(question.id, { isActive: !question.isActive })
                     }
-                    className="flex items-center gap-1.5 text-sm transition-colors"
-                  >
-                    {question.isActive ? (
-                      <>
-                        <ToggleRight className="h-4 w-4 text-primary" />
-                        <span className="text-primary font-medium">활성</span>
-                      </>
-                    ) : (
-                      <>
-                        <ToggleLeft className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">비활성</span>
-                      </>
+                    className={cn(
+                      "cursor-pointer inline-flex h-7 w-20 items-center justify-center rounded-full text-xs font-medium transition-colors",
+                      question.isActive
+                        ? "bg-primary/10 text-primary hover:bg-primary/20"
+                        : "bg-muted text-muted-foreground hover:bg-muted/60",
                     )}
+                  >
+                    {question.isActive ? "활성" : "비활성"}
                   </button>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {question.usageCount.toLocaleString()}회
+                  {question.createdAt}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {question.updatedAt}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
+                    <button
+                      type="button"
+                      className="cursor-pointer flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                       onClick={() => setEditTarget(question)}
                     >
                       <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
+                    </button>
+                    <button
+                      type="button"
+                      className="cursor-pointer flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => onDelete(question.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    </button>
                   </div>
                 </td>
               </motion.tr>
             ))}
+            </AnimatePresence>
           </tbody>
         </table>
 
@@ -139,7 +113,7 @@ export function QuestionTable({
           open={!!editTarget}
           onClose={() => setEditTarget(null)}
           onSave={(data) => {
-            onUpdate(editTarget.id, { ...data, updatedAt: "2026.02.27" });
+            onUpdate(editTarget.id, { ...data, updatedAt: "2026.03.07" });
             setEditTarget(null);
           }}
         />

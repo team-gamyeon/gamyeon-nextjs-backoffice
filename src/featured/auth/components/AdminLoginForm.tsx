@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BrainCircuit, Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { useAdminLogin } from "@/featured/auth/hooks/useAdminLogin";
+import Image from "next/image";
 
 export function AdminLoginForm() {
   const {
@@ -28,12 +29,19 @@ export function AdminLoginForm() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-8 text-center"
+          className="mb-4 text-center"
         >
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
-            <BrainCircuit className="h-8 w-8 text-primary-foreground" />
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg shadow-primary/30">
+            <Image
+              src="/images/Gamyeon_Logo.svg"
+              alt="Gamyeon Logo"
+              width={56}
+              height={56}
+              className="h-10 w-10 object-contain"
+            />
           </div>
-          <h1 className="mt-4 text-2xl font-bold">InterviewAI Admin</h1>
+
+          <h1 className="mt-4 text-2xl font-bold">Gamyeon Backoffice</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             관리자 계정으로 로그인해주세요
           </p>
@@ -45,7 +53,7 @@ export function AdminLoginForm() {
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <Card className="border-border/60 shadow-xl shadow-primary/5">
-            <CardHeader className="pb-2">
+            <CardHeader>
               <div className="flex items-center gap-2 rounded-lg bg-primary/8 px-3 py-2.5">
                 <Lock className="h-4 w-4 text-primary" />
                 <span className="text-xs font-medium text-primary">
@@ -54,7 +62,7 @@ export function AdminLoginForm() {
               </div>
             </CardHeader>
 
-            <CardContent className="pt-2">
+            <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 {error && (
                   <motion.div
@@ -62,7 +70,7 @@ export function AdminLoginForm() {
                     animate={{ opacity: 1, height: "auto" }}
                     className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
                   >
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                    <AlertCircle className="h-4 w-4 shrink-0" />
                     {error}
                   </motion.div>
                 )}

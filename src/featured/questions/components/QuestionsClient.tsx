@@ -2,20 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { QuestionTable } from "./QuestionTable";
 import { QuestionDialog } from "./QuestionDialog";
-import type { CommonQuestion, QuestionCategory } from "@/featured/questions/types";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import type { CommonQuestion } from "@/featured/questions/types";
 
 const INITIAL_QUESTIONS: CommonQuestion[] = [
   {
@@ -101,36 +95,23 @@ const INITIAL_QUESTIONS: CommonQuestion[] = [
   },
 ];
 
-const CATEGORIES: Array<QuestionCategory | "전체"> = [
-  "전체",
-  "자기소개",
-  "지원 동기",
-  "강점/약점",
-  "경험",
-  "기술",
-  "행동",
-  "상황",
-];
-
 export function QuestionsClient() {
   const [questions, setQuestions] = useState<CommonQuestion[]>(INITIAL_QUESTIONS);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<QuestionCategory | "전체">("전체");
   const [activeTab, setActiveTab] = useState<"all" | "active" | "inactive">("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const debouncedSearch = useDebounce(search, 200);
+
   const filtered = useMemo(() => {
-    return questions
-      .filter((q) => {
-        if (search && !q.content.toLowerCase().includes(search.toLowerCase()))
-          return false;
-        if (category !== "전체" && q.category !== category) return false;
-        if (activeTab === "active" && !q.isActive) return false;
-        if (activeTab === "inactive" && q.isActive) return false;
-        return true;
-      })
-      .sort((a, b) => b.usageCount - a.usageCount);
-  }, [questions, search, category, activeTab]);
+    return questions.filter((q) => {
+      if (debouncedSearch && !q.content.toLowerCase().includes(debouncedSearch.toLowerCase()))
+        return false;
+      if (activeTab === "active" && !q.isActive) return false;
+      if (activeTab === "inactive" && q.isActive) return false;
+      return true;
+    });
+  }, [questions, debouncedSearch, activeTab]);
 
   const handleUpdate = (id: string, data: Partial<CommonQuestion>) => {
     setQuestions((prev) =>
@@ -142,17 +123,15 @@ export function QuestionsClient() {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
 
-  const handleAdd = (data: {
-    content: string;
-    category: QuestionCategory;
-    isActive: boolean;
-  }) => {
+  const handleAdd = (data: { content: string; isActive: boolean }) => {
     const newQuestion: CommonQuestion = {
       id: String(Date.now()),
-      ...data,
+      content: data.content,
+      category: "자기소개",
+      isActive: data.isActive,
       usageCount: 0,
-      createdAt: "2026.02.27",
-      updatedAt: "2026.02.27",
+      createdAt: "2026.03.07",
+      updatedAt: "2026.03.07",
     };
     setQuestions((prev) => [newQuestion, ...prev]);
   };
@@ -166,6 +145,7 @@ export function QuestionsClient() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="space-y-4"
+      suppressHydrationWarning
     >
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm">
@@ -192,15 +172,9 @@ export function QuestionsClient() {
           onValueChange={(v) => setActiveTab(v as typeof activeTab)}
         >
           <TabsList className="h-9">
-            <TabsTrigger value="all" className="text-xs">
-              전체
-            </TabsTrigger>
-            <TabsTrigger value="active" className="text-xs">
-              활성
-            </TabsTrigger>
-            <TabsTrigger value="inactive" className="text-xs">
-              비활성
-            </TabsTrigger>
+            <TabsTrigger value="all" className="text-xs">전체</TabsTrigger>
+            <TabsTrigger value="active" className="text-xs">활성</TabsTrigger>
+            <TabsTrigger value="inactive" className="text-xs">비활성</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -214,28 +188,9 @@ export function QuestionsClient() {
           />
         </div>
 
-        <Select
-          value={category}
-          onValueChange={(v) =>
-            setCategory(v as QuestionCategory | "전체")
-          }
-        >
-          <SelectTrigger className="h-9 w-36">
-            <Filter className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Button
           size="sm"
-          className="h-9 gap-1.5"
+          className="h-9 gap-1.5 cursor-pointer"
           onClick={() => setIsDialogOpen(true)}
         >
           <Plus className="h-4 w-4" />

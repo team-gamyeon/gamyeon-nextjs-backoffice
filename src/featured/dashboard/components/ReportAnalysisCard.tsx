@@ -6,10 +6,13 @@ import { PieChart, Pie, Cell, Sector } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 
 const data = [
-  { name: "완료", value: 68, color: "oklch(0.55 0.15 180)" },
-  { name: "진행중", value: 15, color: "oklch(0.72 0.18 150)" },
-  { name: "이탈", value: 17, color: "oklch(0.62 0.15 25)" },
+  { name: "분석 완료", value: 6, color: "oklch(0.55 0.15 180)" },
+  { name: "분석 중", value: 1, color: "oklch(0.72 0.18 150)" },
+  { name: "실패", value: 1, color: "oklch(0.62 0.15 25)" },
 ];
+
+const total = data.reduce((sum, d) => sum + d.value, 0);
+const completedPct = Math.round((data[0].value / total) * 100);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderActiveShape = (props: any) => {
@@ -27,7 +30,7 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export function CompletionRateCard() {
+export function ReportAnalysisCard() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const active = activeIndex !== null ? data[activeIndex] : null;
@@ -36,13 +39,13 @@ export function CompletionRateCard() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.3 }}
+      transition={{ duration: 0.4, delay: 0.4 }}
       className="flex"
       suppressHydrationWarning
     >
       <Card className="border-border/60 h-full w-full">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold">면접 완료율</CardTitle>
+          <CardTitle className="text-base font-semibold">리포트 분석율</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center">
@@ -84,7 +87,9 @@ export function CompletionRateCard() {
                       transition: "fill 0.15s",
                     }}
                   >
-                    {active ? `${active.value}%` : "68%"}
+                    {active
+                      ? `${Math.round((active.value / total) * 100)}%`
+                      : `${completedPct}%`}
                   </text>
                   <text
                     x={100}
@@ -109,7 +114,7 @@ export function CompletionRateCard() {
                   />
                   <span className="text-muted-foreground">{item.name}</span>
                 </div>
-                <span className="font-medium">{item.value}%</span>
+                <span className="font-medium">{item.value}건</span>
               </div>
             ))}
           </div>

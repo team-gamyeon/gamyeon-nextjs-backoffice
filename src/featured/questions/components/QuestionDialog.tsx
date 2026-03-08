@@ -10,13 +10,13 @@ import {
 } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { QuestionForm } from "./QuestionForm";
-import type { CommonQuestion, QuestionCategory } from "@/featured/questions/types";
+import type { CommonQuestion } from "@/featured/questions/types";
 
 interface QuestionDialogProps {
   question?: CommonQuestion;
   open: boolean;
   onClose: () => void;
-  onSave: (data: { content: string; category: QuestionCategory; isActive: boolean }) => void;
+  onSave: (data: { content: string; isActive: boolean }) => void;
 }
 
 export function QuestionDialog({
@@ -27,11 +27,9 @@ export function QuestionDialog({
 }: QuestionDialogProps) {
   const [formData, setFormData] = useState<{
     content: string;
-    category: QuestionCategory;
     isActive: boolean;
   }>({
     content: question?.content ?? "",
-    category: question?.category ?? "자기소개",
     isActive: question?.isActive ?? true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,12 +54,13 @@ export function QuestionDialog({
         <QuestionForm initial={question} onChange={setFormData} />
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="cursor-pointer">
             취소
           </Button>
           <Button
             onClick={handleSave}
             disabled={!formData.content.trim() || isSubmitting}
+            className="cursor-pointer"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">

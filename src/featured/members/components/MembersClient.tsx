@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MemberFilters } from "./MemberFilters";
 import { MemberTable } from "./MemberTable";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 import type { Member, MemberFiltersState } from "@/featured/members/types";
 
 const MOCK_MEMBERS: Member[] = [
@@ -137,11 +138,13 @@ export function MembersClient() {
     sortOrder: "desc",
   });
 
+  const debouncedSearch = useDebounce(filters.search, 200);
+
   const filtered = useMemo(() => {
     let result = [...MOCK_MEMBERS];
 
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
       result = result.filter(
         (m) =>
           m.nickname.toLowerCase().includes(q) ||
@@ -161,7 +164,7 @@ export function MembersClient() {
     });
 
     return result;
-  }, [filters]);
+  }, [debouncedSearch, filters.status, filters.sortBy, filters.sortOrder]);
 
   const handleFilterChange = (partial: Partial<MemberFiltersState>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -173,6 +176,7 @@ export function MembersClient() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="space-y-4"
+      suppressHydrationWarning
     >
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
