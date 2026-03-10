@@ -23,11 +23,11 @@ export function QuestionTable({ questions, onUpdate, onDelete }: QuestionTablePr
           <thead className="bg-muted/40">
             <tr>
               <th className="text-muted-foreground px-4 py-3 text-left font-medium">질문 내용</th>
-              <th className="text-muted-foreground w-50 px-4 py-3 text-center font-medium">상태</th>
-              <th className="text-muted-foreground w-50 px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-40 px-4 py-3 text-center font-medium">상태</th>
+              <th className="text-muted-foreground w-40 px-4 py-3 text-center font-medium">
                 생성일시
               </th>
-              <th className="text-muted-foreground w-50 px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-40 px-4 py-3 text-center font-medium">
                 수정일
               </th>
               <th className="w-24 px-4 py-3" />
