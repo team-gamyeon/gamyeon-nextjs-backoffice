@@ -186,19 +186,11 @@ export function AdminHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            {/* <DropdownMenuItem
-              className="text-destructive focus:text-destructive cursor-pointer gap-2"
-              onClick={logout}
-            >
-              <LogOut className="h-4 w-4" />
-              로그아웃
-            </DropdownMenuItem> */}
 
             <DropdownMenuItem
               className="text-destructive focus:text-destructive cursor-pointer gap-2"
               onClick={logout}
             >
-              {/* text-destructive (또는 text-red-500) 추가 */}
               <LogOut className="text-destructive h-4 w-4" />
               로그아웃
             </DropdownMenuItem>
