@@ -2,13 +2,13 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { QuestionTable } from './QuestionTable'
 import { QuestionDialog } from './QuestionDialog'
 import { useDebounce } from '@/shared/hooks/useDebounce'
+import { SearchInput } from '@/shared/components/SearchInput'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 const INITIAL_QUESTIONS: CommonQuestion[] = [
@@ -174,15 +174,12 @@ export function QuestionsClient() {
           </TabsList>
         </Tabs>
 
-        <div className="relative min-w-48 flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-          <Input
-            placeholder="질문 내용 검색..."
-            className="h-9 pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="질문 내용 검색..."
+          className="min-w-48 flex-1"
+        />
 
         <Button
           size="sm"
