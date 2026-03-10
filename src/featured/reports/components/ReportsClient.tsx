@@ -239,19 +239,21 @@ export function ReportsClient() {
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm">
         <span className="text-muted-foreground">
-          전체 <span className="text-foreground font-semibold">{MOCK_REPORTS.length}</span>개
+          전체 <span className="text-foreground mr-1 font-semibold">{MOCK_REPORTS.length}</span>개
         </span>
         <span className="text-muted-foreground">
           완료{' '}
-          <span className="font-semibold text-green-600 dark:text-green-400">{completedCount}</span>
+          <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
+            {completedCount}
+          </span>
           개
         </span>
         <span className="text-muted-foreground">
-          분석 중 <span className="text-primary font-semibold">{analyzingCount}</span>개
+          분석 중 <span className="text-primary mr-1 font-semibold">{analyzingCount}</span>개
         </span>
         {failedCount > 0 && (
           <span className="text-muted-foreground">
-            실패 <span className="text-destructive font-semibold">{failedCount}</span>개
+            실패 <span className="text-destructive mr-1 font-semibold">{failedCount}</span>개
           </span>
         )}
       </div>
