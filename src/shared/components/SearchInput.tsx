@@ -6,7 +6,7 @@ interface SearchInputProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
-  className?: string // 너비 조절용 (예: flex-1, w-64 등)
+  className?: string 
 }
 
 export function SearchInput({ value, onChange, placeholder, className }: SearchInputProps) {
