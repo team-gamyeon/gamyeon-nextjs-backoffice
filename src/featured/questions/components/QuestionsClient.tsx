@@ -148,13 +148,13 @@ export function QuestionsClient() {
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm">
         <span className="text-muted-foreground">
-          전체 <span className="text-foreground font-semibold">{questions.length}</span>개
+          전체 <span className="text-foreground mr-1 font-semibold">{questions.length}</span>개
         </span>
         <span className="text-muted-foreground">
-          활성 <span className="text-primary font-semibold">{activeCount}</span>개
+          활성 <span className="text-primary mr-1 font-semibold">{activeCount}</span>개
         </span>
         <span className="text-muted-foreground">
-          비활성 <span className="text-foreground font-semibold">{inactiveCount}</span>개
+          비활성 <span className="mr-1 font-semibold text-gray-500">{inactiveCount}</span>개
         </span>
       </div>
 
