@@ -1,10 +1,20 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Bell, Search, StopCircle, UserPlus, FileBarChart2 } from 'lucide-react'
+import {
+  Bell,
+  Search,
+  StopCircle,
+  UserPlus,
+  FileBarChart2,
+  LayoutDashboard,
+  LogOut,
+} from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -151,32 +161,45 @@ export function AdminHeader() {
         </DropdownMenu>
 
         {/* User menu */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex h-9 cursor-pointer items-center gap-2 rounded-full px-2"
-            >
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs outline-none">
+            <button className="ring-primary/40 flex items-center gap-2 rounded-full transition outline-none hover:ring-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                   관
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium" suppressHydrationWarning>
-                {admin?.name ?? '관리자'}
-              </span>
-            </Button>
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="font-normal">
-              <p className="text-muted-foreground text-xs">로그인 계정</p>
-              <p className="truncate text-sm font-medium">{admin?.email ?? 'admin@gamyeon.kr'}</p>
-            </DropdownMenuLabel>
+            <div className="px-3 py-2">
+              <p className="text-sm font-medium">관리자</p>
+              <p className="text-muted-foreground truncate text-xs">
+                {admin?.email ?? 'admin@gamyeon.kr'}
+              </p>
+            </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard" className="cursor-pointer gap-2">
+                <LayoutDashboard className="h-4 w-4" />
+                대시보드
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {/* <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer gap-2"
               onClick={logout}
-              className="text-destructive focus:text-destructive cursor-pointer"
             >
+              <LogOut className="h-4 w-4" />
+              로그아웃
+            </DropdownMenuItem> */}
+
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer gap-2"
+              onClick={logout}
+            >
+              {/* text-destructive (또는 text-red-500) 추가 */}
+              <LogOut className="text-destructive h-4 w-4" />
               로그아웃
             </DropdownMenuItem>
           </DropdownMenuContent>
