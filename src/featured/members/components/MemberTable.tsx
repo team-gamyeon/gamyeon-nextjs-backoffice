@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, MoreHorizontal, Shield, ShieldOff } from 'lucide-react'
+import { MoreHorizontal, Shield, ShieldOff } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import {
   DropdownMenu,
@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { MemberStatusBadge } from './MemberStatusBadge'
-import { MemberDetailDialog } from './MemberDetailDialog'
 import { SanctionDialog } from './SanctionDialog'
 import type { Member } from '@/featured/members/types'
 
@@ -24,7 +23,6 @@ interface MemberTableProps {
 export function MemberTable({ members }: MemberTableProps) {
   const [isMounted, setIsMounted] = useState(false)
 
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [sanctionTarget, setSanctionTarget] = useState<{
     member: Member
     type: 'warning' | 'suspended' | 'release'
@@ -40,12 +38,10 @@ export function MemberTable({ members }: MemberTableProps) {
 
   return (
     <>
-      {/* 💡 표 전체 좌우 여백을 늘리고 싶다면 부모 div에 px을 주거나, th/td의 px을 늘립니다. 여기선 th/td의 px을 늘렸습니다. */}
       <div className="border-border/60 overflow-hidden rounded-lg border">
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              {/* 항목 순서 재배치 및 px-6으로 좌우 여백 확대 */}
               <th className="text-muted-foreground w-[25%] px-6 py-4 text-left font-medium">
                 이메일
               </th>
@@ -64,7 +60,7 @@ export function MemberTable({ members }: MemberTableProps) {
               <th className="text-muted-foreground w-[10%] px-6 py-4 text-center font-medium">
                 상태
               </th>
-              <th className="w-24 px-6 py-4" /> {/* 액션 버튼 고정 너비 약간 증가 */}
+              <th className="w-16 px-6 py-4" />
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
@@ -88,14 +84,6 @@ export function MemberTable({ members }: MemberTableProps) {
                 </td>
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-foreground h-8 w-8 transition-colors"
-                      onClick={() => setSelectedMember(member)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -159,14 +147,6 @@ export function MemberTable({ members }: MemberTableProps) {
           </div>
         )}
       </div>
-
-      {selectedMember && (
-        <MemberDetailDialog
-          member={selectedMember}
-          open={!!selectedMember}
-          onClose={() => setSelectedMember(null)}
-        />
-      )}
 
       {sanctionTarget && (
         <SanctionDialog
