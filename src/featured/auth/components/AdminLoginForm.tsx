@@ -1,13 +1,14 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/ui/card";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
-import { useAdminLogin } from "@/featured/auth/hooks/useAdminLogin";
-import Image from "next/image";
+import { motion } from 'framer-motion'
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react'
+import { Button } from '@/shared/ui/button'
+import { Card, CardContent, CardHeader } from '@/shared/ui/card'
+import { Input } from '@/shared/ui/input'
+import { Label } from '@/shared/ui/label'
+import { useAdminLogin } from '@/featured/auth/hooks/useAdminLogin'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export function AdminLoginForm() {
   const {
@@ -20,131 +21,120 @@ export function AdminLoginForm() {
     isLoading,
     error,
     handleLogin,
-  } = useAdminLogin();
+  } = useAdminLogin()
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
-      <div className="w-full max-w-sm">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-4 text-center"
-        >
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg shadow-primary/30">
+    <div className="bg-muted/20 flex min-h-screen items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md"
+      >
+        {/* 로고 영역: 유저 로그인 화면과 동일하게 수정 */}
+        <div className="mb-4 text-center">
+          <Link
+            href="/admin/dashboard"
+            className="text-foreground flex items-center justify-center gap-0.5"
+          >
             <Image
-              src="/images/Gamyeon_Logo.svg"
-              alt="Gamyeon Logo"
-              width={56}
-              height={56}
-              className="h-10 w-10 object-contain"
+              src="/images/Gamyeon_Logo.png"
+              alt="Gamyeon logo"
+              width={1024}
+              height={768}
+              style={{ height: '44px', width: 'auto' }}
             />
-          </div>
+          </Link>
+        </div>
 
-          <h1 className="mt-4 text-2xl font-bold">Gamyeon Backoffice</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            관리자 계정으로 로그인해주세요
-          </p>
-        </motion.div>
+        <Card className="border-border/50 shadow-primary/5 py-6 shadow-xl">
+          <CardHeader className="pb-4 text-center">
+            {/* 제목과 설명을 흰색 박스(Card) 내부로 이동 */}
+            <h1 className="text-2xl font-bold">Gamyeon Backoffice</h1>
+            <p className="text-muted-foreground text-sm">관리자 계정으로 로그인해주세요</p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          <Card className="border-border/60 shadow-xl shadow-primary/5">
-            <CardHeader>
-              <div className="flex items-center gap-2 rounded-lg bg-primary/8 px-3 py-2.5">
-                <Lock className="h-4 w-4 text-primary" />
-                <span className="text-xs font-medium text-primary">
-                  관리자 전용 접근
-                </span>
+            {/* 관리자 전용 표시 배지 */}
+            <div className="mt-4 flex justify-center">
+              <div className="bg-primary/5 border-primary/10 flex items-center gap-2 rounded-lg border px-3 py-2">
+                <Lock className="text-primary h-3.5 w-3.5" />
+                <span className="text-primary text-xs font-medium">관리자 전용 접근</span>
               </div>
-            </CardHeader>
+            </div>
+          </CardHeader>
 
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
-                  >
-                    <AlertCircle className="h-4 w-4 shrink-0" />
-                    {error}
-                  </motion.div>
-                )}
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">이메일</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="admin@interviewai.kr"
-                      className="pl-10"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="password">비밀번호</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="비밀번호를 입력하세요"
-                      className="pl-10 pr-10"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={isLoading}
+          <CardContent className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md px-3 py-2.5 text-sm"
                 >
-                  {isLoading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                      로그인 중...
-                    </span>
-                  ) : (
-                    "로그인"
-                  )}
-                </Button>
-              </form>
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  {error}
+                </motion.div>
+              )}
 
-              <p className="mt-4 text-center text-xs text-muted-foreground">
-                테스트 계정:{" "}
-                <span className="font-mono text-foreground">
-                  admin@interviewai.kr / admin1234!
-                </span>
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">이메일</Label>
+                <div className="relative">
+                  <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@interviewai.kr"
+                    className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">비밀번호</Label>
+                <div className="relative">
+                  <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="비밀번호를 입력하세요"
+                    className="pr-10 pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <span className="border-primary-foreground h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                    로그인 중...
+                  </span>
+                ) : (
+                  '로그인'
+                )}
+              </Button>
+            </form>
+
+            <p className="text-muted-foreground mt-4 text-center text-xs">
+              테스트 계정:{' '}
+              <span className="text-foreground bg-muted rounded px-1.5 py-0.5 font-mono">
+                admin@interviewai.kr / admin1234!
+              </span>
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
-  );
+  )
 }
