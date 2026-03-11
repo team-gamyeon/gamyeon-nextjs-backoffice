@@ -16,7 +16,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     userNickname: '최유진',
     interviewTitle: 'PM 직무 면접',
     status: 'completed',
-    score: 88,
+    score: 88, // 파란색 (75점 이상)
     summary:
       'PM 직군에 적합한 논리적 사고력과 커뮤니케이션 능력이 돋보입니다. 데이터 기반 의사결정 경험이 풍부하며 팀 리더십 역량이 우수합니다.',
     strengths: [
@@ -34,11 +34,15 @@ const MOCK_REPORTS: AnalysisReport[] = [
     userNickname: '김민준',
     interviewTitle: '프론트엔드 기술 면접',
     status: 'completed',
-    score: 74,
+    score: 45, // 노란색/주황색 (25~49점)
     summary:
-      '프론트엔드 기술 역량은 양호하나 실무 프로젝트 경험 서술에서 구체성이 부족합니다. 문제 해결 접근 방식은 체계적입니다.',
-    strengths: ['최신 기술 스택 이해', '체계적인 문제 해결 접근'],
-    improvements: ['실무 경험 구체화 필요', '성능 최적화 사례 준비 권장', '팀 협업 경험 어필 강화'],
+      '프론트엔드 기술에 대한 이해도가 다소 부족하며, 실무 적용 경험에 대한 답변이 미흡합니다. 프레임워크 기초 개념 학습이 더 필요합니다.',
+    strengths: ['최신 기술 동향 관심', '체계적인 문제 해결 접근 시도'],
+    improvements: [
+      '실무 경험 구체화 필요',
+      'JavaScript 코어 개념 학습 권장',
+      '성능 최적화 사례 준비',
+    ],
     createdAt: '2026.02.27 13:47',
     completedAt: '2026.02.27 13:50',
   },
@@ -48,7 +52,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     userNickname: '이서연',
     interviewTitle: '백엔드 기술 면접',
     status: 'completed',
-    score: 92,
+    score: 92, // 파란색 (75점 이상)
     summary:
       '백엔드 개발 전반에 걸쳐 높은 수준의 역량을 보여주었습니다. 시스템 설계 능력과 기술적 깊이가 뛰어나며 면접 전반에서 자신감이 느껴졌습니다.',
     strengths: ['탁월한 시스템 설계 능력', '깊이 있는 기술 이해', '명확한 의사 전달'],
@@ -70,11 +74,11 @@ const MOCK_REPORTS: AnalysisReport[] = [
     userNickname: '임서준',
     interviewTitle: '데이터 분석가 면접',
     status: 'completed',
-    score: 61,
+    score: 18, // 빨간색 (0~24점)
     summary:
-      '데이터 분석 기초 역량은 갖추고 있으나 실제 비즈니스 인사이트 도출 경험이 부족합니다. 통계적 사고력을 더 발전시킬 필요가 있습니다.',
-    strengths: ['기초 통계 이해', 'SQL 활용 능력'],
-    improvements: ['비즈니스 인사이트 도출 경험 확보', '시각화 역량 강화', 'A/B 테스트 경험 준비'],
+      '데이터 분석에 대한 기본적인 이해가 부족하며, 질문의 의도를 파악하는 데 어려움을 보였습니다. 통계적 사고력과 SQL 작성 능력을 기초부터 다시 다져야 합니다.',
+    strengths: ['학습에 대한 열정'],
+    improvements: ['기초 통계학 재학습', 'SQL 쿼리 작성 능력 강화', '비즈니스 로직 이해도 향상'],
     createdAt: '2026.02.25 09:46',
     completedAt: '2026.02.25 09:49',
   },
@@ -84,9 +88,9 @@ const MOCK_REPORTS: AnalysisReport[] = [
     userNickname: '최유진',
     interviewTitle: 'PM 직무 면접',
     status: 'completed',
-    score: 79,
+    score: 65, // 초록색 (50~74점)
     summary:
-      '전반적으로 양호한 면접 역량을 보였습니다. 이전 면접 대비 성장이 느껴지며 구체적인 사례 제시가 더 강화되었습니다.',
+      '기본적인 PM 역량은 갖추고 있으나, 특정 상황에서의 위기 대처 능력에 대한 답변이 모호합니다. 구체적인 사례 제시가 더 강화되어야 합니다.',
     strengths: ['논리적 사고', '시장 분석 능력'],
     improvements: ['수치 기반 성과 언급 강화', '경쟁사 분석 역량 보강'],
     createdAt: '2026.02.24 11:33',
@@ -125,11 +129,11 @@ function ScoreBadge({ score }: { score?: number }) {
   // 25점 기준으로 컬러 단계 세분화
   let color = ''
   if (score >= 75) {
-    color = 'text-blue-600 dark:text-blue-400' // 75~100: 우수 (초록)
+    color = 'text-blue-600 dark:text-blue-400' // 75~100: 우수 (파랑)
   } else if (score >= 50) {
-    color = 'text-green-600 dark:text-green-400' // 50~74: 보통 (파랑)
+    color = 'text-green-600 dark:text-green-400' // 50~74: 보통 (초록)
   } else if (score >= 25) {
-    color = 'text-amber-600 dark:text-amber-400' // 25~49: 미흡 (노랑/주황)
+    color = 'text-yellow-500 dark:text-yellow-300' // 25~49: 미흡 (노랑)
   } else {
     color = 'text-red-600 dark:text-red-400' // 0~24: 부족 (빨강)
   }
@@ -300,7 +304,6 @@ export function ReportsClient() {
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              {/* 👇 인지 흐름(유저->면접->결과->시간->ID)에 맞게 순서/비율/정렬 변경 👇 */}
               <th className="text-muted-foreground w-[12%] px-4 py-3 text-left font-medium">
                 유저
               </th>
@@ -334,7 +337,6 @@ export function ReportsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="group hover:bg-muted/30 transition-colors"
               >
-                {/* 👇 데이터 순서도 표 헤더에 맞춰 변경됨 👇 */}
                 <td className="truncate px-4 py-3 text-left font-medium">{report.userNickname}</td>
 
                 <td className="text-muted-foreground truncate px-4 py-3 text-left">
