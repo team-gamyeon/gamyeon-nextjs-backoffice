@@ -246,50 +246,55 @@ export function NoticesClient() {
               transition={{ delay: i * 0.04 }}
               className="border-border/60 bg-card rounded-lg border"
             >
-              {/* Header row */}
-              <div className="flex items-center gap-3 px-4 py-3">
+              <div className="flex items-center justify-between gap-4 px-4 py-3">
                 <button
                   type="button"
                   onClick={() => setExpandedId(isExpanded ? null : notice.id)}
-                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left"
+                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 pr-4 text-left"
                 >
                   {isExpanded ? (
                     <ChevronUp className="text-muted-foreground h-4 w-4 shrink-0" />
                   ) : (
                     <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" />
                   )}
-                  <span className="flex-1 truncate text-sm font-medium">{notice.title}</span>
+                  <span className="truncate text-sm font-medium">{notice.title}</span>
                 </button>
+                <div className="flex shrink-0 items-center gap-6 sm:gap-8">
+                  <span className="text-muted-foreground w-24 text-center text-xs">
+                    {notice.createdAt}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleToggle(notice.id)}
+                    className={cn(
+                      'inline-flex h-7 w-20 shrink-0 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
+                      notice.isActive
+                        ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/60',
+                    )}
+                  >
+                    {notice.isActive ? '활성' : '비활성'}
+                  </button>
 
-                <span className="text-muted-foreground shrink-0 text-xs">{notice.createdAt}</span>
-
-                <button
-                  type="button"
-                  onClick={() => handleToggle(notice.id)}
-                  className={cn(
-                    'inline-flex h-7 w-20 shrink-0 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
-                    notice.isActive
-                      ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/60',
-                  )}
-                >
-                  {notice.isActive ? '활성' : '비활성'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleEdit(notice)}
-                  className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(notice.id)}
-                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(notice)}
+                      className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors"
+                      title="수정"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(notice.id)}
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors"
+                      title="삭제"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Expanded content */}
