@@ -14,7 +14,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r001',
     sessionId: '4901',
     userNickname: '최유진',
-    jobCategory: 'PM',
+    interviewTitle: 'PM 직무 면접',
     status: 'completed',
     score: 88,
     summary:
@@ -32,7 +32,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r002',
     sessionId: '4900',
     userNickname: '김민준',
-    jobCategory: '프론트엔드',
+    interviewTitle: '프론트엔드 기술 면접',
     status: 'completed',
     score: 74,
     summary:
@@ -46,7 +46,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r003',
     sessionId: '4898',
     userNickname: '이서연',
-    jobCategory: '백엔드',
+    interviewTitle: '백엔드 기술 면접',
     status: 'completed',
     score: 92,
     summary:
@@ -60,7 +60,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r004',
     sessionId: '4899',
     userNickname: '강도윤',
-    jobCategory: '백엔드',
+    interviewTitle: '백엔드 기술 면접',
     status: 'analyzing',
     createdAt: '2026.02.27 15:45',
   },
@@ -68,7 +68,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r005',
     sessionId: '4896',
     userNickname: '임서준',
-    jobCategory: '데이터 분석',
+    interviewTitle: '데이터 분석가 면접',
     status: 'completed',
     score: 61,
     summary:
@@ -82,7 +82,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r006',
     sessionId: '4894',
     userNickname: '최유진',
-    jobCategory: 'PM',
+    interviewTitle: 'PM 직무 면접',
     status: 'completed',
     score: 79,
     summary:
@@ -96,7 +96,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r007',
     sessionId: '4885',
     userNickname: '정다현',
-    jobCategory: '디자이너',
+    interviewTitle: 'UX/UI 디자이너 면접',
     status: 'failed',
     createdAt: '2026.02.23 09:00',
   },
@@ -149,8 +149,8 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
         <div className="space-y-4 text-sm">
           <div className="bg-muted/40 flex flex-wrap gap-4 rounded-lg px-4 py-3">
             <div>
-              <p className="text-muted-foreground text-xs">직군</p>
-              <p className="font-medium">{report.jobCategory}</p>
+              <p className="text-muted-foreground text-xs">면접 제목</p>
+              <p className="font-medium">{report.interviewTitle}</p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs">세션 ID</p>
@@ -177,7 +177,7 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
             <div>
               <p className="mb-2 font-semibold text-green-600 dark:text-green-400">강점</p>
               <ul className="space-y-1">
-                {report.strengths.map((s, i) => (
+                {report.strengths.map((s: string, i: number) => (
                   <li key={i} className="text-muted-foreground flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
                     {s}
@@ -191,7 +191,7 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
             <div>
               <p className="mb-2 font-semibold text-amber-600 dark:text-amber-400">개선 필요</p>
               <ul className="space-y-1">
-                {report.improvements.map((s, i) => (
+                {report.improvements.map((s: string, i: number) => (
                   <li key={i} className="text-muted-foreground flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                     {s}
@@ -209,7 +209,7 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
 export function ReportsClient() {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<ReportStatus | 'all'>('all')
-  const [selected, setSelected] = useState<AnalysisReport | null>(null)
+  const [selected, setSelected] = useState<any | null>(null)
 
   const filtered = useMemo(() => {
     return MOCK_REPORTS.filter((r) => {
@@ -287,17 +287,33 @@ export function ReportsClient() {
 
       {/* Table */}
       <div className="border-border/60 overflow-hidden rounded-lg border">
-        <table className="w-full text-sm">
+        {/* table-fixed 추가 및 각 항목별 비율(w-[%]) 적용 */}
+        <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">리포트 ID</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">세션 ID</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">유저</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">직군</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">상태</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">점수</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">생성일시</th>
-              <th className="px-4 py-3" />
+              {/* 인지 흐름에 맞춘 순서 변경 및 정렬 적용 */}
+              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+                생성일시
+              </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                리포트 ID
+              </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                세션 ID
+              </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                유저
+              </th>
+              <th className="text-muted-foreground w-[25%] px-4 py-3 text-left font-medium">
+                면접 제목
+              </th>
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
+                상태
+              </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                점수
+              </th>
+              <th className="w-[8%] px-4 py-3 text-center" />
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
@@ -309,39 +325,54 @@ export function ReportsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="group hover:bg-muted/30 transition-colors"
               >
-                <td className="px-4 py-3">
+                {/* 데이터 순서도 헤더와 동일하게 매핑 및 정렬 */}
+                <td className="text-muted-foreground truncate px-4 py-3 text-center">
+                  {report.createdAt}
+                </td>
+                <td className="truncate px-4 py-3 text-center">
                   <span className="text-muted-foreground font-mono text-xs">{report.id}</span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="truncate px-4 py-3 text-center">
                   <span className="text-muted-foreground font-mono text-xs">
                     #{report.sessionId}
                   </span>
                 </td>
-                <td className="px-4 py-3 font-medium">{report.userNickname}</td>
-                <td className="text-muted-foreground px-4 py-3">{report.jobCategory}</td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={report.status} />
+                <td className="truncate px-4 py-3 text-center font-medium">
+                  {report.userNickname}
                 </td>
-                <td className="px-4 py-3">
+                <td className="text-muted-foreground truncate px-4 py-3 text-left">
+                  {report.interviewTitle}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {/* Badge가 가운데 정렬되도록 flex 컨테이너에 justify-center 추가 */}
+                  <div className="flex justify-center">
+                    <StatusBadge status={report.status} />
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-center">
                   <ScoreBadge score={report.score} />
                 </td>
-                <td className="text-muted-foreground px-4 py-3">{report.createdAt}</td>
-                <td className="px-4 py-3">
-                  {report.status === 'completed' ? (
-                    <button
-                      type="button"
-                      onClick={() => setSelected(report)}
-                      className="text-primary hover:bg-primary/10 flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      상세 보기
-                    </button>
-                  ) : report.status === 'failed' ? (
-                    <span className="text-destructive flex items-center gap-1 text-xs opacity-0 group-hover:opacity-100">
-                      <AlertCircle className="h-3.5 w-3.5" />
-                      분석 실패
-                    </span>
-                  ) : null}
+                <td className="px-4 py-3 text-center">
+                  <div className="flex justify-center">
+                    {report.status === 'completed' ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelected(report)}
+                        title="상세 보기"
+                        className="text-primary hover:bg-primary/10 flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        {/* 텍스트 제거하고 아이콘만 유지 */}
+                        <FileText className="h-4 w-4" />
+                      </button>
+                    ) : report.status === 'failed' ? (
+                      <div
+                        className="text-destructive flex items-center justify-center opacity-0 group-hover:opacity-100"
+                        title="분석 실패"
+                      >
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                    ) : null}
+                  </div>
                 </td>
               </motion.tr>
             ))}
