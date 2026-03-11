@@ -121,15 +121,21 @@ function StatusBadge({ status }: { status: ReportStatus }) {
 
 function ScoreBadge({ score }: { score?: number }) {
   if (score == null) return <span className="text-muted-foreground">—</span>
-  const color =
-    score >= 80
-      ? 'text-green-600 dark:text-green-400'
-      : score >= 60
-        ? 'text-amber-600 dark:text-amber-400'
-        : 'text-red-600 dark:text-red-400'
+
+  // 25점 기준으로 컬러 단계 세분화
+  let color = ''
+  if (score >= 75) {
+    color = 'text-blue-600 dark:text-blue-400' // 75~100: 우수 (초록)
+  } else if (score >= 50) {
+    color = 'text-green-600 dark:text-green-400' // 50~74: 보통 (파랑)
+  } else if (score >= 25) {
+    color = 'text-amber-600 dark:text-amber-400' // 25~49: 미흡 (노랑/주황)
+  } else {
+    color = 'text-red-600 dark:text-red-400' // 0~24: 부족 (빨강)
+  }
+
   return <span className={`font-semibold ${color}`}>{score}점</span>
 }
-
 interface ReportDetailDialogProps {
   report: AnalysisReport
   open: boolean
@@ -287,19 +293,11 @@ export function ReportsClient() {
 
       {/* Table */}
       <div className="border-border/60 overflow-hidden rounded-lg border">
-        {/* table-fixed 추가 및 각 항목별 비율(w-[%]) 적용 */}
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              {/* 인지 흐름에 맞춘 순서 변경 및 정렬 적용 */}
-              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-[15%] px-4 py-3 text-left font-medium">
                 생성일시
-              </th>
-              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
-                리포트 ID
-              </th>
-              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
-                세션 ID
               </th>
               <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 유저
@@ -313,6 +311,12 @@ export function ReportsClient() {
               <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 점수
               </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                세션 ID
+              </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                리포트 ID
+              </th>
               <th className="w-[8%] px-4 py-3 text-center" />
             </tr>
           </thead>
@@ -325,33 +329,38 @@ export function ReportsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="group hover:bg-muted/30 transition-colors"
               >
-                {/* 데이터 순서도 헤더와 동일하게 매핑 및 정렬 */}
-                <td className="text-muted-foreground truncate px-4 py-3 text-center">
+                <td className="text-muted-foreground truncate px-4 py-3 text-left">
                   {report.createdAt}
                 </td>
-                <td className="truncate px-4 py-3 text-center">
-                  <span className="text-muted-foreground font-mono text-xs">{report.id}</span>
+
+                <td className="truncate px-4 py-3 text-center font-medium">
+                  {report.userNickname}
                 </td>
+
+                <td className="text-muted-foreground truncate px-4 py-3 text-left">
+                  {report.interviewTitle}
+                </td>
+
+                <td className="px-4 py-3 text-center">
+                  <div className="flex justify-center">
+                    <StatusBadge status={report.status} />
+                  </div>
+                </td>
+
+                <td className="px-4 py-3 text-center">
+                  <ScoreBadge score={report.score} />
+                </td>
+
                 <td className="truncate px-4 py-3 text-center">
                   <span className="text-muted-foreground font-mono text-xs">
                     #{report.sessionId}
                   </span>
                 </td>
-                <td className="truncate px-4 py-3 text-center font-medium">
-                  {report.userNickname}
+
+                <td className="truncate px-4 py-3 text-center">
+                  <span className="text-muted-foreground font-mono text-xs">{report.id}</span>
                 </td>
-                <td className="text-muted-foreground truncate px-4 py-3 text-left">
-                  {report.interviewTitle}
-                </td>
-                <td className="px-4 py-3 text-center">
-                  {/* Badge가 가운데 정렬되도록 flex 컨테이너에 justify-center 추가 */}
-                  <div className="flex justify-center">
-                    <StatusBadge status={report.status} />
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <ScoreBadge score={report.score} />
-                </td>
+
                 <td className="px-4 py-3 text-center">
                   <div className="flex justify-center">
                     {report.status === 'completed' ? (
@@ -361,7 +370,6 @@ export function ReportsClient() {
                         title="상세 보기"
                         className="text-primary hover:bg-primary/10 flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity group-hover:opacity-100"
                       >
-                        {/* 텍스트 제거하고 아이콘만 유지 */}
                         <FileText className="h-4 w-4" />
                       </button>
                     ) : report.status === 'failed' ? (
