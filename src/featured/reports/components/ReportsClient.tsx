@@ -1,163 +1,150 @@
-"use client";
+'use client'
 
-import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { Search, FileText, Loader2, AlertCircle } from "lucide-react";
-import { Input } from "@/shared/ui/input";
-import { Badge } from "@/shared/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
-import type { AnalysisReport, ReportStatus } from "@/featured/reports/types";
+import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { FileText, Loader2, AlertCircle } from 'lucide-react'
+import { Badge } from '@/shared/ui/badge'
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
+import { SearchInput } from '@/shared/components/SearchInput'
+import type { AnalysisReport, ReportStatus } from '@/featured/reports/types'
 
 const MOCK_REPORTS: AnalysisReport[] = [
   {
-    id: "r001",
-    sessionId: "4901",
-    userNickname: "최유진",
-    jobCategory: "PM",
-    status: "completed",
-    score: 88,
+    id: 'r001',
+    sessionId: '4901',
+    userNickname: '최유진',
+    interviewTitle: 'PM 직무 면접',
+    status: 'completed',
+    score: 88, // 파란색 (75점 이상)
     summary:
-      "PM 직군에 적합한 논리적 사고력과 커뮤니케이션 능력이 돋보입니다. 데이터 기반 의사결정 경험이 풍부하며 팀 리더십 역량이 우수합니다.",
+      'PM 직군에 적합한 논리적 사고력과 커뮤니케이션 능력이 돋보입니다. 데이터 기반 의사결정 경험이 풍부하며 팀 리더십 역량이 우수합니다.',
     strengths: [
-      "명확한 문제 정의 및 우선순위 설정 능력",
-      "이해관계자 커뮤니케이션 스킬",
-      "데이터 기반 의사결정 경험",
+      '명확한 문제 정의 및 우선순위 설정 능력',
+      '이해관계자 커뮤니케이션 스킬',
+      '데이터 기반 의사결정 경험',
     ],
+    improvements: ['기술적 깊이 강화 필요', '리스크 관리 방법론 학습 권장'],
+    createdAt: '2026.02.27 15:03',
+    completedAt: '2026.02.27 15:06',
+  },
+  {
+    id: 'r002',
+    sessionId: '4900',
+    userNickname: '김민준',
+    interviewTitle: '프론트엔드 기술 면접',
+    status: 'completed',
+    score: 45, // 노란색/주황색 (25~49점)
+    summary:
+      '프론트엔드 기술에 대한 이해도가 다소 부족하며, 실무 적용 경험에 대한 답변이 미흡합니다. 프레임워크 기초 개념 학습이 더 필요합니다.',
+    strengths: ['최신 기술 동향 관심', '체계적인 문제 해결 접근 시도'],
     improvements: [
-      "기술적 깊이 강화 필요",
-      "리스크 관리 방법론 학습 권장",
+      '실무 경험 구체화 필요',
+      'JavaScript 코어 개념 학습 권장',
+      '성능 최적화 사례 준비',
     ],
-    createdAt: "2026.02.27 15:03",
-    completedAt: "2026.02.27 15:06",
+    createdAt: '2026.02.27 13:47',
+    completedAt: '2026.02.27 13:50',
   },
   {
-    id: "r002",
-    sessionId: "4900",
-    userNickname: "김민준",
-    jobCategory: "프론트엔드",
-    status: "completed",
-    score: 74,
+    id: 'r003',
+    sessionId: '4898',
+    userNickname: '이서연',
+    interviewTitle: '백엔드 기술 면접',
+    status: 'completed',
+    score: 92, // 파란색 (75점 이상)
     summary:
-      "프론트엔드 기술 역량은 양호하나 실무 프로젝트 경험 서술에서 구체성이 부족합니다. 문제 해결 접근 방식은 체계적입니다.",
-    strengths: ["최신 기술 스택 이해", "체계적인 문제 해결 접근"],
-    improvements: [
-      "실무 경험 구체화 필요",
-      "성능 최적화 사례 준비 권장",
-      "팀 협업 경험 어필 강화",
-    ],
-    createdAt: "2026.02.27 13:47",
-    completedAt: "2026.02.27 13:50",
+      '백엔드 개발 전반에 걸쳐 높은 수준의 역량을 보여주었습니다. 시스템 설계 능력과 기술적 깊이가 뛰어나며 면접 전반에서 자신감이 느껴졌습니다.',
+    strengths: ['탁월한 시스템 설계 능력', '깊이 있는 기술 이해', '명확한 의사 전달'],
+    improvements: ['비기술 직군과의 협업 경험 언급 보강'],
+    createdAt: '2026.02.26 10:46',
+    completedAt: '2026.02.26 10:49',
   },
   {
-    id: "r003",
-    sessionId: "4898",
-    userNickname: "이서연",
-    jobCategory: "백엔드",
-    status: "completed",
-    score: 92,
+    id: 'r004',
+    sessionId: '4899',
+    userNickname: '강도윤',
+    interviewTitle: '백엔드 기술 면접',
+    status: 'analyzing',
+    createdAt: '2026.02.27 15:45',
+  },
+  {
+    id: 'r005',
+    sessionId: '4896',
+    userNickname: '임서준',
+    interviewTitle: '데이터 분석가 면접',
+    status: 'completed',
+    score: 18, // 빨간색 (0~24점)
     summary:
-      "백엔드 개발 전반에 걸쳐 높은 수준의 역량을 보여주었습니다. 시스템 설계 능력과 기술적 깊이가 뛰어나며 면접 전반에서 자신감이 느껴졌습니다.",
-    strengths: [
-      "탁월한 시스템 설계 능력",
-      "깊이 있는 기술 이해",
-      "명확한 의사 전달",
-    ],
-    improvements: ["비기술 직군과의 협업 경험 언급 보강"],
-    createdAt: "2026.02.26 10:46",
-    completedAt: "2026.02.26 10:49",
+      '데이터 분석에 대한 기본적인 이해가 부족하며, 질문의 의도를 파악하는 데 어려움을 보였습니다. 통계적 사고력과 SQL 작성 능력을 기초부터 다시 다져야 합니다.',
+    strengths: ['학습에 대한 열정'],
+    improvements: ['기초 통계학 재학습', 'SQL 쿼리 작성 능력 강화', '비즈니스 로직 이해도 향상'],
+    createdAt: '2026.02.25 09:46',
+    completedAt: '2026.02.25 09:49',
   },
   {
-    id: "r004",
-    sessionId: "4899",
-    userNickname: "강도윤",
-    jobCategory: "백엔드",
-    status: "analyzing",
-    createdAt: "2026.02.27 15:45",
-  },
-  {
-    id: "r005",
-    sessionId: "4896",
-    userNickname: "임서준",
-    jobCategory: "데이터 분석",
-    status: "completed",
-    score: 61,
+    id: 'r006',
+    sessionId: '4894',
+    userNickname: '최유진',
+    interviewTitle: 'PM 직무 면접',
+    status: 'completed',
+    score: 65, // 초록색 (50~74점)
     summary:
-      "데이터 분석 기초 역량은 갖추고 있으나 실제 비즈니스 인사이트 도출 경험이 부족합니다. 통계적 사고력을 더 발전시킬 필요가 있습니다.",
-    strengths: ["기초 통계 이해", "SQL 활용 능력"],
-    improvements: [
-      "비즈니스 인사이트 도출 경험 확보",
-      "시각화 역량 강화",
-      "A/B 테스트 경험 준비",
-    ],
-    createdAt: "2026.02.25 09:46",
-    completedAt: "2026.02.25 09:49",
+      '기본적인 PM 역량은 갖추고 있으나, 특정 상황에서의 위기 대처 능력에 대한 답변이 모호합니다. 구체적인 사례 제시가 더 강화되어야 합니다.',
+    strengths: ['논리적 사고', '시장 분석 능력'],
+    improvements: ['수치 기반 성과 언급 강화', '경쟁사 분석 역량 보강'],
+    createdAt: '2026.02.24 11:33',
+    completedAt: '2026.02.24 11:36',
   },
   {
-    id: "r006",
-    sessionId: "4894",
-    userNickname: "최유진",
-    jobCategory: "PM",
-    status: "completed",
-    score: 79,
-    summary:
-      "전반적으로 양호한 면접 역량을 보였습니다. 이전 면접 대비 성장이 느껴지며 구체적인 사례 제시가 더 강화되었습니다.",
-    strengths: ["논리적 사고", "시장 분석 능력"],
-    improvements: ["수치 기반 성과 언급 강화", "경쟁사 분석 역량 보강"],
-    createdAt: "2026.02.24 11:33",
-    completedAt: "2026.02.24 11:36",
+    id: 'r007',
+    sessionId: '4885',
+    userNickname: '정다현',
+    interviewTitle: 'UX/UI 디자이너 면접',
+    status: 'failed',
+    createdAt: '2026.02.23 09:00',
   },
-  {
-    id: "r007",
-    sessionId: "4885",
-    userNickname: "정다현",
-    jobCategory: "디자이너",
-    status: "failed",
-    createdAt: "2026.02.23 09:00",
-  },
-];
+]
 
 function StatusBadge({ status }: { status: ReportStatus }) {
-  if (status === "completed")
+  if (status === 'completed')
     return (
-      <Badge className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400 border-0 text-xs">
+      <Badge className="border-0 bg-green-100 text-xs text-green-700 dark:bg-green-500/20 dark:text-green-400">
         분석 완료
       </Badge>
-    );
-  if (status === "analyzing")
+    )
+  if (status === 'analyzing')
     return (
-      <Badge className="bg-primary/10 text-primary border-0 text-xs gap-1">
+      <Badge className="bg-primary/10 text-primary gap-1 border-0 text-xs">
         <Loader2 className="h-3 w-3 animate-spin" />
         분석 중
       </Badge>
-    );
-  return (
-    <Badge className="bg-destructive/10 text-destructive border-0 text-xs">
-      실패
-    </Badge>
-  );
+    )
+  return <Badge className="bg-destructive/10 text-destructive border-0 text-xs">실패</Badge>
 }
 
 function ScoreBadge({ score }: { score?: number }) {
-  if (score == null) return <span className="text-muted-foreground">—</span>;
-  const color =
-    score >= 80
-      ? "text-green-600 dark:text-green-400"
-      : score >= 60
-        ? "text-amber-600 dark:text-amber-400"
-        : "text-red-600 dark:text-red-400";
-  return <span className={`font-semibold ${color}`}>{score}점</span>;
+  if (score == null) return <span className="text-muted-foreground">—</span>
+
+  // 25점 기준으로 컬러 단계 세분화
+  let color = ''
+  if (score >= 75) {
+    color = 'text-blue-600 dark:text-blue-400' // 75~100: 우수 (파랑)
+  } else if (score >= 50) {
+    color = 'text-green-600 dark:text-green-400' // 50~74: 보통 (초록)
+  } else if (score >= 25) {
+    color = 'text-yellow-500 dark:text-yellow-300' // 25~49: 미흡 (노랑)
+  } else {
+    color = 'text-red-600 dark:text-red-400' // 0~24: 부족 (빨강)
+  }
+
+  return <span className={`font-semibold ${color}`}>{score}점</span>
 }
 
 interface ReportDetailDialogProps {
-  report: AnalysisReport;
-  open: boolean;
-  onClose: () => void;
+  report: AnalysisReport
+  open: boolean
+  onClose: () => void
 }
 
 function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) {
@@ -166,47 +153,46 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-primary" />
+            <FileText className="text-primary h-4 w-4" />
             리포트 상세 — {report.userNickname}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 text-sm">
-          <div className="flex flex-wrap gap-4 rounded-lg bg-muted/40 px-4 py-3">
-            <div>
-              <p className="text-xs text-muted-foreground">직군</p>
-              <p className="font-medium">{report.jobCategory}</p>
+          <div className="bg-muted/40 flex flex-col gap-2.5 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground text-sm font-medium">면접 제목</span>
+              <span className="text-base font-semibold">{report.interviewTitle}</span>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">세션 ID</p>
-              <p className="font-mono font-medium">#{report.sessionId}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">점수</p>
+
+            <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+              <span>세션 ID</span>
+              <span className="text-foreground font-mono font-medium">#{report.sessionId}</span>
+
+              <span className="text-border/60 mx-1">|</span>
+
+              <span>점수</span>
               <ScoreBadge score={report.score} />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">분석 완료</p>
-              <p className="font-medium">{report.completedAt ?? "—"}</p>
+
+              <span className="text-border/60 mx-1">|</span>
+
+              <span>분석 완료</span>
+              <span className="text-foreground font-medium">{report.completedAt ?? '—'}</span>
             </div>
           </div>
 
           {report.summary && (
             <div>
               <p className="mb-1 font-semibold">종합 평가</p>
-              <p className="leading-relaxed text-muted-foreground">
-                {report.summary}
-              </p>
+              <p className="text-muted-foreground leading-relaxed">{report.summary}</p>
             </div>
           )}
 
           {report.strengths && (
             <div>
-              <p className="mb-2 font-semibold text-green-600 dark:text-green-400">
-                강점
-              </p>
+              <p className="mb-2 font-semibold text-green-600 dark:text-green-400">강점</p>
               <ul className="space-y-1">
-                {report.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
+                {report.strengths.map((s: string, i: number) => (
+                  <li key={i} className="text-muted-foreground flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
                     {s}
                   </li>
@@ -217,12 +203,10 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
 
           {report.improvements && (
             <div>
-              <p className="mb-2 font-semibold text-amber-600 dark:text-amber-400">
-                개선 필요
-              </p>
+              <p className="mb-2 font-semibold text-amber-600 dark:text-amber-400">개선 필요</p>
               <ul className="space-y-1">
-                {report.improvements.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-muted-foreground">
+                {report.improvements.map((s: string, i: number) => (
+                  <li key={i} className="text-muted-foreground flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                     {s}
                   </li>
@@ -233,13 +217,13 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 export function ReportsClient() {
-  const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<ReportStatus | "all">("all");
-  const [selected, setSelected] = useState<AnalysisReport | null>(null);
+  const [search, setSearch] = useState('')
+  const [activeTab, setActiveTab] = useState<ReportStatus | 'all'>('all')
+  const [selected, setSelected] = useState<any | null>(null)
 
   const filtered = useMemo(() => {
     return MOCK_REPORTS.filter((r) => {
@@ -248,19 +232,15 @@ export function ReportsClient() {
         !r.userNickname.toLowerCase().includes(search.toLowerCase()) &&
         !r.sessionId.includes(search)
       )
-        return false;
-      if (activeTab !== "all" && r.status !== activeTab) return false;
-      return true;
-    });
-  }, [search, activeTab]);
+        return false
+      if (activeTab !== 'all' && r.status !== activeTab) return false
+      return true
+    })
+  }, [search, activeTab])
 
-  const completedCount = MOCK_REPORTS.filter(
-    (r) => r.status === "completed",
-  ).length;
-  const analyzingCount = MOCK_REPORTS.filter(
-    (r) => r.status === "analyzing",
-  ).length;
-  const failedCount = MOCK_REPORTS.filter((r) => r.status === "failed").length;
+  const completedCount = MOCK_REPORTS.filter((r) => r.status === 'completed').length
+  const analyzingCount = MOCK_REPORTS.filter((r) => r.status === 'analyzing').length
+  const failedCount = MOCK_REPORTS.filter((r) => r.status === 'failed').length
 
   return (
     <motion.div
@@ -273,38 +253,28 @@ export function ReportsClient() {
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm">
         <span className="text-muted-foreground">
-          전체{" "}
-          <span className="font-semibold text-foreground">
-            {MOCK_REPORTS.length}
-          </span>
-          개
+          전체 <span className="text-foreground mr-1 font-semibold">{MOCK_REPORTS.length}</span>개
         </span>
         <span className="text-muted-foreground">
-          완료{" "}
-          <span className="font-semibold text-green-600 dark:text-green-400">
+          완료{' '}
+          <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
             {completedCount}
           </span>
           개
         </span>
         <span className="text-muted-foreground">
-          분석 중{" "}
-          <span className="font-semibold text-primary">{analyzingCount}</span>개
+          분석 중 <span className="text-primary mr-1 font-semibold">{analyzingCount}</span>개
         </span>
         {failedCount > 0 && (
           <span className="text-muted-foreground">
-            실패{" "}
-            <span className="font-semibold text-destructive">{failedCount}</span>
-            개
+            실패 <span className="text-destructive mr-1 font-semibold">{failedCount}</span>개
           </span>
         )}
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as typeof activeTab)}
-        >
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="h-9">
             <TabsTrigger value="all" className="text-xs">
               전체
@@ -321,94 +291,102 @@ export function ReportsClient() {
           </TabsList>
         </Tabs>
 
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="유저명 또는 세션 ID 검색..."
-            className="pl-9 h-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="유저명 또는 세션 ID 검색..."
+          className="min-w-48 flex-1"
+        />
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-border/60">
-        <table className="w-full text-sm">
+      <div className="border-border/60 overflow-hidden rounded-lg border">
+        <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                리포트 ID
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                세션 ID
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-left font-medium">
                 유저
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                직군
+              <th className="text-muted-foreground w-[24%] px-4 py-3 text-left font-medium">
+                면접 제목
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
                 상태
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 점수
               </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
                 생성일시
               </th>
-              <th className="px-4 py-3" />
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                세션 ID
+              </th>
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                리포트 ID
+              </th>
+              <th className="w-[6%] px-4 py-3 text-center" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/40 bg-background">
+          <tbody className="divide-border/40 bg-background divide-y">
             {filtered.map((report, i) => (
               <motion.tr
                 key={report.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.04 }}
-                className="group transition-colors hover:bg-muted/30"
+                className="group hover:bg-muted/30 transition-colors"
               >
-                <td className="px-4 py-3">
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {report.id}
-                  </span>
+                <td className="truncate px-4 py-3 text-left font-medium">{report.userNickname}</td>
+
+                <td className="text-muted-foreground truncate px-4 py-3 text-left">
+                  {report.interviewTitle}
                 </td>
-                <td className="px-4 py-3">
-                  <span className="font-mono text-xs text-muted-foreground">
+
+                <td className="px-4 py-3 text-center">
+                  <div className="flex justify-center">
+                    <StatusBadge status={report.status} />
+                  </div>
+                </td>
+
+                <td className="px-4 py-3 text-center">
+                  <ScoreBadge score={report.score} />
+                </td>
+
+                <td className="text-muted-foreground truncate px-4 py-3 text-center">
+                  {report.createdAt}
+                </td>
+
+                <td className="truncate px-4 py-3 text-center">
+                  <span className="text-muted-foreground font-mono text-xs">
                     #{report.sessionId}
                   </span>
                 </td>
-                <td className="px-4 py-3 font-medium">{report.userNickname}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {report.jobCategory}
+
+                <td className="truncate px-4 py-3 text-center">
+                  <span className="text-muted-foreground font-mono text-xs">{report.id}</span>
                 </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={report.status} />
-                </td>
-                <td className="px-4 py-3">
-                  <ScoreBadge score={report.score} />
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {report.createdAt}
-                </td>
-                <td className="px-4 py-3">
-                  {report.status === "completed" ? (
-                    <button
-                      type="button"
-                      onClick={() => setSelected(report)}
-                      className="flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 hover:bg-primary/10"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      상세 보기
-                    </button>
-                  ) : report.status === "failed" ? (
-                    <span className="flex items-center gap-1 text-xs text-destructive opacity-0 group-hover:opacity-100">
-                      <AlertCircle className="h-3.5 w-3.5" />
-                      분석 실패
-                    </span>
-                  ) : null}
+
+                <td className="px-4 py-3 text-center">
+                  <div className="flex justify-center">
+                    {report.status === 'completed' ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelected(report)}
+                        title="상세 보기"
+                        className="text-primary hover:bg-primary/10 flex h-7 w-7 items-center justify-center rounded-md transition-opacity"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </button>
+                    ) : report.status === 'failed' ? (
+                      <div
+                        className="text-destructive flex items-center justify-center"
+                        title="분석 실패"
+                      >
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                    ) : null}
+                  </div>
                 </td>
               </motion.tr>
             ))}
@@ -416,19 +394,15 @@ export function ReportsClient() {
         </table>
 
         {filtered.length === 0 && (
-          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
             검색 결과가 없습니다.
           </div>
         )}
       </div>
 
       {selected && (
-        <ReportDetailDialog
-          report={selected}
-          open={!!selected}
-          onClose={() => setSelected(null)}
-        />
+        <ReportDetailDialog report={selected} open={!!selected} onClose={() => setSelected(null)} />
       )}
     </motion.div>
-  );
+  )
 }
