@@ -6,14 +6,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/shared/ui/badge'
 import { Progress } from '@/shared/ui/progress'
 import { SearchInput } from '@/shared/components/SearchInput'
+// type 파일에서 InterviewSession의 jobCategory 속성을 interviewTitle로 변경해야 합니다.
 import type { InterviewSession } from '@/featured/sessions/types'
 
-const ABANDONED_SESSIONS: InterviewSession[] = [
+const INTERVIEW_TITLES = [
+  '전체',
+  '프론트엔드 기술 면접',
+  '백엔드 기술 면접',
+  '풀스택 실무 면접',
+  '데이터 분석가 면접',
+  'PM 직무 면접',
+  'UX/UI 디자이너 면접',
+  'DevOps 인프라 면접',
+]
+
+const ABANDONED_SESSIONS: (Omit<InterviewSession, 'jobCategory'> & { interviewTitle: string })[] = [
   {
     id: '4897',
     userId: '7',
     userNickname: '윤하은',
-    jobCategory: '디자이너',
+    interviewTitle: 'UX/UI 디자이너 면접',
     status: 'abandoned',
     questionCount: 5,
     answeredCount: 2,
@@ -24,7 +36,7 @@ const ABANDONED_SESSIONS: InterviewSession[] = [
     id: '4895',
     userId: '3',
     userNickname: '박준혁',
-    jobCategory: '풀스택',
+    interviewTitle: '풀스택 실무 면접',
     status: 'abandoned',
     questionCount: 5,
     answeredCount: 1,
@@ -35,7 +47,7 @@ const ABANDONED_SESSIONS: InterviewSession[] = [
     id: '4890',
     userId: '5',
     userNickname: '정다현',
-    jobCategory: '백엔드',
+    interviewTitle: '백엔드 기술 면접',
     status: 'abandoned',
     questionCount: 5,
     answeredCount: 3,
@@ -46,7 +58,7 @@ const ABANDONED_SESSIONS: InterviewSession[] = [
     id: '4882',
     userId: '8',
     userNickname: '임서준',
-    jobCategory: '데이터 분석',
+    interviewTitle: '데이터 분석가 면접',
     status: 'abandoned',
     questionCount: 5,
     answeredCount: 0,
@@ -57,7 +69,7 @@ const ABANDONED_SESSIONS: InterviewSession[] = [
     id: '4871',
     userId: '1',
     userNickname: '김민준',
-    jobCategory: '프론트엔드',
+    interviewTitle: '프론트엔드 기술 면접',
     status: 'abandoned',
     questionCount: 5,
     answeredCount: 4,
@@ -68,24 +80,13 @@ const ABANDONED_SESSIONS: InterviewSession[] = [
     id: '4860',
     userId: '6',
     userNickname: '강도윤',
-    jobCategory: 'PM',
+    interviewTitle: 'PM 직무 면접',
     status: 'abandoned',
     questionCount: 5,
     answeredCount: 2,
     durationSec: 380,
     startedAt: '2026.02.15 17:30',
   },
-]
-
-const JOB_CATEGORIES = [
-  '전체',
-  '프론트엔드',
-  '백엔드',
-  '풀스택',
-  '데이터 분석',
-  'PM',
-  '디자이너',
-  'DevOps',
 ]
 
 function formatDuration(seconds: number) {
@@ -96,7 +97,7 @@ function formatDuration(seconds: number) {
 
 export function InterviewsClient() {
   const [search, setSearch] = useState('')
-  const [jobCategory, setJobCategory] = useState('전체')
+  const [selectedTitle, setSelectedTitle] = useState('전체')
 
   const filtered = useMemo(() => {
     return ABANDONED_SESSIONS.filter((s) => {
@@ -106,10 +107,10 @@ export function InterviewsClient() {
         !s.id.includes(search)
       )
         return false
-      if (jobCategory !== '전체' && s.jobCategory !== jobCategory) return false
+      if (selectedTitle !== '전체' && s.interviewTitle !== selectedTitle) return false
       return true
     })
-  }, [search, jobCategory])
+  }, [search, selectedTitle])
 
   return (
     <motion.div
@@ -138,14 +139,14 @@ export function InterviewsClient() {
           className="min-w-52 flex-1"
         />
 
-        <Select value={jobCategory} onValueChange={setJobCategory}>
-          <SelectTrigger className="h-9 w-36">
-            <SelectValue placeholder="직군" />
+        <Select value={selectedTitle} onValueChange={setSelectedTitle}>
+          <SelectTrigger className="h-9 w-48">
+            <SelectValue placeholder="면접 제목" />
           </SelectTrigger>
           <SelectContent>
-            {JOB_CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+            {INTERVIEW_TITLES.map((title) => (
+              <SelectItem key={title} value={title}>
+                {title}
               </SelectItem>
             ))}
           </SelectContent>
@@ -158,15 +159,31 @@ export function InterviewsClient() {
 
       {/* Table */}
       <div className="border-border/60 overflow-hidden rounded-lg border">
-        <table className="w-full text-sm">
+        <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">세션 ID</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">유저</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">직군</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">답변 진도</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">진행 시간</th>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">시작일시</th>
+              {/* 좌측 정렬 (text-left) */}
+              <th className="text-muted-foreground w-[15%] px-4 py-3 text-left font-medium">
+                시작일시
+              </th>
+              {/* 가운데 정렬 (text-center) */}
+              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+                세션 ID
+              </th>
+              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+                유저
+              </th>
+              {/* 좌측 정렬 (text-left) */}
+              <th className="text-muted-foreground w-[30%] px-4 py-3 text-left font-medium">
+                면접 제목
+              </th>
+              {/* 가운데 정렬 (text-center) */}
+              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+                답변 진도
+              </th>
+              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+                진행 시간
+              </th>
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
@@ -178,26 +195,43 @@ export function InterviewsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="hover:bg-muted/30 transition-colors"
               >
-                <td className="px-4 py-3">
+                {/* 시작일시: 좌측 정렬 */}
+                <td className="text-muted-foreground truncate px-4 py-3 text-left">
+                  {session.startedAt}
+                </td>
+
+                {/* 세션 ID: 가운데 정렬 */}
+                <td className="truncate px-4 py-3 text-center">
                   <span className="text-muted-foreground font-mono text-xs">#{session.id}</span>
                 </td>
-                <td className="px-4 py-3 font-medium">{session.userNickname}</td>
-                <td className="text-muted-foreground px-4 py-3">{session.jobCategory}</td>
+
+                {/* 유저: 가운데 정렬 */}
+                <td className="truncate px-4 py-3 text-center font-medium">
+                  {session.userNickname}
+                </td>
+
+                {/* 면접 제목: 좌측 정렬 */}
+                <td className="text-muted-foreground truncate px-4 py-3 text-left">
+                  {session.interviewTitle}
+                </td>
+
+                {/* 답변 진도: 가운데 정렬 (flex 컨테이너라 justify-center 적용) */}
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <Progress
                       value={(session.answeredCount / session.questionCount) * 100}
-                      className="h-1.5 w-20"
+                      className="h-1.5 w-16"
                     />
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-muted-foreground text-xs whitespace-nowrap">
                       {session.answeredCount}/{session.questionCount}
                     </span>
                   </div>
                 </td>
-                <td className="text-muted-foreground px-4 py-3">
+
+                {/* 진행 시간: 가운데 정렬 */}
+                <td className="text-muted-foreground truncate px-4 py-3 text-center">
                   {formatDuration(session.durationSec)}
                 </td>
-                <td className="text-muted-foreground px-4 py-3">{session.startedAt}</td>
               </motion.tr>
             ))}
           </tbody>
