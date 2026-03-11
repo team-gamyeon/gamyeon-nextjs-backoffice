@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/shared/ui/badge'
 import { Progress } from '@/shared/ui/progress'
 import { SearchInput } from '@/shared/components/SearchInput'
-// type 파일에서 InterviewSession의 jobCategory 속성을 interviewTitle로 변경해야 합니다.
 import type { InterviewSession } from '@/featured/sessions/types'
 
 const INTERVIEW_TITLES = [
@@ -20,7 +19,7 @@ const INTERVIEW_TITLES = [
   'DevOps 인프라 면접',
 ]
 
-const ABANDONED_SESSIONS: (Omit<InterviewSession, 'jobCategory'> & { interviewTitle: string })[] = [
+const ABANDONED_SESSIONS: InterviewSession[] = [
   {
     id: '4897',
     userId: '7',
@@ -162,22 +161,18 @@ export function InterviewsClient() {
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              {/* 좌측 정렬 (text-left) */}
               <th className="text-muted-foreground w-[15%] px-4 py-3 text-left font-medium">
                 시작일시
               </th>
-              {/* 가운데 정렬 (text-center) */}
               <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 세션 ID
               </th>
               <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
                 유저
               </th>
-              {/* 좌측 정렬 (text-left) */}
               <th className="text-muted-foreground w-[30%] px-4 py-3 text-left font-medium">
                 면접 제목
               </th>
-              {/* 가운데 정렬 (text-center) */}
               <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
                 답변 진도
               </th>
@@ -195,27 +190,22 @@ export function InterviewsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="hover:bg-muted/30 transition-colors"
               >
-                {/* 시작일시: 좌측 정렬 */}
                 <td className="text-muted-foreground truncate px-4 py-3 text-left">
                   {session.startedAt}
                 </td>
 
-                {/* 세션 ID: 가운데 정렬 */}
                 <td className="truncate px-4 py-3 text-center">
                   <span className="text-muted-foreground font-mono text-xs">#{session.id}</span>
                 </td>
 
-                {/* 유저: 가운데 정렬 */}
                 <td className="truncate px-4 py-3 text-center font-medium">
                   {session.userNickname}
                 </td>
 
-                {/* 면접 제목: 좌측 정렬 */}
                 <td className="text-muted-foreground truncate px-4 py-3 text-left">
                   {session.interviewTitle}
                 </td>
 
-                {/* 답변 진도: 가운데 정렬 (flex 컨테이너라 justify-center 적용) */}
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-center gap-2">
                     <Progress
@@ -228,7 +218,6 @@ export function InterviewsClient() {
                   </div>
                 </td>
 
-                {/* 진행 시간: 가운데 정렬 */}
                 <td className="text-muted-foreground truncate px-4 py-3 text-center">
                   {formatDuration(session.durationSec)}
                 </td>
