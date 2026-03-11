@@ -136,6 +136,7 @@ function ScoreBadge({ score }: { score?: number }) {
 
   return <span className={`font-semibold ${color}`}>{score}점</span>
 }
+
 interface ReportDetailDialogProps {
   report: AnalysisReport
   open: boolean
@@ -153,22 +154,25 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 text-sm">
-          <div className="bg-muted/40 flex flex-wrap gap-4 rounded-lg px-4 py-3">
-            <div>
-              <p className="text-muted-foreground text-xs">면접 제목</p>
-              <p className="font-medium">{report.interviewTitle}</p>
+          <div className="bg-muted/40 flex flex-col gap-2.5 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground text-sm font-medium">면접 제목</span>
+              <span className="text-base font-semibold">{report.interviewTitle}</span>
             </div>
-            <div>
-              <p className="text-muted-foreground text-xs">세션 ID</p>
-              <p className="font-mono font-medium">#{report.sessionId}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs">점수</p>
+
+            <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+              <span>세션 ID</span>
+              <span className="text-foreground font-mono font-medium">#{report.sessionId}</span>
+
+              <span className="text-border/60 mx-1">|</span>
+
+              <span>점수</span>
               <ScoreBadge score={report.score} />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs">분석 완료</p>
-              <p className="font-medium">{report.completedAt ?? '—'}</p>
+
+              <span className="text-border/60 mx-1">|</span>
+
+              <span>분석 완료</span>
+              <span className="text-foreground font-medium">{report.completedAt ?? '—'}</span>
             </div>
           </div>
 
@@ -296,13 +300,11 @@ export function ReportsClient() {
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="text-muted-foreground w-[15%] px-4 py-3 text-left font-medium">
-                생성일시
-              </th>
-              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
+              {/* 👇 인지 흐름(유저->면접->결과->시간->ID)에 맞게 순서/비율/정렬 변경 👇 */}
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-left font-medium">
                 유저
               </th>
-              <th className="text-muted-foreground w-[25%] px-4 py-3 text-left font-medium">
+              <th className="text-muted-foreground w-[24%] px-4 py-3 text-left font-medium">
                 면접 제목
               </th>
               <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
@@ -311,13 +313,16 @@ export function ReportsClient() {
               <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 점수
               </th>
+              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
+                생성일시
+              </th>
               <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 세션 ID
               </th>
               <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
                 리포트 ID
               </th>
-              <th className="w-[8%] px-4 py-3 text-center" />
+              <th className="w-[6%] px-4 py-3 text-center" />
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
@@ -329,13 +334,8 @@ export function ReportsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="group hover:bg-muted/30 transition-colors"
               >
-                <td className="text-muted-foreground truncate px-4 py-3 text-left">
-                  {report.createdAt}
-                </td>
-
-                <td className="truncate px-4 py-3 text-center font-medium">
-                  {report.userNickname}
-                </td>
+                {/* 👇 데이터 순서도 표 헤더에 맞춰 변경됨 👇 */}
+                <td className="truncate px-4 py-3 text-left font-medium">{report.userNickname}</td>
 
                 <td className="text-muted-foreground truncate px-4 py-3 text-left">
                   {report.interviewTitle}
@@ -349,6 +349,10 @@ export function ReportsClient() {
 
                 <td className="px-4 py-3 text-center">
                   <ScoreBadge score={report.score} />
+                </td>
+
+                <td className="text-muted-foreground truncate px-4 py-3 text-center">
+                  {report.createdAt}
                 </td>
 
                 <td className="truncate px-4 py-3 text-center">
@@ -368,13 +372,13 @@ export function ReportsClient() {
                         type="button"
                         onClick={() => setSelected(report)}
                         title="상세 보기"
-                        className="text-primary hover:bg-primary/10 flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity group-hover:opacity-100"
+                        className="text-primary hover:bg-primary/10 flex h-7 w-7 items-center justify-center rounded-md transition-opacity"
                       >
                         <FileText className="h-4 w-4" />
                       </button>
                     ) : report.status === 'failed' ? (
                       <div
-                        className="text-destructive flex items-center justify-center opacity-0 group-hover:opacity-100"
+                        className="text-destructive flex items-center justify-center"
                         title="분석 실패"
                       >
                         <AlertCircle className="h-4 w-4" />
