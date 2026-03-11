@@ -42,11 +42,11 @@ export function MemberTable({ members }: MemberTableProps) {
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="text-muted-foreground w-[25%] px-6 py-4 text-left font-medium">
-                이메일
-              </th>
               <th className="text-muted-foreground w-[15%] px-6 py-4 text-left font-medium">
                 닉네임
+              </th>
+              <th className="text-muted-foreground w-[25%] px-6 py-4 text-left font-medium">
+                이메일
               </th>
               <th className="text-muted-foreground w-[15%] px-6 py-4 text-center font-medium">
                 가입일
@@ -66,8 +66,9 @@ export function MemberTable({ members }: MemberTableProps) {
           <tbody className="divide-border/40 bg-background divide-y">
             {members.map((member) => (
               <motion.tr key={member.id} className="group hover:bg-muted/30 transition-colors">
-                <td className="text-muted-foreground truncate px-6 py-3">{member.email}</td>
                 <td className="truncate px-6 py-3 font-medium">{member.nickname}</td>
+                <td className="text-muted-foreground truncate px-6 py-3">{member.email}</td>
+
                 <td className="text-muted-foreground truncate px-6 py-3 text-center">
                   {member.joinedAt}
                 </td>
