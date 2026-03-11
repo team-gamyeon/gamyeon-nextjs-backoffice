@@ -118,7 +118,6 @@ export function InterviewsClient() {
       transition={{ duration: 0.3 }}
       className="space-y-4"
     >
-      {/* Summary banner */}
       <div className="border-destructive/20 bg-destructive/5 flex items-center gap-3 rounded-lg border px-4 py-3">
         <Badge variant="destructive" className="text-xs">
           중단
@@ -129,7 +128,6 @@ export function InterviewsClient() {
         </p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <SearchInput
           value={search}
@@ -156,28 +154,27 @@ export function InterviewsClient() {
         </p>
       </div>
 
-      {/* Table */}
       <div className="border-border/60 overflow-hidden rounded-lg border">
         <table className="w-full table-fixed text-sm">
           <thead className="bg-muted/40">
             <tr>
-              <th className="text-muted-foreground w-[15%] px-4 py-3 text-left font-medium">
-                시작일시
-              </th>
-              <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
-                세션 ID
-              </th>
-              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-left font-medium">
                 유저
               </th>
-              <th className="text-muted-foreground w-[30%] px-4 py-3 text-left font-medium">
+              <th className="text-muted-foreground w-[28%] px-4 py-3 text-left font-medium">
                 면접 제목
               </th>
-              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
+                시작일시
+              </th>
+              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
                 답변 진도
               </th>
-              <th className="text-muted-foreground w-[15%] px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
                 진행 시간
+              </th>
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
+                세션 ID
               </th>
             </tr>
           </thead>
@@ -190,20 +187,14 @@ export function InterviewsClient() {
                 transition={{ delay: i * 0.04 }}
                 className="hover:bg-muted/30 transition-colors"
               >
-                <td className="text-muted-foreground truncate px-4 py-3 text-left">
-                  {session.startedAt}
-                </td>
-
-                <td className="truncate px-4 py-3 text-center">
-                  <span className="text-muted-foreground font-mono text-xs">#{session.id}</span>
-                </td>
-
-                <td className="truncate px-4 py-3 text-center font-medium">
-                  {session.userNickname}
-                </td>
+                <td className="truncate px-4 py-3 text-left font-medium">{session.userNickname}</td>
 
                 <td className="text-muted-foreground truncate px-4 py-3 text-left">
                   {session.interviewTitle}
+                </td>
+
+                <td className="text-muted-foreground truncate px-4 py-3 text-center">
+                  {session.startedAt}
                 </td>
 
                 <td className="px-4 py-3">
@@ -220,6 +211,10 @@ export function InterviewsClient() {
 
                 <td className="text-muted-foreground truncate px-4 py-3 text-center">
                   {formatDuration(session.durationSec)}
+                </td>
+
+                <td className="truncate px-4 py-3 text-center">
+                  <span className="text-muted-foreground font-mono text-xs">#{session.id}</span>
                 </td>
               </motion.tr>
             ))}
