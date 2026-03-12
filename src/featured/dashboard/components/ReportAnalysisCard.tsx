@@ -1,18 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Sector } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-
-const data = [
-  { name: "분석 완료", value: 6, color: "oklch(0.55 0.15 180)" },
-  { name: "분석 중", value: 1, color: "oklch(0.72 0.18 150)" },
-  { name: "실패", value: 1, color: "oklch(0.62 0.15 25)" },
-];
-
-const total = data.reduce((sum, d) => sum + d.value, 0);
-const completedPct = Math.round((data[0].value / total) * 100);
+import type { DashboardSummary } from "@/featured/dashboard/types";
+import { REPORT_SEGMENT_MAP } from "@/featured/dashboard/constants";
+import { useDonutChart } from "@/featured/dashboard/hooks/useDonutChart";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderActiveShape = (props: any) => {
@@ -30,10 +23,26 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export function ReportAnalysisCard() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+interface Props {
+  reportAnalysis?: DashboardSummary["reportAnalysis"];
+}
 
-  const active = activeIndex !== null ? data[activeIndex] : null;
+export function ReportAnalysisCard({ reportAnalysis }: Props) {
+  const data = (reportAnalysis?.segments ?? [])
+    .filter((s) => REPORT_SEGMENT_MAP[s.label])
+    .map((s) => ({
+      name: REPORT_SEGMENT_MAP[s.label].name,
+      value: s.count,
+      color: REPORT_SEGMENT_MAP[s.label].color,
+      order: REPORT_SEGMENT_MAP[s.label].order,
+    }))
+    .sort((a, b) => a.order - b.order);
+
+  const completionRate = reportAnalysis?.completionRate ?? 0;
+
+  const { setActiveIndex, active } = useDonutChart(data);
+
+  const pieData = data.length > 0 ? data : [{ name: "", value: 1, color: "oklch(0.9 0 0)", order: 0 }];
 
   return (
     <motion.div
@@ -52,20 +61,20 @@ export function ReportAnalysisCard() {
             <div>
               <PieChart width={200} height={180} onMouseLeave={() => setActiveIndex(null)}>
                   <Pie
-                    data={data}
+                    data={pieData}
                     cx="50%"
                     cy="50%"
                     innerRadius={54}
                     outerRadius={80}
-                    paddingAngle={3}
+                    paddingAngle={data.length > 0 ? 3 : 0}
                     dataKey="value"
                     startAngle={90}
                     endAngle={-270}
                     activeShape={renderActiveShape}
-                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseEnter={(_, index) => data.length > 0 && setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(null)}
                   >
-                    {data.map((entry, index) => (
+                    {pieData.map((entry, index) => (
                       <Cell
                         key={index}
                         fill={entry.color}
@@ -87,9 +96,7 @@ export function ReportAnalysisCard() {
                       transition: "fill 0.15s",
                     }}
                   >
-                    {active
-                      ? `${Math.round((active.value / total) * 100)}%`
-                      : `${completedPct}%`}
+                    {active ? `${active.value}건` : `${completionRate}%`}
                   </text>
                   <text
                     x={100}

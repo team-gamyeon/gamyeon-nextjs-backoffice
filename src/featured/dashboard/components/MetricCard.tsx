@@ -9,8 +9,8 @@ import { cn } from "@/shared/lib/utils";
 interface MetricCardProps {
   title: string;
   value: string | number;
-  change: number;
-  changeLabel: string;
+  change?: number;
+  changeLabel?: string;
   icon: React.ReactNode;
   href?: string;
   index?: number;
@@ -25,7 +25,8 @@ export function MetricCard({
   href,
   index = 0,
 }: MetricCardProps) {
-  const isPositive = change >= 0;
+  const hasChange = change !== undefined && change !== null;
+  const isPositive = hasChange && change >= 0;
 
   return (
     <motion.div
@@ -48,27 +49,31 @@ export function MetricCard({
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
               {icon}
             </div>
-            <span
-              className={cn(
-                "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                isPositive
-                  ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
-                  : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
-              )}
-            >
-              {isPositive ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : (
-                <TrendingDown className="h-3 w-3" />
-              )}
-              {isPositive ? "+" : ""}
-              {change}%
-            </span>
+            {hasChange && (
+              <span
+                className={cn(
+                  "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                  isPositive
+                    ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+                    : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
+                )}
+              >
+                {isPositive ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
+                {isPositive ? "+" : ""}
+                {change}%
+              </span>
+            )}
           </div>
           <div className="mt-3">
             <p className="text-2xl font-bold tracking-tight">{value}</p>
             <p className="text-sm font-medium text-foreground">{title}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{changeLabel}</p>
+            {changeLabel && (
+              <p className="mt-0.5 text-xs text-muted-foreground">{changeLabel}</p>
+            )}
           </div>
         </CardContent>
       </Card>

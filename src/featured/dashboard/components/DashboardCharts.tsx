@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { DashboardSummary } from "@/featured/dashboard/types";
 
 function ChartSkeleton({ height }: { height: number }) {
   return (
@@ -31,14 +32,20 @@ const ReportAnalysisCard = dynamic(
   { ssr: false, loading: () => <ChartSkeleton height={240} /> }
 );
 
-export function DashboardCharts() {
+interface Props {
+  signupTrend?: DashboardSummary["signupTrend"];
+  interviewCompletion?: DashboardSummary["interviewCompletion"];
+  reportAnalysis?: DashboardSummary["reportAnalysis"];
+}
+
+export function DashboardCharts({ signupTrend, interviewCompletion, reportAnalysis }: Props) {
   return (
     <div className="grid grid-cols-5 gap-4 items-stretch">
       <div className="col-span-3 flex">
-        <DauChart />
+        <DauChart signupTrend={signupTrend} />
       </div>
-      <CompletionRateCard />
-      <ReportAnalysisCard />
+      <CompletionRateCard interviewCompletion={interviewCompletion} />
+      <ReportAnalysisCard reportAnalysis={reportAnalysis} />
     </div>
   );
 }

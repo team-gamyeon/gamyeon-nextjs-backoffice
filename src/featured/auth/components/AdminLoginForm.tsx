@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
@@ -23,6 +23,7 @@ export function AdminLoginForm() {
   const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY)
@@ -42,7 +43,8 @@ export function AdminLoginForm() {
         localStorage.removeItem(REMEMBER_KEY)
       }
       setAuthenticated(true)
-      router.push('/dashboard')
+      setIsSuccess(true)
+      setTimeout(() => router.push('/dashboard'), 800)
     }
   }, [state, router, rememberMe, email, password, setAuthenticated])
 
@@ -149,10 +151,15 @@ export function AdminLoginForm() {
                 </Label>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isPending}>
-                {isPending ? (
+              <Button type="submit" className="w-full" size="lg" disabled={isPending || isSuccess}>
+                {isSuccess ? (
                   <span className="flex items-center gap-2">
-                    <span className="border-primary-foreground h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                    <Check className="h-4 w-4" />
+                    완료
+                  </span>
+                ) : isPending ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     로그인 중...
                   </span>
                 ) : (
