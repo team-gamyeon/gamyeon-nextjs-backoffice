@@ -1,23 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ['/login']
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-  const token = request.cookies.get("admin_token")?.value;
+  const { pathname } = request.nextUrl
+  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p))
 
-  if (!isPublic && !token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (isPublic) return NextResponse.next()
+
+  const refreshToken = request.cookies.get('refreshToken')?.value
+  if (!refreshToken) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (isPublic && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  return NextResponse.next();
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
-};
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+}

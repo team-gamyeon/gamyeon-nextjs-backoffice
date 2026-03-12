@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   LogOut,
 } from 'lucide-react'
-import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 
@@ -25,6 +24,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { useAdminStore } from '@/featured/auth/store'
 import { cn } from '@/shared/lib/utils'
+import type { Admin } from '@/featured/auth/types'
 
 const NOTIFICATIONS = [
   {
@@ -62,12 +62,15 @@ const NOTIFICATIONS = [
 ]
 
 export function AdminHeader() {
-  const { admin, logout } = useAdminStore()
+  const { admin, setAdmin, logout } = useAdminStore()
   const [readIds, setReadIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     useAdminStore.persist.rehydrate()
-  }, [])
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((json) => { if (json?.data) setAdmin(json.data as Admin) })
+  }, [setAdmin])
 
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread && !readIds.has(n.id)).length
 
@@ -175,7 +178,7 @@ export function AdminHeader() {
             <div className="px-3 py-2">
               <p className="text-sm font-medium">관리자</p>
               <p className="text-muted-foreground truncate text-xs">
-                {admin?.email ?? 'admin@gamyeon.kr'}
+                {admin?.email ?? ''}
               </p>
             </div>
             <DropdownMenuSeparator />

@@ -25,3 +25,10 @@ export interface RecentActivity {
   message: string;
   time: string;
 }
+
+export interface DashboardSummary {
+  dauData: DauDataPoint[];
+  metrics: MetricCardData[];
+  completionStats: CompletionStats;
+  recentActivities: RecentActivity[];
+}

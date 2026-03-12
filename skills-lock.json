@@ -4,7 +4,12 @@
     "executing-plans": {
       "source": "obra/superpowers",
       "sourceType": "github",
-      "computedHash": "7311ed85870f37e9af1e8354c500e7c4161893d845031eed43dd1d55157da83a"
+      "computedHash": "2f709d1a2c7564f8ce6a9bb707e7f5451117ba80f8e8e2302662c29bc61246a6"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "computedHash": "25872a21881a950edc3db1f3329664d60405d539660ce05b3265db2de06a7dfd"
     },
     "framer-motion-animator": {
       "source": "patricio0312rev/skills",
@@ -21,6 +26,11 @@
       "sourceType": "github",
       "computedHash": "c31ddd68ba5798a79a516c619b1e1fc4408cc4876ad600fefa4f5add4425719d"
     },
+    "playwright-best-practices": {
+      "source": "currents-dev/playwright-best-practices-skill",
+      "sourceType": "github",
+      "computedHash": "ca2f7f1764495d6b0c2e1b41fe9b81a6aa6c6ea650826603d909b4b4feff8d89"
+    },
     "playwright-explore-website": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
@@ -30,6 +40,11 @@
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "computedHash": "3ff06f0712886f7c2660d6746856c22d3127bd6568ddde29ddad8b72dbaaa226"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "d8e7d3afe37dcc8a97b99ffb5afdb4d0919ae0092ea8b68f44eb201f035e33ac"
     }
   }
 }
