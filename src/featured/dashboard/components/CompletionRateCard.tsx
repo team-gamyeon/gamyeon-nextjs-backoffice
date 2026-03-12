@@ -1,15 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Sector } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-
-const data = [
-  { name: "완료", value: 68, color: "oklch(0.55 0.15 180)" },
-  { name: "진행중", value: 15, color: "oklch(0.72 0.18 150)" },
-  { name: "이탈", value: 17, color: "oklch(0.62 0.15 25)" },
-];
+import type { DashboardSummary } from "@/featured/dashboard/types";
+import { INTERVIEW_SEGMENT_MAP } from "@/featured/dashboard/constants";
+import { useDonutChart } from "@/featured/dashboard/hooks/useDonutChart";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderActiveShape = (props: any) => {
@@ -27,10 +23,27 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export function CompletionRateCard() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+interface Props {
+  interviewCompletion?: DashboardSummary["interviewCompletion"];
+}
 
-  const active = activeIndex !== null ? data[activeIndex] : null;
+export function CompletionRateCard({ interviewCompletion }: Props) {
+  const data = (interviewCompletion?.segments ?? [])
+    .filter((s) => s.label !== "READY" && INTERVIEW_SEGMENT_MAP[s.label])
+    .map((s) => ({
+      name: INTERVIEW_SEGMENT_MAP[s.label].name,
+      value: s.percentage,
+      count: s.count,
+      color: INTERVIEW_SEGMENT_MAP[s.label].color,
+      order: INTERVIEW_SEGMENT_MAP[s.label].order,
+    }))
+    .sort((a, b) => a.order - b.order);
+
+  const completionRate = interviewCompletion?.completionRate ?? 0;
+
+  const { setActiveIndex, active } = useDonutChart(data);
+
+  const pieData = data.length > 0 ? data : [{ name: "", value: 1, color: "oklch(0.9 0 0)", order: 0 }];
 
   return (
     <motion.div
@@ -49,20 +62,20 @@ export function CompletionRateCard() {
             <div>
               <PieChart width={200} height={180} onMouseLeave={() => setActiveIndex(null)}>
                   <Pie
-                    data={data}
+                    data={pieData}
                     cx="50%"
                     cy="50%"
                     innerRadius={54}
                     outerRadius={80}
-                    paddingAngle={3}
+                    paddingAngle={data.length > 0 ? 3 : 0}
                     dataKey="value"
                     startAngle={90}
                     endAngle={-270}
                     activeShape={renderActiveShape}
-                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseEnter={(_, index) => data.length > 0 && setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(null)}
                   >
-                    {data.map((entry, index) => (
+                    {pieData.map((entry, index) => (
                       <Cell
                         key={index}
                         fill={entry.color}
@@ -84,7 +97,7 @@ export function CompletionRateCard() {
                       transition: "fill 0.15s",
                     }}
                   >
-                    {active ? `${active.value}%` : "68%"}
+                    {active ? `${active.count}건` : `${completionRate}%`}
                   </text>
                   <text
                     x={100}

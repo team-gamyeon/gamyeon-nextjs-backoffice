@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart,
@@ -13,46 +12,17 @@ import {
 } from "recharts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import type { DashboardSummary } from "@/featured/dashboard/types";
+import { DAY_LABELS } from "@/featured/dashboard/constants";
+import { useSignupTrend } from "@/featured/dashboard/hooks/useSignupTrend";
 
-const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
-
-function getMondayOfWeek(weekOffset: number): Date {
-  const today = new Date();
-  const dow = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) + weekOffset * 7);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
+interface Props {
+  signupTrend?: DashboardSummary["signupTrend"];
 }
 
-function getWeekData(weekOffset: number) {
-  const monday = getMondayOfWeek(weekOffset);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-    const base = isWeekend ? 35 : 85;
-    const count = base + ((seed * 17 + 31) % 75);
-    return { date: `${mm}/${dd}`, day: DAY_LABELS[i], count };
-  });
-}
-
-function getWeekLabel(weekOffset: number): string {
-  const monday = getMondayOfWeek(weekOffset);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  const fmt = (d: Date) => `${d.getMonth() + 1}월 ${d.getDate()}일`;
-  return `${fmt(monday)} ~ ${fmt(sunday)}`;
-}
-
-export function DauChart() {
-  const [weekOffset, setWeekOffset] = useState(0);
-
-  const weekData = getWeekData(weekOffset);
-  const weekLabel = getWeekLabel(weekOffset);
+export function DauChart({ signupTrend }: Props) {
+  const { weekOffset, setWeekOffset, weekData, weekLabel, minOffset, maxOffset } =
+    useSignupTrend(signupTrend);
 
   return (
     <motion.div
@@ -70,7 +40,8 @@ export function DauChart() {
               <button
                 type="button"
                 onClick={() => setWeekOffset((w) => w - 1)}
-                className="hover:bg-accent flex h-6 w-6 cursor-pointer items-center justify-center rounded-md"
+                disabled={weekOffset <= minOffset}
+                className="hover:bg-accent flex h-6 w-6 cursor-pointer items-center justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -80,7 +51,7 @@ export function DauChart() {
               <button
                 type="button"
                 onClick={() => setWeekOffset((w) => w + 1)}
-                disabled={weekOffset >= 0}
+                disabled={weekOffset >= maxOffset}
                 className="hover:bg-accent flex h-6 w-6 cursor-pointer items-center justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronRight className="h-4 w-4" />
