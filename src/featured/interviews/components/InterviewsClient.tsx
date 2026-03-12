@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/shared/ui/badge'
 import { Progress } from '@/shared/ui/progress'
 import { SearchInput } from '@/shared/components/SearchInput'
-import type { InterviewSession } from '@/featured/sessions/types'
+import { InterviewSession } from '../types'
 
 const INTERVIEW_TITLES = [
   '전체',
