@@ -13,18 +13,38 @@ import { useAdminStore } from '@/featured/auth/store'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const REMEMBER_KEY = 'login_remember'
+
 export function AdminLoginForm() {
   const router = useRouter()
-  const { setAdmin } = useAdminStore()
+  const { setAuthenticated } = useAdminStore()
   const [showPassword, setShowPassword] = useState(false)
   const [state, action, isPending] = useActionState(loginAction, null)
+  const [rememberMe, setRememberMe] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   useEffect(() => {
-    if (state?.success && state.admin) {
-      setAdmin(state.admin)
+    const saved = localStorage.getItem(REMEMBER_KEY)
+    if (saved) {
+      const { email, password } = JSON.parse(saved)
+      setEmail(email ?? '')
+      setPassword(password ?? '')
+      setRememberMe(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (state?.success) {
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email, password }))
+      } else {
+        localStorage.removeItem(REMEMBER_KEY)
+      }
+      setAuthenticated(true)
       router.push('/dashboard')
     }
-  }, [state, setAdmin, router])
+  }, [state, router, rememberMe, email, password, setAuthenticated])
 
   return (
     <div className="bg-muted/20 flex min-h-screen items-center justify-center px-4">
@@ -86,6 +106,8 @@ export function AdminLoginForm() {
                     placeholder="admin@interviewai.kr"
                     className="pl-10"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
@@ -101,6 +123,8 @@ export function AdminLoginForm() {
                     placeholder="비밀번호를 입력하세요"
                     className="pr-10 pl-10"
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -110,6 +134,19 @@ export function AdminLoginForm() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 cursor-pointer accent-primary"
+                />
+                <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
+                  로그인 정보 저장
+                </Label>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isPending}>

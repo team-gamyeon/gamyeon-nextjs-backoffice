@@ -1,11 +1,16 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { login } from '@/featured/auth/service'
-import type { Admin } from '@/featured/auth/types'
+
+export async function logoutAction() {
+  const cookieStore = await cookies()
+  cookieStore.delete('accessToken')
+  cookieStore.delete('refreshToken')
+}
 
 export interface LoginActionState {
   success: boolean
-  admin?: Admin | null
   error?: string
 }
 
@@ -17,8 +22,8 @@ export async function loginAction(
   const password = formData.get('password') as string
 
   try {
-    const admin = await login({ email, password })
-    return { success: true, admin }
+    await login({ email, password })
+    return { success: true }
   } catch (error: unknown) {
     const err = error as { message?: string }
     return { success: false, error: err.message ?? '로그인에 실패했습니다.' }
