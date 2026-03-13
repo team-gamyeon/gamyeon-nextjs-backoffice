@@ -37,6 +37,10 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
     setQuestions((prev) => prev.filter((question) => question.id !== id))
   }
 
+  const handleUpdate = (updated: CommonQuestion) => {
+    setQuestions((prev) => prev.map((question) => question.id === updated.id ? updated : question))
+  }
+
   const activeCount = questions.filter((question) => question.isActive).length
   const inactiveCount = questions.filter((question) => !question.isActive).length
 
@@ -95,7 +99,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
       </div>
 
       <div className="flex flex-1 min-h-0 flex-col py-4">
-        <QuestionTable questions={filtered} onDelete={handleDelete} />
+        <QuestionTable questions={filtered} onDelete={handleDelete} onUpdate={handleUpdate} />
       </div>
 
       <QuestionDialog

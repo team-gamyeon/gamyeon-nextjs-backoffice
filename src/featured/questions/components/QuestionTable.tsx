@@ -5,16 +5,31 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { QuestionDialog } from './QuestionDialog'
-import { updateQuestionAction } from '@/featured/questions/actions/questions.action'
+import { deleteQuestionAction, updateQuestionAction } from '@/featured/questions/actions/questions.action'
+import { QuestionDeleteDialog } from './QuestionDeleteDialog'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
   onDelete: (id: string) => void
+  onUpdate: (updated: CommonQuestion) => void
 }
 
-export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
+export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTableProps) {
   const [editTarget, setEditTarget] = useState<CommonQuestion | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<CommonQuestion | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    const result = await deleteQuestionAction(deleteTarget.id)
+    setIsDeleting(false)
+    if (result.success) {
+      onDelete(deleteTarget.id)
+      setDeleteTarget(null)
+    }
+  }
 
   return (
     <>
@@ -53,7 +68,10 @@ export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
-                        onClick={() => updateQuestionAction(question.id, { status: question.isActive ? 'INACTIVE' : 'ACTIVE' })}
+                        onClick={async () => {
+                          const result = await updateQuestionAction(question.id, { status: question.isActive ? 'INACTIVE' : 'ACTIVE' })
+                          if (result.success) onUpdate({ ...question, isActive: !question.isActive })
+                        }}
                         className={cn(
                           'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
                           question.isActive
@@ -82,7 +100,7 @@ export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
                         <button
                           type="button"
                           className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors"
-                          onClick={() => onDelete(question.id)}
+                          onClick={() => setDeleteTarget(question)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -107,8 +125,16 @@ export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
           question={editTarget}
           open={!!editTarget}
           onClose={() => setEditTarget(null)}
+          onSuccess={(updated) => { onUpdate(updated); setEditTarget(null) }}
         />
       )}
+
+      <QuestionDeleteDialog
+        open={!!deleteTarget}
+        isDeleting={isDeleting}
+        onConfirm={handleDeleteConfirm}
+        onClose={() => setDeleteTarget(null)}
+      />
     </>
   )
 }

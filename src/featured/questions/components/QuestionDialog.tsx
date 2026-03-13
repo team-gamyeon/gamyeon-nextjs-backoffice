@@ -11,9 +11,10 @@ interface QuestionDialogProps {
   question?: CommonQuestion
   open: boolean
   onClose: () => void
+  onSuccess?: (updated: CommonQuestion) => void
 }
 
-export function QuestionDialog({ question, open, onClose }: QuestionDialogProps) {
+export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionDialogProps) {
   const [formData, setFormData] = useState<{
     content: string
     isActive: boolean
@@ -51,6 +52,7 @@ export function QuestionDialog({ question, open, onClose }: QuestionDialogProps)
       setError(result.error ?? '질문 수정에 실패했습니다.')
       return
     }
+    onSuccess?.({ ...question!, content: formData.content, isActive: formData.isActive })
     onClose()
   }
 

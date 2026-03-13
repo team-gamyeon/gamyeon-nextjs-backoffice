@@ -5,6 +5,7 @@ import type {
   CommonQuestion,
   CreateQuestionRequest,
   CreateQuestionResponse,
+  DeleteQuestionResponse,
   QuestionListResponse,
   UpdateQuestionRequest,
   UpdateQuestionResponse,
@@ -20,6 +21,10 @@ export async function createQuestion(body: CreateQuestionRequest) {
 
 export async function updateQuestion(id: string, body: UpdateQuestionRequest) {
   return serverApi.patch<UpdateQuestionResponse>(`/api/v1/questions/${id}`, body)
+}
+
+export async function deleteQuestion(id: string) {
+  return serverApi.delete<DeleteQuestionResponse>(`/api/v1/questions/${id}`)
 }
 
 export function mapApiQuestionToCommon(question: ApiQuestion): CommonQuestion {

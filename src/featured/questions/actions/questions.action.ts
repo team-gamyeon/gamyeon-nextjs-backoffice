@@ -1,8 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createQuestion, updateQuestion } from '@/featured/questions/services/questions.service'
-import type { CreateQuestionResponse, QuestionStatus, UpdateQuestionResponse } from '@/featured/questions/types'
+import { createQuestion, deleteQuestion, updateQuestion } from '@/featured/questions/services/questions.service'
+import type { CreateQuestionResponse, DeleteQuestionResponse, QuestionStatus, UpdateQuestionResponse } from '@/featured/questions/types'
 
 export interface CreateQuestionActionState {
   success: boolean
@@ -44,5 +44,22 @@ export async function updateQuestionAction(
   } catch (error: unknown) {
     const apiError = error as { message?: string }
     return { success: false, error: apiError.message ?? '질문 수정에 실패했습니다.' }
+  }
+}
+
+export interface DeleteQuestionActionState {
+  success: boolean
+  data?: DeleteQuestionResponse
+  error?: string
+}
+
+export async function deleteQuestionAction(id: string): Promise<DeleteQuestionActionState> {
+  try {
+    const data = await deleteQuestion(id)
+    revalidatePath('/questions')
+    return { success: true, data: data ?? undefined }
+  } catch (error: unknown) {
+    const apiError = error as { message?: string }
+    return { success: false, error: apiError.message ?? '질문 삭제에 실패했습니다.' }
   }
 }

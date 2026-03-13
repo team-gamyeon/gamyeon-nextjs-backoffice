@@ -64,3 +64,9 @@ export interface UpdateQuestionResponse {
   content: string;
   status: QuestionStatus;
 }
+
+export interface DeleteQuestionResponse {
+  id: string;
+  status: 'DELETED';
+  deletedAt: string;
+}
