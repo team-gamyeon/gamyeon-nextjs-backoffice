@@ -102,23 +102,23 @@ const MOCK_STATS: JobStat[] = [
   },
 ];
 
-const totalSessions = MOCK_STATS.reduce((s, r) => s + r.totalSessions, 0);
-const overallAvg = (MOCK_STATS.reduce((s, r) => s + r.avgScore * r.totalSessions, 0) / totalSessions).toFixed(1);
-const bestCategory = MOCK_STATS.reduce((a, b) => a.avgScore > b.avgScore ? a : b);
-const worstCategory = MOCK_STATS.reduce((a, b) => a.avgScore < b.avgScore ? a : b);
+const totalSessions = MOCK_STATS.reduce((total, jobStat) => total + jobStat.totalSessions, 0);
+const overallAvg = (MOCK_STATS.reduce((total, jobStat) => total + jobStat.avgScore * jobStat.totalSessions, 0) / totalSessions).toFixed(1);
+const bestCategory = MOCK_STATS.reduce((best, current) => best.avgScore > current.avgScore ? best : current);
+const worstCategory = MOCK_STATS.reduce((worst, current) => worst.avgScore < current.avgScore ? worst : current);
 
 function ScoreBar({ stat }: { stat: JobStat }) {
   const maxScore = 100;
   return (
     <div className="flex h-3 w-full overflow-hidden rounded-full">
-      {stat.scoreDistribution.map((d) => {
-        const width = (d.count / stat.totalSessions) * 100;
+      {stat.scoreDistribution.map((distribution) => {
+        const width = (distribution.count / stat.totalSessions) * 100;
         return (
           <div
-            key={d.label}
-            className={`${d.color} h-full transition-all`}
+            key={distribution.label}
+            className={`${distribution.color} h-full transition-all`}
             style={{ width: `${width}%` }}
-            title={`${d.label}: ${d.count}명`}
+            title={`${distribution.label}: ${distribution.count}명`}
           />
         );
       })}
@@ -141,11 +141,11 @@ export function StatisticsClient() {
           { label: "전체 평균 점수", value: `${overallAvg}점`, sub: "가중 평균" },
           { label: "최고 평균 직군", value: bestCategory.jobCategory, sub: `평균 ${bestCategory.avgScore}점` },
           { label: "최저 평균 직군", value: worstCategory.jobCategory, sub: `평균 ${worstCategory.avgScore}점` },
-        ].map((s) => (
-          <Card key={s.label} className="p-4">
-            <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className="mt-1 text-2xl font-bold">{s.value}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{s.sub}</p>
+        ].map((stat) => (
+          <Card key={stat.label} className="p-4">
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className="mt-1 text-2xl font-bold">{stat.value}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{stat.sub}</p>
           </Card>
         ))}
       </div>
@@ -158,10 +158,10 @@ export function StatisticsClient() {
           { label: "B (70-89점)", color: "bg-blue-500" },
           { label: "C (50-69점)", color: "bg-amber-500" },
           { label: "D (50점↓)", color: "bg-red-500" },
-        ].map((l) => (
-          <div key={l.label} className="flex items-center gap-1.5">
-            <div className={`h-2.5 w-2.5 rounded-full ${l.color}`} />
-            <span className="text-xs text-muted-foreground">{l.label}</span>
+        ].map((legend) => (
+          <div key={legend.label} className="flex items-center gap-1.5">
+            <div className={`h-2.5 w-2.5 rounded-full ${legend.color}`} />
+            <span className="text-xs text-muted-foreground">{legend.label}</span>
           </div>
         ))}
       </div>
@@ -181,17 +181,17 @@ export function StatisticsClient() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 bg-background">
-            {MOCK_STATS.sort((a, b) => b.avgScore - a.avgScore).map((stat, i) => (
+            {MOCK_STATS.sort((statA, statB) => statB.avgScore - statA.avgScore).map((stat, index) => (
               <motion.tr
                 key={stat.jobCategory}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.05 }}
+                transition={{ delay: index * 0.05 }}
                 className="hover:bg-muted/30 transition-colors"
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
+                    <span className="text-xs font-mono text-muted-foreground">#{index + 1}</span>
                     <span className="font-medium">{stat.jobCategory}</span>
                   </div>
                 </td>

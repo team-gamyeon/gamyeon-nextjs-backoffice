@@ -51,7 +51,7 @@ const typeConfig: Record<PromptType, { label: string; className: string }> = {
 export function PromptsClient() {
   const [viewTarget, setViewTarget] = useState<PromptVersion | null>(null);
 
-  const activePrompts = MOCK_DATA.filter((p) => p.status === "active");
+  const activePrompts = MOCK_DATA.filter((prompt) => prompt.status === "active");
 
   return (
     <motion.div
@@ -64,19 +64,19 @@ export function PromptsClient() {
       <div>
         <h3 className="mb-3 text-sm font-semibold text-foreground">현재 활성 버전</h3>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          {activePrompts.map((p) => {
-            const tc = typeConfig[p.type];
+          {activePrompts.map((prompt) => {
+            const promptType = typeConfig[prompt.type];
             return (
-              <Card key={p.id} className="p-4 border-l-4 border-l-primary">
+              <Card key={prompt.id} className="p-4 border-l-4 border-l-primary">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{p.name}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{p.version}</p>
+                    <p className="truncate text-sm font-semibold">{prompt.name}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{prompt.version}</p>
                   </div>
-                  <Badge variant="outline" className={`shrink-0 text-xs ${tc.className}`}>{tc.label}</Badge>
+                  <Badge variant="outline" className={`shrink-0 text-xs ${promptType.className}`}>{promptType.label}</Badge>
                 </div>
-                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{p.content}</p>
-                <p className="mt-2 text-xs text-muted-foreground">수정: {p.updatedAt}</p>
+                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{prompt.content}</p>
+                <p className="mt-2 text-xs text-muted-foreground">수정: {prompt.updatedAt}</p>
               </Card>
             );
           })}
@@ -107,37 +107,37 @@ export function PromptsClient() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 bg-background">
-            {MOCK_DATA.map((p) => {
-              const sc = statusConfig[p.status];
-              const tc = typeConfig[p.type];
+            {MOCK_DATA.map((prompt) => {
+              const promptStatus = statusConfig[prompt.status];
+              const promptType = typeConfig[prompt.type];
               return (
-                <tr key={p.id} className="group transition-colors hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">{p.name}</td>
+                <tr key={prompt.id} className="group transition-colors hover:bg-muted/30">
+                  <td className="px-4 py-3 font-medium">{prompt.name}</td>
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <GitBranch className="h-3.5 w-3.5" />
-                      {p.version}
+                      {prompt.version}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant="outline" className={`text-xs ${tc.className}`}>{tc.label}</Badge>
+                    <Badge variant="outline" className={`text-xs ${promptType.className}`}>{promptType.label}</Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant="outline" className={`text-xs ${sc.className}`}>{sc.label}</Badge>
+                    <Badge variant="outline" className={`text-xs ${promptStatus.className}`}>{promptStatus.label}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.updatedAt}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.updatedBy}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{prompt.updatedAt}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{prompt.updatedBy}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewTarget(p)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewTarget(prompt)}>
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
-                      {p.status === "draft" && (
+                      {prompt.status === "draft" && (
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600">
                           <CheckCircle className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      {p.status === "active" && (
+                      {prompt.status === "active" && (
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
                           <Archive className="h-3.5 w-3.5" />
                         </Button>

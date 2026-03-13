@@ -56,7 +56,7 @@ export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup
             value={filters.status}
-            onValueChange={(v) => onFilterChange({ status: v as MemberFiltersState['status'] })}
+            onValueChange={(value) => onFilterChange({ status: value as MemberFiltersState['status'] })}
           >
             <DropdownMenuRadioItem value="all">전체 상태</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="active">정상</DropdownMenuRadioItem>
@@ -80,7 +80,7 @@ export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup
             value={filters.sortBy}
-            onValueChange={(v) => onFilterChange({ sortBy: v as MemberFiltersState['sortBy'] })}
+            onValueChange={(value) => onFilterChange({ sortBy: value as MemberFiltersState['sortBy'] })}
           >
             <DropdownMenuRadioItem value="joinedAt">가입일</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="lastActiveAt">최근 활동</DropdownMenuRadioItem>

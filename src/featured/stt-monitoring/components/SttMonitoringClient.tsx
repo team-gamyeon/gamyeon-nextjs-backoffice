@@ -62,27 +62,27 @@ const DAILY_TREND = [
   { date: "02.26", avgRate: 7.8 },
   { date: "02.27", avgRate: 2.3 },
 ];
-const maxRate = Math.max(...DAILY_TREND.map((d) => d.avgRate));
+const maxRate = Math.max(...DAILY_TREND.map((day) => day.avgRate));
 
 export function SttMonitoringClient() {
   const [search, setSearch] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
 
   const filtered = useMemo(() => {
-    return MOCK_DATA.filter((r) => {
-      const matchSearch = !search || r.nickname.includes(search) || r.sessionId.includes(search);
+    return MOCK_DATA.filter((record) => {
+      const matchSearch = !search || record.nickname.includes(search) || record.sessionId.includes(search);
       const matchLevel =
         levelFilter === "all" ||
-        (levelFilter === "good" && r.errorRate < 5) ||
-        (levelFilter === "caution" && r.errorRate >= 5 && r.errorRate < 15) ||
-        (levelFilter === "critical" && r.errorRate >= 15);
+        (levelFilter === "good" && record.errorRate < 5) ||
+        (levelFilter === "caution" && record.errorRate >= 5 && record.errorRate < 15) ||
+        (levelFilter === "critical" && record.errorRate >= 15);
       return matchSearch && matchLevel;
     });
   }, [search, levelFilter]);
 
-  const overallRate = (MOCK_DATA.reduce((s, r) => s + r.errorRate, 0) / MOCK_DATA.length).toFixed(1);
-  const criticalCount = MOCK_DATA.filter((r) => r.errorRate >= 15).length;
-  const perfectCount = MOCK_DATA.filter((r) => r.errorRate === 0).length;
+  const overallRate = (MOCK_DATA.reduce((total, record) => total + record.errorRate, 0) / MOCK_DATA.length).toFixed(1);
+  const criticalCount = MOCK_DATA.filter((record) => record.errorRate >= 15).length;
+  const perfectCount = MOCK_DATA.filter((record) => record.errorRate === 0).length;
 
   return (
     <motion.div
@@ -98,11 +98,11 @@ export function SttMonitoringClient() {
           { label: "모니터링 세션", value: MOCK_DATA.length, sub: "최근 7일" },
           { label: "심각 (15%↑)", value: criticalCount, sub: "즉시 조치 필요", color: "text-destructive" },
           { label: "완벽 (오류 없음)", value: perfectCount, sub: "전체의 " + Math.round(perfectCount / MOCK_DATA.length * 100) + "%", color: "text-green-600" },
-        ].map((s) => (
-          <Card key={s.label} className="p-4">
-            <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className={`mt-1 text-2xl font-bold ${s.color ?? ""}`}>{s.value}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{s.sub}</p>
+        ].map((stat) => (
+          <Card key={stat.label} className="p-4">
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className={`mt-1 text-2xl font-bold ${stat.color ?? ""}`}>{stat.value}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{stat.sub}</p>
           </Card>
         ))}
       </div>
@@ -111,19 +111,19 @@ export function SttMonitoringClient() {
       <Card className="p-4">
         <p className="mb-4 text-sm font-semibold">일별 평균 STT 오류율 추이</p>
         <div className="flex items-end gap-3 h-24">
-          {DAILY_TREND.map((d) => {
-            const height = (d.avgRate / maxRate) * 100;
-            const color = d.avgRate < 5 ? "bg-green-500" : d.avgRate < 15 ? "bg-amber-500" : "bg-red-500";
+          {DAILY_TREND.map((day) => {
+            const height = (day.avgRate / maxRate) * 100;
+            const color = day.avgRate < 5 ? "bg-green-500" : day.avgRate < 15 ? "bg-amber-500" : "bg-red-500";
             return (
-              <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
-                <span className="text-xs text-muted-foreground">{d.avgRate}%</span>
+              <div key={day.date} className="flex flex-1 flex-col items-center gap-1">
+                <span className="text-xs text-muted-foreground">{day.avgRate}%</span>
                 <div className="flex w-full flex-col justify-end" style={{ height: "64px" }}>
                   <div
                     className={`w-full rounded-t-sm transition-all ${color}`}
                     style={{ height: `${height}%` }}
                   />
                 </div>
-                <span className="text-xs text-muted-foreground">{d.date}</span>
+                <span className="text-xs text-muted-foreground">{day.date}</span>
               </div>
             );
           })}
@@ -136,7 +136,7 @@ export function SttMonitoringClient() {
           placeholder="닉네임 또는 세션 ID 검색..."
           className="h-9 w-64 bg-muted/40 text-sm"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
         />
         <Select value={levelFilter} onValueChange={setLevelFilter}>
           <SelectTrigger className="h-9 w-36 text-sm">
@@ -170,36 +170,36 @@ export function SttMonitoringClient() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 bg-background">
-            {filtered.map((r) => (
-              <tr key={r.sessionId} className="hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{r.sessionId}</td>
-                <td className="px-4 py-3 font-medium">{r.nickname}</td>
-                <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{r.jobCategory}</Badge></td>
-                <td className="px-4 py-3 text-center">{r.totalWords.toLocaleString()}</td>
-                <td className="px-4 py-3 text-center font-medium">{r.errorWords}</td>
+            {filtered.map((record) => (
+              <tr key={record.sessionId} className="hover:bg-muted/30 transition-colors">
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{record.sessionId}</td>
+                <td className="px-4 py-3 font-medium">{record.nickname}</td>
+                <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{record.jobCategory}</Badge></td>
+                <td className="px-4 py-3 text-center">{record.totalWords.toLocaleString()}</td>
+                <td className="px-4 py-3 text-center font-medium">{record.errorWords}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="w-20">
-                      <Progress value={Math.min(r.errorRate, 100)} className="h-1.5" />
+                      <Progress value={Math.min(record.errorRate, 100)} className="h-1.5" />
                     </div>
-                    <span className={`text-xs font-semibold ${errorRateColor(r.errorRate)}`}>
-                      {r.errorRate.toFixed(1)}%
+                    <span className={`text-xs font-semibold ${errorRateColor(record.errorRate)}`}>
+                      {record.errorRate.toFixed(1)}%
                     </span>
-                    {errorRateBadge(r.errorRate)}
+                    {errorRateBadge(record.errorRate)}
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {r.errorTypes.length === 0 ? (
+                  {record.errorTypes.length === 0 ? (
                     <span className="text-xs text-muted-foreground">—</span>
                   ) : (
                     <div className="flex flex-wrap gap-1">
-                      {r.errorTypes.map((t) => (
-                        <span key={t} className="rounded-sm bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{t}</span>
+                      {record.errorTypes.map((errorType) => (
+                        <span key={errorType} className="rounded-sm bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{errorType}</span>
                       ))}
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{r.date}</td>
+                <td className="px-4 py-3 text-muted-foreground">{record.date}</td>
               </tr>
             ))}
           </tbody>

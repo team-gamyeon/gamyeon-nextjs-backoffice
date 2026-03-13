@@ -29,15 +29,15 @@ interface Props {
 
 export function CompletionRateCard({ interviewCompletion }: Props) {
   const data = (interviewCompletion?.segments ?? [])
-    .filter((s) => s.label !== "READY" && INTERVIEW_SEGMENT_MAP[s.label])
-    .map((s) => ({
-      name: INTERVIEW_SEGMENT_MAP[s.label].name,
-      value: s.percentage,
-      count: s.count,
-      color: INTERVIEW_SEGMENT_MAP[s.label].color,
-      order: INTERVIEW_SEGMENT_MAP[s.label].order,
+    .filter((segment) => segment.label !== "READY" && INTERVIEW_SEGMENT_MAP[segment.label])
+    .map((segment) => ({
+      name: INTERVIEW_SEGMENT_MAP[segment.label].name,
+      value: segment.percentage,
+      count: segment.count,
+      color: INTERVIEW_SEGMENT_MAP[segment.label].color,
+      order: INTERVIEW_SEGMENT_MAP[segment.label].order,
     }))
-    .sort((a, b) => a.order - b.order);
+    .sort((segmentA, segmentB) => segmentA.order - segmentB.order);
 
   const completionRate = interviewCompletion?.completionRate ?? 0;
 

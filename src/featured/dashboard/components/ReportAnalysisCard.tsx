@@ -29,14 +29,14 @@ interface Props {
 
 export function ReportAnalysisCard({ reportAnalysis }: Props) {
   const data = (reportAnalysis?.segments ?? [])
-    .filter((s) => REPORT_SEGMENT_MAP[s.label])
-    .map((s) => ({
-      name: REPORT_SEGMENT_MAP[s.label].name,
-      value: s.count,
-      color: REPORT_SEGMENT_MAP[s.label].color,
-      order: REPORT_SEGMENT_MAP[s.label].order,
+    .filter((segment) => REPORT_SEGMENT_MAP[segment.label])
+    .map((segment) => ({
+      name: REPORT_SEGMENT_MAP[segment.label].name,
+      value: segment.count,
+      color: REPORT_SEGMENT_MAP[segment.label].color,
+      order: REPORT_SEGMENT_MAP[segment.label].order,
     }))
-    .sort((a, b) => a.order - b.order);
+    .sort((segmentA, segmentB) => segmentA.order - segmentB.order);
 
   const completionRate = reportAnalysis?.completionRate ?? 0;
 
