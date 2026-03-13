@@ -1,6 +1,6 @@
 import { PageHeader } from "@/shared/components/PageHeader";
 import { MembersClient } from "@/featured/members/components/MembersClient";
-import { getUsers, mapApiUserToMember } from "@/featured/members/service";
+import { getUsers, mapApiUserToMember } from "@/featured/members/services/members.service";
 
 export default async function MembersPage() {
   const result = await getUsers();
