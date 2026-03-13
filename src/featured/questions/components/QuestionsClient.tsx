@@ -33,25 +33,8 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
     })
   }, [questions, debouncedSearch, activeTab])
 
-  const handleUpdate = (id: string, data: Partial<CommonQuestion>) => {
-    setQuestions((prev) => prev.map((question) => (question.id === id ? { ...question, ...data } : question)))
-  }
-
   const handleDelete = (id: string) => {
     setQuestions((prev) => prev.filter((question) => question.id !== id))
-  }
-
-  const handleAdd = (data: { content: string; isActive: boolean }) => {
-    const newQuestion: CommonQuestion = {
-      id: String(Date.now()),
-      content: data.content,
-      category: '자기소개',
-      isActive: data.isActive,
-      usageCount: 0,
-      createdAt: '2026.03.07',
-      updatedAt: '2026.03.07',
-    }
-    setQuestions((prev) => [newQuestion, ...prev])
   }
 
   const activeCount = questions.filter((question) => question.isActive).length
@@ -112,13 +95,12 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
       </div>
 
       <div className="flex flex-1 min-h-0 flex-col">
-        <QuestionTable questions={filtered} onUpdate={handleUpdate} onDelete={handleDelete} />
+        <QuestionTable questions={filtered} onDelete={handleDelete} />
       </div>
 
       <QuestionDialog
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onSave={handleAdd}
       />
     </motion.div>
   )

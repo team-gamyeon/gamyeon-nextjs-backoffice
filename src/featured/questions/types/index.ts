@@ -53,3 +53,14 @@ export interface CreateQuestionResponse {
   content: string;
   status: QuestionStatus;
 }
+
+export interface UpdateQuestionRequest {
+  content?: string;
+  status?: QuestionStatus;
+}
+
+export interface UpdateQuestionResponse {
+  id: string;
+  content: string;
+  status: QuestionStatus;
+}

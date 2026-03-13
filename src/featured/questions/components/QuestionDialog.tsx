@@ -1,22 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { QuestionForm } from './QuestionForm'
-import { createQuestionAction } from '@/featured/questions/actions/questions.action'
+import { createQuestionAction, updateQuestionAction } from '@/featured/questions/actions/questions.action'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionDialogProps {
   question?: CommonQuestion
   open: boolean
   onClose: () => void
-  onSave: (data: { content: string; isActive: boolean }) => void
 }
 
-export function QuestionDialog({ question, open, onClose, onSave }: QuestionDialogProps) {
-  const router = useRouter()
+export function QuestionDialog({ question, open, onClose }: QuestionDialogProps) {
   const [formData, setFormData] = useState<{
     content: string
     isActive: boolean
@@ -32,22 +29,28 @@ export function QuestionDialog({ question, open, onClose, onSave }: QuestionDial
     setError(null)
 
     if (!isEdit) {
-      const fd = new FormData()
-      fd.append('content', formData.content)
-      fd.append('status', formData.isActive ? 'ACTIVE' : 'INACTIVE')
-      const result = await createQuestionAction(null, fd)
+      const formDataPayload = new FormData()
+      formDataPayload.append('content', formData.content)
+      formDataPayload.append('status', formData.isActive ? 'ACTIVE' : 'INACTIVE')
+      const result = await createQuestionAction(null, formDataPayload)
       setIsSubmitting(false)
       if (!result.success) {
         setError(result.error ?? '질문 생성에 실패했습니다.')
         return
       }
-      router.refresh()
       onClose()
       return
     }
 
-    onSave(formData)
+    const result = await updateQuestionAction(question!.id, {
+      content: formData.content,
+      status: formData.isActive ? 'ACTIVE' : 'INACTIVE',
+    })
     setIsSubmitting(false)
+    if (!result.success) {
+      setError(result.error ?? '질문 수정에 실패했습니다.')
+      return
+    }
     onClose()
   }
 

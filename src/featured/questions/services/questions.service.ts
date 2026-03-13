@@ -1,6 +1,14 @@
 import { serverApi } from '@/shared/lib/api'
 import { timeAgo } from '@/shared/lib/utils/timeAgo'
-import type { ApiQuestion, CommonQuestion, CreateQuestionRequest, CreateQuestionResponse, QuestionListResponse } from '@/featured/questions/types'
+import type {
+  ApiQuestion,
+  CommonQuestion,
+  CreateQuestionRequest,
+  CreateQuestionResponse,
+  QuestionListResponse,
+  UpdateQuestionRequest,
+  UpdateQuestionResponse,
+} from '@/featured/questions/types'
 
 export async function getQuestions() {
   return serverApi.get<QuestionListResponse>('/api/v1/questions')
@@ -8,6 +16,10 @@ export async function getQuestions() {
 
 export async function createQuestion(body: CreateQuestionRequest) {
   return serverApi.post<CreateQuestionResponse>('/api/v1/questions', body)
+}
+
+export async function updateQuestion(id: string, body: UpdateQuestionRequest) {
+  return serverApi.patch<UpdateQuestionResponse>(`/api/v1/questions/${id}`, body)
 }
 
 export function mapApiQuestionToCommon(question: ApiQuestion): CommonQuestion {

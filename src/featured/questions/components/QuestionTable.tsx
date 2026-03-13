@@ -5,15 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { QuestionDialog } from './QuestionDialog'
+import { updateQuestionAction } from '@/featured/questions/actions/questions.action'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
-  onUpdate: (id: string, data: Partial<CommonQuestion>) => void
   onDelete: (id: string) => void
 }
 
-export function QuestionTable({ questions, onUpdate, onDelete }: QuestionTableProps) {
+export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
   const [editTarget, setEditTarget] = useState<CommonQuestion | null>(null)
 
   return (
@@ -60,7 +60,7 @@ export function QuestionTable({ questions, onUpdate, onDelete }: QuestionTablePr
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
-                        onClick={() => onUpdate(question.id, { isActive: !question.isActive })}
+                        onClick={() => updateQuestionAction(question.id, { status: question.isActive ? 'INACTIVE' : 'ACTIVE' })}
                         className={cn(
                           'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
                           question.isActive
@@ -114,10 +114,6 @@ export function QuestionTable({ questions, onUpdate, onDelete }: QuestionTablePr
           question={editTarget}
           open={!!editTarget}
           onClose={() => setEditTarget(null)}
-          onSave={(data) => {
-            onUpdate(editTarget.id, { ...data, updatedAt: '2026.03.07' })
-            setEditTarget(null)
-          }}
         />
       )}
     </>
