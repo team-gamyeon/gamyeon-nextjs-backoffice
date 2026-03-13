@@ -64,7 +64,7 @@ export async function parseApiResponse<T>(res: Response): Promise<ApiResult<T>> 
   if (!body.success) {
     return {
       data: null,
-      error: new ApiError(res.status, body.message, body.code, body.errors),
+      error: new ApiError(res.status, body as unknown as Record<string, unknown>),
     }
   }
 

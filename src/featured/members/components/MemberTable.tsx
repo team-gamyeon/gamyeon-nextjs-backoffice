@@ -38,8 +38,8 @@ export function MemberTable({ members }: MemberTableProps) {
 
   return (
     <>
-      <div className="border-border/60 overflow-hidden rounded-lg border">
-        <table className="w-full table-fixed text-sm">
+      <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
+        <table className="w-full table-fixed text-sm shrink-0">
           <thead className="bg-muted/40">
             <tr>
               <th className="text-muted-foreground w-[15%] px-6 py-4 text-left font-medium">
@@ -63,6 +63,18 @@ export function MemberTable({ members }: MemberTableProps) {
               <th className="w-16 px-6 py-4" />
             </tr>
           </thead>
+        </table>
+        <div className="overflow-y-auto flex-1 min-h-0 [scrollbar-gutter:stable]">
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            <col className="w-[15%]" />
+            <col className="w-[25%]" />
+            <col className="w-[15%]" />
+            <col className="w-[15%]" />
+            <col className="w-[10%]" />
+            <col className="w-[10%]" />
+            <col className="w-16" />
+          </colgroup>
           <tbody className="divide-border/40 bg-background divide-y">
             {members.map((member) => (
               <motion.tr key={member.id} className="group hover:bg-muted/30 transition-colors">
@@ -141,6 +153,7 @@ export function MemberTable({ members }: MemberTableProps) {
             ))}
           </tbody>
         </table>
+        </div>
 
         {members.length === 0 && (
           <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
