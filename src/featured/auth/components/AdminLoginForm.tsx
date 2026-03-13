@@ -109,7 +109,7 @@ export function AdminLoginForm() {
                     className="pl-10"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
                   />
                 </div>
               </div>
@@ -126,7 +126,7 @@ export function AdminLoginForm() {
                     className="pr-10 pl-10"
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(event) => setPassword(event.target.value)}
                   />
                   <button
                     type="button"
@@ -143,7 +143,7 @@ export function AdminLoginForm() {
                   id="remember"
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  onChange={(event) => setRememberMe(event.target.checked)}
                   className="h-4 w-4 cursor-pointer accent-primary"
                 />
                 <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">

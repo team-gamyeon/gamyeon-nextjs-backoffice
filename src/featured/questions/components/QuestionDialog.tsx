@@ -4,16 +4,17 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { QuestionForm } from './QuestionForm'
+import { createQuestionAction, updateQuestionAction } from '@/featured/questions/actions/questions.action'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionDialogProps {
   question?: CommonQuestion
   open: boolean
   onClose: () => void
-  onSave: (data: { content: string; isActive: boolean }) => void
+  onSuccess?: (updated: CommonQuestion) => void
 }
 
-export function QuestionDialog({ question, open, onClose, onSave }: QuestionDialogProps) {
+export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionDialogProps) {
   const [formData, setFormData] = useState<{
     content: string
     isActive: boolean
@@ -22,12 +23,36 @@ export function QuestionDialog({ question, open, onClose, onSave }: QuestionDial
     isActive: question?.isActive ?? true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSave = async () => {
     setIsSubmitting(true)
-    await new Promise((r) => setTimeout(r, 600))
-    onSave(formData)
+    setError(null)
+
+    if (!isEdit) {
+      const formDataPayload = new FormData()
+      formDataPayload.append('content', formData.content)
+      formDataPayload.append('status', formData.isActive ? 'ACTIVE' : 'INACTIVE')
+      const result = await createQuestionAction(null, formDataPayload)
+      setIsSubmitting(false)
+      if (!result.success) {
+        setError(result.error ?? '질문 생성에 실패했습니다.')
+        return
+      }
+      onClose()
+      return
+    }
+
+    const result = await updateQuestionAction(question!.id, {
+      content: formData.content,
+      status: formData.isActive ? 'ACTIVE' : 'INACTIVE',
+    })
     setIsSubmitting(false)
+    if (!result.success) {
+      setError(result.error ?? '질문 수정에 실패했습니다.')
+      return
+    }
+    onSuccess?.({ ...question!, content: formData.content, isActive: formData.isActive })
     onClose()
   }
 
@@ -41,6 +66,8 @@ export function QuestionDialog({ question, open, onClose, onSave }: QuestionDial
         </DialogHeader>
 
         <QuestionForm initial={question} onChange={setFormData} />
+
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <DialogFooter>
           <Button

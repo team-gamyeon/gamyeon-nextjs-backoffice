@@ -149,7 +149,7 @@ interface ReportDetailDialogProps {
 
 function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -191,10 +191,10 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
             <div>
               <p className="mb-2 font-semibold text-green-600 dark:text-green-400">강점</p>
               <ul className="space-y-1">
-                {report.strengths.map((s: string, i: number) => (
-                  <li key={i} className="text-muted-foreground flex items-start gap-2">
+                {report.strengths.map((strength: string, index: number) => (
+                  <li key={index} className="text-muted-foreground flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
-                    {s}
+                    {strength}
                   </li>
                 ))}
               </ul>
@@ -205,10 +205,10 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
             <div>
               <p className="mb-2 font-semibold text-amber-600 dark:text-amber-400">개선 필요</p>
               <ul className="space-y-1">
-                {report.improvements.map((s: string, i: number) => (
-                  <li key={i} className="text-muted-foreground flex items-start gap-2">
+                {report.improvements.map((improvement: string, index: number) => (
+                  <li key={index} className="text-muted-foreground flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                    {s}
+                    {improvement}
                   </li>
                 ))}
               </ul>
@@ -226,21 +226,21 @@ export function ReportsClient() {
   const [selected, setSelected] = useState<any | null>(null)
 
   const filtered = useMemo(() => {
-    return MOCK_REPORTS.filter((r) => {
+    return MOCK_REPORTS.filter((report) => {
       if (
         search &&
-        !r.userNickname.toLowerCase().includes(search.toLowerCase()) &&
-        !r.sessionId.includes(search)
+        !report.userNickname.toLowerCase().includes(search.toLowerCase()) &&
+        !report.sessionId.includes(search)
       )
         return false
-      if (activeTab !== 'all' && r.status !== activeTab) return false
+      if (activeTab !== 'all' && report.status !== activeTab) return false
       return true
     })
   }, [search, activeTab])
 
-  const completedCount = MOCK_REPORTS.filter((r) => r.status === 'completed').length
-  const analyzingCount = MOCK_REPORTS.filter((r) => r.status === 'analyzing').length
-  const failedCount = MOCK_REPORTS.filter((r) => r.status === 'failed').length
+  const completedCount = MOCK_REPORTS.filter((report) => report.status === 'completed').length
+  const analyzingCount = MOCK_REPORTS.filter((report) => report.status === 'analyzing').length
+  const failedCount = MOCK_REPORTS.filter((report) => report.status === 'failed').length
 
   return (
     <motion.div
@@ -274,7 +274,7 @@ export function ReportsClient() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
           <TabsList className="h-9">
             <TabsTrigger value="all" className="text-xs">
               전체
@@ -329,12 +329,12 @@ export function ReportsClient() {
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
-            {filtered.map((report, i) => (
+            {filtered.map((report, index) => (
               <motion.tr
                 key={report.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
+                transition={{ delay: index * 0.04 }}
                 className="group hover:bg-muted/30 transition-colors"
               >
                 <td className="truncate px-4 py-3 text-left font-medium">{report.userNickname}</td>

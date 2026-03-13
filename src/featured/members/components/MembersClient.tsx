@@ -25,23 +25,23 @@ export function MembersClient({ initialMembers }: MembersClientProps) {
     let result = [...initialMembers];
 
     if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
+      const query = debouncedSearch.toLowerCase();
       result = result.filter(
-        (m) =>
-          m.nickname.toLowerCase().includes(q) ||
-          m.email.toLowerCase().includes(q)
+        (member) =>
+          member.nickname.toLowerCase().includes(query) ||
+          member.email.toLowerCase().includes(query)
       );
     }
 
     if (filters.status !== "all") {
-      result = result.filter((m) => m.status === filters.status);
+      result = result.filter((member) => member.status === filters.status);
     }
 
-    result.sort((a, b) => {
-      const aVal = a[filters.sortBy];
-      const bVal = b[filters.sortBy];
-      const mul = filters.sortOrder === "desc" ? -1 : 1;
-      return aVal > bVal ? mul : -mul;
+    result.sort((memberA, memberB) => {
+      const memberAValue = memberA[filters.sortBy];
+      const memberBValue = memberB[filters.sortBy];
+      const sortMultiplier = filters.sortOrder === "desc" ? -1 : 1;
+      return memberAValue > memberBValue ? sortMultiplier : -sortMultiplier;
     });
 
     return result;
@@ -68,7 +68,7 @@ export function MembersClient({ initialMembers }: MembersClientProps) {
       </div>
 
       <MemberFilters filters={filters} onFilterChange={handleFilterChange} />
-      <div className="flex flex-1 min-h-0 flex-col">
+      <div className="flex flex-1 min-h-0 flex-col py-4">
         <MemberTable members={filtered} />
       </div>
     </motion.div>

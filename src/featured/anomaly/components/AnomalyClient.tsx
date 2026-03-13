@@ -72,10 +72,10 @@ export function AnomalyClient() {
   const [statusFilter, setStatusFilter] = useState<AnomalyStatus | "all">("all");
 
   const filtered = useMemo(() => {
-    return MOCK_DATA.filter((r) => {
-      const matchSearch = !search || r.nickname.includes(search) || r.sessionId.includes(search);
-      const matchSeverity = severityFilter === "all" || r.severity === severityFilter;
-      const matchStatus = statusFilter === "all" || r.status === statusFilter;
+    return MOCK_DATA.filter((anomaly) => {
+      const matchSearch = !search || anomaly.nickname.includes(search) || anomaly.sessionId.includes(search);
+      const matchSeverity = severityFilter === "all" || anomaly.severity === severityFilter;
+      const matchStatus = statusFilter === "all" || anomaly.status === statusFilter;
       return matchSearch && matchSeverity && matchStatus;
     });
   }, [search, severityFilter, statusFilter]);
@@ -91,13 +91,13 @@ export function AnomalyClient() {
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {[
           { label: "전체 이상 감지", value: MOCK_DATA.length, color: "" },
-          { label: "심각", value: MOCK_DATA.filter(r => r.severity === "high").length, color: "text-destructive" },
-          { label: "검토 중", value: MOCK_DATA.filter(r => r.status === "reviewing").length, color: "text-blue-600" },
-          { label: "무시됨", value: MOCK_DATA.filter(r => r.status === "dismissed").length, color: "text-muted-foreground" },
-        ].map((s) => (
-          <Card key={s.label} className="p-4">
-            <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className={`mt-1 text-2xl font-bold ${s.color}`}>{s.value}</p>
+          { label: "심각", value: MOCK_DATA.filter((anomaly) => anomaly.severity === "high").length, color: "text-destructive" },
+          { label: "검토 중", value: MOCK_DATA.filter((anomaly) => anomaly.status === "reviewing").length, color: "text-blue-600" },
+          { label: "무시됨", value: MOCK_DATA.filter((anomaly) => anomaly.status === "dismissed").length, color: "text-muted-foreground" },
+        ].map((stat) => (
+          <Card key={stat.label} className="p-4">
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className={`mt-1 text-2xl font-bold ${stat.color}`}>{stat.value}</p>
           </Card>
         ))}
       </div>
@@ -108,9 +108,9 @@ export function AnomalyClient() {
           placeholder="닉네임 또는 세션 ID 검색..."
           className="h-9 w-64 bg-muted/40 text-sm"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
         />
-        <Select value={severityFilter} onValueChange={(v) => setSeverityFilter(v as Severity | "all")}>
+        <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as Severity | "all")}>
           <SelectTrigger className="h-9 w-32 text-sm">
             <SelectValue />
           </SelectTrigger>
@@ -121,7 +121,7 @@ export function AnomalyClient() {
             <SelectItem value="low">낮음</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as AnomalyStatus | "all")}>
+        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as AnomalyStatus | "all")}>
           <SelectTrigger className="h-9 w-32 text-sm">
             <SelectValue />
           </SelectTrigger>
@@ -154,39 +154,39 @@ export function AnomalyClient() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 bg-background">
-            {filtered.map((r) => {
-              const sv = severityConfig[r.severity];
-              const st = statusConfig[r.status];
+            {filtered.map((anomaly) => {
+              const anomalySeverity = severityConfig[anomaly.severity];
+              const anomalyStatus = statusConfig[anomaly.status];
               return (
-                <tr key={r.id} className="group transition-colors hover:bg-muted/30">
+                <tr key={anomaly.id} className="group transition-colors hover:bg-muted/30">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
-                      <div className={`h-2 w-2 rounded-full ${sv.dotColor}`} />
-                      <Badge variant="outline" className={`text-xs ${sv.className}`}>{sv.label}</Badge>
+                      <div className={`h-2 w-2 rounded-full ${anomalySeverity.dotColor}`} />
+                      <Badge variant="outline" className={`text-xs ${anomalySeverity.className}`}>{anomalySeverity.label}</Badge>
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{r.sessionId}</td>
-                  <td className="px-4 py-3 font-medium">{r.nickname}</td>
-                  <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{r.jobCategory}</Badge></td>
-                  <td className="px-4 py-3 text-muted-foreground">{typeLabel[r.type]}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{anomaly.sessionId}</td>
+                  <td className="px-4 py-3 font-medium">{anomaly.nickname}</td>
+                  <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{anomaly.jobCategory}</Badge></td>
+                  <td className="px-4 py-3 text-muted-foreground">{typeLabel[anomaly.type]}</td>
                   <td className="px-4 py-3 max-w-xs">
-                    <p className="truncate text-xs text-muted-foreground">{r.detail}</p>
+                    <p className="truncate text-xs text-muted-foreground">{anomaly.detail}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant="outline" className={`text-xs ${st.className}`}>{st.label}</Badge>
+                    <Badge variant="outline" className={`text-xs ${anomalyStatus.className}`}>{anomalyStatus.label}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{r.detectedAt}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">{anomaly.detectedAt}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <Button variant="ghost" size="icon" className="h-7 w-7" title="상세 보기">
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
-                      {r.status === "pending" && (
+                      {anomaly.status === "pending" && (
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-600" title="검토 시작">
                           <ShieldCheck className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      {r.status !== "dismissed" && (
+                      {anomaly.status !== "dismissed" && (
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" title="무시">
                           <XCircle className="h-3.5 w-3.5" />
                         </Button>

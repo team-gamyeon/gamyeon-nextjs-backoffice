@@ -50,10 +50,10 @@ function StarRating({ value }: { value: number }) {
   );
 }
 
-function qualityBadge(q: number) {
-  if (q >= 5) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">우수</Badge>;
-  if (q >= 4) return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">양호</Badge>;
-  if (q >= 3) return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">보통</Badge>;
+function qualityBadge(quality: number) {
+  if (quality >= 5) return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">우수</Badge>;
+  if (quality >= 4) return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">양호</Badge>;
+  if (quality >= 3) return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">보통</Badge>;
   return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs">개선 필요</Badge>;
 }
 
@@ -62,19 +62,19 @@ export function AiFeedbackClient() {
   const [qualityFilter, setQualityFilter] = useState("all");
 
   const filtered = useMemo(() => {
-    return MOCK_DATA.filter((r) => {
-      const matchSearch = !search || r.nickname.includes(search) || r.sessionId.includes(search);
+    return MOCK_DATA.filter((record) => {
+      const matchSearch = !search || record.nickname.includes(search) || record.sessionId.includes(search);
       const matchQuality =
         qualityFilter === "all" ||
-        (qualityFilter === "high" && r.feedbackQuality >= 4) ||
-        (qualityFilter === "mid" && r.feedbackQuality === 3) ||
-        (qualityFilter === "low" && r.feedbackQuality <= 2);
+        (qualityFilter === "high" && record.feedbackQuality >= 4) ||
+        (qualityFilter === "mid" && record.feedbackQuality === 3) ||
+        (qualityFilter === "low" && record.feedbackQuality <= 2);
       return matchSearch && matchQuality;
     });
   }, [search, qualityFilter]);
 
-  const avgQuality = (MOCK_DATA.reduce((s, r) => s + r.feedbackQuality, 0) / MOCK_DATA.length).toFixed(1);
-  const highQualityPct = Math.round((MOCK_DATA.filter(r => r.feedbackQuality >= 4).length / MOCK_DATA.length) * 100);
+  const avgQuality = (MOCK_DATA.reduce((total, record) => total + record.feedbackQuality, 0) / MOCK_DATA.length).toFixed(1);
+  const highQualityPct = Math.round((MOCK_DATA.filter((record) => record.feedbackQuality >= 4).length / MOCK_DATA.length) * 100);
 
   return (
     <motion.div
@@ -89,12 +89,12 @@ export function AiFeedbackClient() {
           { label: "평균 품질 점수", value: `${avgQuality} / 5`, sub: "전체 세션" },
           { label: "총 검토 건수", value: MOCK_DATA.length, sub: "이번 주" },
           { label: "우수 피드백 비율", value: `${highQualityPct}%`, sub: "품질 4점 이상" },
-          { label: "개선 필요", value: MOCK_DATA.filter(r => r.feedbackQuality <= 2).length, sub: "품질 2점 이하" },
-        ].map((s) => (
-          <Card key={s.label} className="p-4">
-            <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className="mt-1 text-2xl font-bold">{s.value}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{s.sub}</p>
+          { label: "개선 필요", value: MOCK_DATA.filter((record) => record.feedbackQuality <= 2).length, sub: "품질 2점 이하" },
+        ].map((stat) => (
+          <Card key={stat.label} className="p-4">
+            <p className="text-sm text-muted-foreground">{stat.label}</p>
+            <p className="mt-1 text-2xl font-bold">{stat.value}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{stat.sub}</p>
           </Card>
         ))}
       </div>
@@ -105,7 +105,7 @@ export function AiFeedbackClient() {
           placeholder="닉네임 또는 세션 ID 검색..."
           className="h-9 w-64 bg-muted/40 text-sm"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
         />
         <Select value={qualityFilter} onValueChange={setQualityFilter}>
           <SelectTrigger className="h-9 w-36 text-sm">
@@ -139,31 +139,31 @@ export function AiFeedbackClient() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40 bg-background">
-            {filtered.map((r) => (
-              <tr key={r.sessionId} className="hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{r.sessionId}</td>
-                <td className="px-4 py-3 font-medium">{r.nickname}</td>
-                <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{r.jobCategory}</Badge></td>
-                <td className="px-4 py-3 text-center font-semibold">{r.avgScore}</td>
+            {filtered.map((record) => (
+              <tr key={record.sessionId} className="hover:bg-muted/30 transition-colors">
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{record.sessionId}</td>
+                <td className="px-4 py-3 font-medium">{record.nickname}</td>
+                <td className="px-4 py-3"><Badge variant="outline" className="text-xs">{record.jobCategory}</Badge></td>
+                <td className="px-4 py-3 text-center font-semibold">{record.avgScore}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <StarRating value={r.feedbackQuality} />
-                    {qualityBadge(r.feedbackQuality)}
+                    <StarRating value={record.feedbackQuality} />
+                    {qualityBadge(record.feedbackQuality)}
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <Progress value={r.completeness} className="h-1.5 w-20" />
-                    <span className="text-xs text-muted-foreground">{r.completeness}%</span>
+                    <Progress value={record.completeness} className="h-1.5 w-20" />
+                    <span className="text-xs text-muted-foreground">{record.completeness}%</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <Progress value={r.relevance} className="h-1.5 w-20" />
-                    <span className="text-xs text-muted-foreground">{r.relevance}%</span>
+                    <Progress value={record.relevance} className="h-1.5 w-20" />
+                    <span className="text-xs text-muted-foreground">{record.relevance}%</span>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{r.reviewedAt}</td>
+                <td className="px-4 py-3 text-muted-foreground">{record.reviewedAt}</td>
               </tr>
             ))}
           </tbody>

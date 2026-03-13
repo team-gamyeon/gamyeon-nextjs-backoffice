@@ -22,3 +22,51 @@ export interface QuestionFiltersState {
   category: QuestionCategory | "전체";
   isActive: "all" | "active" | "inactive";
 }
+
+// API 응답 타입
+export type QuestionStatus = "ACTIVE" | "INACTIVE" | "DELETED";
+
+export interface ApiQuestion {
+  id: string;
+  content: string;
+  status: QuestionStatus;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface QuestionListResponse {
+  totalCount: number;
+  filteredCount: number;
+  page: number;
+  limit: number;
+  items: ApiQuestion[];
+}
+
+export interface CreateQuestionRequest {
+  content: string;
+  status: QuestionStatus;
+}
+
+export interface CreateQuestionResponse {
+  id: string;
+  content: string;
+  status: QuestionStatus;
+}
+
+export interface UpdateQuestionRequest {
+  content?: string;
+  status?: QuestionStatus;
+}
+
+export interface UpdateQuestionResponse {
+  id: string;
+  content: string;
+  status: QuestionStatus;
+}
+
+export interface DeleteQuestionResponse {
+  id: string;
+  status: 'DELETED';
+  deletedAt: string;
+}

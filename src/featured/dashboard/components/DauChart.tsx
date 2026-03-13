@@ -39,7 +39,7 @@ export function DauChart({ signupTrend }: Props) {
             <div className="flex items-center gap-0.5">
               <button
                 type="button"
-                onClick={() => setWeekOffset((w) => w - 1)}
+                onClick={() => setWeekOffset((prevWeekOffset) => prevWeekOffset - 1)}
                 disabled={weekOffset <= minOffset}
                 className="hover:bg-accent flex h-6 w-6 cursor-pointer items-center justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-30"
               >
@@ -50,7 +50,7 @@ export function DauChart({ signupTrend }: Props) {
               </span>
               <button
                 type="button"
-                onClick={() => setWeekOffset((w) => w + 1)}
+                onClick={() => setWeekOffset((prevWeekOffset) => prevWeekOffset + 1)}
                 disabled={weekOffset >= maxOffset}
                 className="hover:bg-accent flex h-6 w-6 cursor-pointer items-center justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-30"
               >
@@ -93,7 +93,7 @@ export function DauChart({ signupTrend }: Props) {
                 }}
                 labelStyle={{ fontWeight: 600 }}
                 labelFormatter={(label) => {
-                  const item = weekData.find((d) => d.date === label);
+                  const item = weekData.find((weekDataItem) => weekDataItem.date === label);
                   return item ? `${item.day} (${item.date})` : label;
                 }}
                 formatter={(value: number) => [`${value.toLocaleString()}명`, "신규 가입"]}

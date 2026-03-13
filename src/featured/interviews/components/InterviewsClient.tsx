@@ -89,9 +89,9 @@ const ABANDONED_SESSIONS: InterviewSession[] = [
 ]
 
 function formatDuration(seconds: number) {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}분 ${s}초`
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}분 ${remainingSeconds}초`
 }
 
 export function InterviewsClient() {
@@ -99,14 +99,14 @@ export function InterviewsClient() {
   const [selectedTitle, setSelectedTitle] = useState('전체')
 
   const filtered = useMemo(() => {
-    return ABANDONED_SESSIONS.filter((s) => {
+    return ABANDONED_SESSIONS.filter((session) => {
       if (
         search &&
-        !s.userNickname.toLowerCase().includes(search.toLowerCase()) &&
-        !s.id.includes(search)
+        !session.userNickname.toLowerCase().includes(search.toLowerCase()) &&
+        !session.id.includes(search)
       )
         return false
-      if (selectedTitle !== '전체' && s.interviewTitle !== selectedTitle) return false
+      if (selectedTitle !== '전체' && session.interviewTitle !== selectedTitle) return false
       return true
     })
   }, [search, selectedTitle])
@@ -179,12 +179,12 @@ export function InterviewsClient() {
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
-            {filtered.map((session, i) => (
+            {filtered.map((session, index) => (
               <motion.tr
                 key={session.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
+                transition={{ delay: index * 0.04 }}
                 className="hover:bg-muted/30 transition-colors"
               >
                 <td className="truncate px-4 py-3 text-left font-medium">{session.userNickname}</td>

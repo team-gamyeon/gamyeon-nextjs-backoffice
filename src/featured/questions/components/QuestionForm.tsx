@@ -34,7 +34,7 @@ export function QuestionForm({ initial, onChange }: QuestionFormProps) {
         <Textarea
           placeholder="질문 내용을 입력하세요..."
           value={content}
-          onChange={(e) => handleChange({ content: e.target.value })}
+          onChange={(event) => handleChange({ content: event.target.value })}
           className="resize-none min-h-24"
           rows={4}
         />
@@ -52,7 +52,7 @@ export function QuestionForm({ initial, onChange }: QuestionFormProps) {
         </div>
         <Switch
           checked={isActive}
-          onCheckedChange={(v) => handleChange({ isActive: v })}
+          onCheckedChange={(checked) => handleChange({ isActive: checked })}
         />
       </div>
     </div>

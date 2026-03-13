@@ -80,7 +80,7 @@ function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{notice ? '공지사항 수정' : '공지사항 추가'}</DialogTitle>
@@ -92,7 +92,7 @@ function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProps) {
               id="notice-title"
               placeholder="공지사항 제목을 입력하세요"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(event) => setTitle(event.target.value)}
             />
           </div>
           <div className="space-y-1.5">
@@ -102,7 +102,7 @@ function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProps) {
               placeholder="공지사항 내용을 입력하세요"
               rows={5}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(event) => setContent(event.target.value)}
             />
           </div>
           <div className="border-border/60 flex items-center justify-between rounded-lg border px-4 py-3">
@@ -137,20 +137,20 @@ export function NoticesClient() {
   const [editTarget, setEditTarget] = useState<Notice | undefined>(undefined)
 
   const filtered = useMemo(() => {
-    return notices.filter((n) => {
-      if (search && !n.title.toLowerCase().includes(search.toLowerCase())) return false
-      if (activeTab === 'active' && !n.isActive) return false
-      if (activeTab === 'inactive' && n.isActive) return false
+    return notices.filter((notice) => {
+      if (search && !notice.title.toLowerCase().includes(search.toLowerCase())) return false
+      if (activeTab === 'active' && !notice.isActive) return false
+      if (activeTab === 'inactive' && notice.isActive) return false
       return true
     })
   }, [notices, search, activeTab])
 
   const handleToggle = (id: string) => {
-    setNotices((prev) => prev.map((n) => (n.id === id ? { ...n, isActive: !n.isActive } : n)))
+    setNotices((prev) => prev.map((notice) => (notice.id === id ? { ...notice, isActive: !notice.isActive } : notice)))
   }
 
   const handleDelete = (id: string) => {
-    setNotices((prev) => prev.filter((n) => n.id !== id))
+    setNotices((prev) => prev.filter((notice) => notice.id !== id))
     if (expandedId === id) setExpandedId(null)
   }
 
@@ -167,7 +167,7 @@ export function NoticesClient() {
   const handleSave = (data: { title: string; content: string; isActive: boolean }) => {
     if (editTarget) {
       setNotices((prev) =>
-        prev.map((n) => (n.id === editTarget.id ? { ...n, ...data, updatedAt: '2026.03.07' } : n)),
+        prev.map((notice) => (notice.id === editTarget.id ? { ...notice, ...data, updatedAt: '2026.03.07' } : notice)),
       )
     } else {
       const newNotice: Notice = {
@@ -180,8 +180,8 @@ export function NoticesClient() {
     }
   }
 
-  const activeCount = notices.filter((n) => n.isActive).length
-  const inactiveCount = notices.filter((n) => !n.isActive).length
+  const activeCount = notices.filter((notice) => notice.isActive).length
+  const inactiveCount = notices.filter((notice) => !notice.isActive).length
 
   return (
     <motion.div
@@ -204,7 +204,7 @@ export function NoticesClient() {
 
       {/* Filters + Actions */}
       <div className="flex flex-wrap items-center gap-3">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
           <TabsList className="h-9">
             <TabsTrigger value="all" className="text-xs">
               전체
@@ -236,14 +236,14 @@ export function NoticesClient() {
         {filtered.length === 0 && (
           <p className="text-muted-foreground py-10 text-center text-sm">공지사항이 없습니다.</p>
         )}
-        {filtered.map((notice, i) => {
+        {filtered.map((notice, index) => {
           const isExpanded = expandedId === notice.id
           return (
             <motion.div
               key={notice.id}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
+              transition={{ delay: index * 0.04 }}
               className="border-border/60 bg-card rounded-lg border"
             >
               <div className="flex items-center justify-between gap-4 px-4 py-3">
