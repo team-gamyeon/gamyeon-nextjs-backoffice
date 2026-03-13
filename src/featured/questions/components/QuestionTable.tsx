@@ -19,22 +19,6 @@ export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
   return (
     <>
       <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-        <table className="w-full table-fixed text-sm shrink-0">
-          <thead className="bg-muted/40">
-            <tr>
-              <th className="text-muted-foreground px-4 py-3 text-left font-medium">질문 내용</th>
-              <th className="text-muted-foreground w-40 px-4 py-3 text-center font-medium">상태</th>
-              <th className="text-muted-foreground w-40 px-4 py-3 text-center font-medium">
-                생성일시
-              </th>
-              <th className="text-muted-foreground w-40 px-4 py-3 text-center font-medium">
-                수정일
-              </th>
-              <th className="w-24 px-4 py-3" />
-            </tr>
-          </thead>
-        </table>
-
         <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable]">
           <table className="w-full table-fixed text-sm">
             <colgroup>
@@ -44,6 +28,15 @@ export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
               <col className="w-40" />
               <col className="w-24" />
             </colgroup>
+            <thead className="bg-muted sticky top-0 z-10">
+              <tr>
+                <th className="text-muted-foreground px-4 py-3 text-left font-medium">질문 내용</th>
+                <th className="text-muted-foreground px-4 py-3 text-center font-medium">상태</th>
+                <th className="text-muted-foreground px-4 py-3 text-center font-medium">생성일시</th>
+                <th className="text-muted-foreground px-4 py-3 text-center font-medium">수정일</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
             <tbody className="divide-border/40 bg-background divide-y">
               <AnimatePresence initial={false}>
                 {questions.map((question) => (
@@ -100,13 +93,13 @@ export function QuestionTable({ questions, onDelete }: QuestionTableProps) {
               </AnimatePresence>
             </tbody>
           </table>
-        </div>
 
-        {questions.length === 0 && (
-          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-            등록된 질문이 없습니다.
-          </div>
-        )}
+          {questions.length === 0 && (
+            <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
+              등록된 질문이 없습니다.
+            </div>
+          )}
+        </div>
       </div>
 
       {editTarget && (

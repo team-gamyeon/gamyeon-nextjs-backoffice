@@ -68,7 +68,7 @@ export function MembersClient({ initialMembers }: MembersClientProps) {
       </div>
 
       <MemberFilters filters={filters} onFilterChange={handleFilterChange} />
-      <div className="flex flex-1 min-h-0 flex-col">
+      <div className="flex flex-1 min-h-0 flex-col py-4">
         <MemberTable members={filtered} />
       </div>
     </motion.div>

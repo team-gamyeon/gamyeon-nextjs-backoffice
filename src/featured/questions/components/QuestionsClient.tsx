@@ -94,7 +94,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
         </Button>
       </div>
 
-      <div className="flex flex-1 min-h-0 flex-col">
+      <div className="flex flex-1 min-h-0 flex-col py-4">
         <QuestionTable questions={filtered} onDelete={handleDelete} />
       </div>
 
