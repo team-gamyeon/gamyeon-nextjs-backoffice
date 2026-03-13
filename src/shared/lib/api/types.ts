@@ -1,37 +1,28 @@
-/** 필드 유효성 에러 */
-export interface ApiFieldError {
-  field: string
-  reason: string
-}
-
-/** 서버 공통 응답 래퍼 */
+/** 서버 공통 응답 래퍼 — success, data 필수 */
 export interface ApiResponse<T> {
   success: boolean
-  code: string
-  message: string
-  data?: T | null
-  errors?: ApiFieldError[]
+  data: T | null
 }
 
-/** API 에러 — 서버가 내려준 값으로만 구성됨 */
+/** API 에러 — 서버 raw body 전체를 보존 */
 export class ApiError extends Error {
   readonly status: number
-  readonly code: string
-  readonly errors?: ApiFieldError[]
+  readonly raw: Record<string, unknown>
 
-  constructor(status: number, message: string, code: string, errors?: ApiFieldError[]) {
-    super(message)
+  constructor(status: number, raw: Record<string, unknown>) {
+    super(typeof raw['message'] === 'string' ? raw['message'] : '오류가 발생했습니다.')
     this.name = 'ApiError'
     this.status = status
-    this.code = code
-    this.errors = errors
+    this.raw = raw
   }
 }
 
 /** 서버 응답 없이 네트워크 자체가 실패한 경우 */
-export class NetworkError extends ApiError {
+export class NetworkError extends Error {
+  readonly status = 0
+
   constructor() {
-    super(0, '네트워크 오류가 발생했습니다.', 'NETWORK_ERROR')
+    super('네트워크 오류가 발생했습니다.')
     this.name = 'NetworkError'
   }
 }
