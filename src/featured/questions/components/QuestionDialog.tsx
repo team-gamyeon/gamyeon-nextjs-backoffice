@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { QuestionForm } from './QuestionForm'
+import { createQuestionAction } from '@/featured/questions/actions/questions.action'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionDialogProps {
@@ -14,6 +16,7 @@ interface QuestionDialogProps {
 }
 
 export function QuestionDialog({ question, open, onClose, onSave }: QuestionDialogProps) {
+  const router = useRouter()
   const [formData, setFormData] = useState<{
     content: string
     isActive: boolean
@@ -22,10 +25,27 @@ export function QuestionDialog({ question, open, onClose, onSave }: QuestionDial
     isActive: question?.isActive ?? true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSave = async () => {
     setIsSubmitting(true)
-    await new Promise((r) => setTimeout(r, 600))
+    setError(null)
+
+    if (!isEdit) {
+      const fd = new FormData()
+      fd.append('content', formData.content)
+      fd.append('status', formData.isActive ? 'ACTIVE' : 'INACTIVE')
+      const result = await createQuestionAction(null, fd)
+      setIsSubmitting(false)
+      if (!result.success) {
+        setError(result.error ?? '질문 생성에 실패했습니다.')
+        return
+      }
+      router.refresh()
+      onClose()
+      return
+    }
+
     onSave(formData)
     setIsSubmitting(false)
     onClose()
@@ -41,6 +61,8 @@ export function QuestionDialog({ question, open, onClose, onSave }: QuestionDial
         </DialogHeader>
 
         <QuestionForm initial={question} onChange={setFormData} />
+
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <DialogFooter>
           <Button

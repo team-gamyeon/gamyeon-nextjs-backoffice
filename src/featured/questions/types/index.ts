@@ -42,3 +42,14 @@ export interface QuestionListResponse {
   limit: number;
   items: ApiQuestion[];
 }
+
+export interface CreateQuestionRequest {
+  content: string;
+  status: QuestionStatus;
+}
+
+export interface CreateQuestionResponse {
+  id: string;
+  content: string;
+  status: QuestionStatus;
+}

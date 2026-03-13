@@ -1,19 +1,23 @@
 import { serverApi } from '@/shared/lib/api'
 import { timeAgo } from '@/shared/lib/utils/timeAgo'
-import type { ApiQuestion, CommonQuestion, QuestionListResponse } from '@/featured/questions/types'
+import type { ApiQuestion, CommonQuestion, CreateQuestionRequest, CreateQuestionResponse, QuestionListResponse } from '@/featured/questions/types'
 
 export async function getQuestions() {
   return serverApi.get<QuestionListResponse>('/api/v1/questions')
 }
 
-export function mapApiQuestionToCommon(q: ApiQuestion): CommonQuestion {
+export async function createQuestion(body: CreateQuestionRequest) {
+  return serverApi.post<CreateQuestionResponse>('/api/v1/questions', body)
+}
+
+export function mapApiQuestionToCommon(question: ApiQuestion): CommonQuestion {
   return {
-    id: q.id,
-    content: q.content,
+    id: question.id,
+    content: question.content,
     category: '자기소개',
-    isActive: q.status === 'ACTIVE',
+    isActive: question.status === 'ACTIVE',
     usageCount: 0,
-    createdAt: timeAgo(q.createdAt),
-    updatedAt: timeAgo(q.updatedAt),
+    createdAt: timeAgo(question.createdAt),
+    updatedAt: timeAgo(question.updatedAt),
   }
 }

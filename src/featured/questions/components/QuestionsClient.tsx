@@ -24,21 +24,21 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
   const debouncedSearch = useDebounce(search, 200)
 
   const filtered = useMemo(() => {
-    return questions.filter((q) => {
-      if (debouncedSearch && !q.content.toLowerCase().includes(debouncedSearch.toLowerCase()))
+    return questions.filter((question) => {
+      if (debouncedSearch && !question.content.toLowerCase().includes(debouncedSearch.toLowerCase()))
         return false
-      if (activeTab === 'active' && !q.isActive) return false
-      if (activeTab === 'inactive' && q.isActive) return false
+      if (activeTab === 'active' && !question.isActive) return false
+      if (activeTab === 'inactive' && question.isActive) return false
       return true
     })
   }, [questions, debouncedSearch, activeTab])
 
   const handleUpdate = (id: string, data: Partial<CommonQuestion>) => {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, ...data } : q)))
+    setQuestions((prev) => prev.map((question) => (question.id === id ? { ...question, ...data } : question)))
   }
 
   const handleDelete = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id))
+    setQuestions((prev) => prev.filter((question) => question.id !== id))
   }
 
   const handleAdd = (data: { content: string; isActive: boolean }) => {
@@ -54,8 +54,8 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
     setQuestions((prev) => [newQuestion, ...prev])
   }
 
-  const activeCount = questions.filter((q) => q.isActive).length
-  const inactiveCount = questions.filter((q) => !q.isActive).length
+  const activeCount = questions.filter((question) => question.isActive).length
+  const inactiveCount = questions.filter((question) => !question.isActive).length
 
   return (
     <motion.div
@@ -80,7 +80,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
 
       {/* Tabs + Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
           <TabsList className="h-9">
             <TabsTrigger value="all" className="text-xs">
               전체
