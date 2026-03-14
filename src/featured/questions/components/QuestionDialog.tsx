@@ -60,14 +60,15 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="flex max-h-[90vh] max-w-md flex-col">
         <DialogHeader>
           <DialogTitle>{isEdit ? '질문 수정' : '새 질문 추가'}</DialogTitle>
         </DialogHeader>
 
-        <QuestionForm initial={question} onChange={setFormData} />
-
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
+          <QuestionForm initial={question} onChange={setFormData} />
+          {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+        </div>
 
         <DialogFooter>
           <Button
