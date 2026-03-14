@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { getNotices, createNotice, mapApiNoticeToNotice } from '@/featured/notices/services/notices.service'
 import type { Notice, CreateNoticeRequest, CreateNoticeResponse } from '@/featured/notices/types'
 
@@ -29,6 +30,7 @@ export interface CreateNoticeActionState {
 export async function createNoticeAction(body: CreateNoticeRequest): Promise<CreateNoticeActionState> {
   try {
     const data = await createNotice(body)
+    revalidatePath('/notices')
     return { success: true, data }
   } catch (error: unknown) {
     const apiError = error as { message?: string }
