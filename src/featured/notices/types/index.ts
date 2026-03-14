@@ -1,5 +1,6 @@
 // API 응답 타입
 export type NoticeCategory = 'NOTICE' | 'UPDATE' | 'GUIDE' | 'EVENT' | 'MAINTENANCE'
+export type NoticeStatus = 'ACTIVE' | 'INACTIVE'
 
 export interface CreateNoticeRequest {
   title: string
@@ -8,6 +9,20 @@ export interface CreateNoticeRequest {
 }
 
 export interface CreateNoticeResponse {
+  id: number
+  title: string
+  content: string
+  category: NoticeCategory
+}
+
+export interface UpdateNoticeRequest {
+  title?: string
+  content?: string
+  status?: NoticeStatus
+  category?: NoticeCategory
+}
+
+export interface UpdateNoticeResponse {
   id: number
   title: string
   content: string

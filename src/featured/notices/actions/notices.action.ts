@@ -1,8 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getNotices, createNotice, mapApiNoticeToNotice } from '@/featured/notices/services/notices.service'
-import type { Notice, CreateNoticeRequest, CreateNoticeResponse } from '@/featured/notices/types'
+import { getNotices, createNotice, updateNotice, mapApiNoticeToNotice } from '@/featured/notices/services/notices.service'
+import type { Notice, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse } from '@/featured/notices/types'
 
 export interface GetNoticesActionState {
   success: boolean
@@ -35,5 +35,22 @@ export async function createNoticeAction(body: CreateNoticeRequest): Promise<Cre
   } catch (error: unknown) {
     const apiError = error as { message?: string }
     return { success: false, error: apiError.message ?? '공지사항 생성에 실패했습니다.' }
+  }
+}
+
+export interface UpdateNoticeActionState {
+  success: boolean
+  data?: UpdateNoticeResponse
+  error?: string
+}
+
+export async function updateNoticeAction(id: number, body: UpdateNoticeRequest): Promise<UpdateNoticeActionState> {
+  try {
+    const data = await updateNotice(id, body)
+    revalidatePath('/notices')
+    return { success: true, data }
+  } catch (error: unknown) {
+    const apiError = error as { message?: string }
+    return { success: false, error: apiError.message ?? '공지사항 수정에 실패했습니다.' }
   }
 }
