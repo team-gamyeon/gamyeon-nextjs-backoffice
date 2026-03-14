@@ -8,7 +8,7 @@ import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 import { Switch } from '@/shared/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
-import { createNoticeAction } from '@/featured/notices/actions/notices.action'
+import { createNoticeAction, updateNoticeAction } from '@/featured/notices/actions/notices.action'
 import { NOTICE_CATEGORY } from '@/featured/notices/constants'
 import type { Notice, NoticeCategory } from '@/featured/notices/types'
 
@@ -23,16 +23,24 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
   const [title, setTitle] = useState(notice?.title ?? '')
   const [content, setContent] = useState(notice?.content ?? '')
   const [isActive, setIsActive] = useState(notice?.isActive ?? false)
-  const [category, setCategory] = useState<NoticeCategory>('NOTICE')
+  const [category, setCategory] = useState<NoticeCategory>(notice?.category ?? 'NOTICE')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSave = async () => {
-    if (!title.trim()) return
+    const trimmedTitle = title.trim()
+    const trimmedContent = content.trim()
+    if (!trimmedTitle) return
     setIsLoading(true)
-    const result = await createNoticeAction({ title: title.trim(), content: content.trim(), category })
+    const result = notice
+      ? await updateNoticeAction(Number(notice.id), {
+          title: trimmedTitle,
+          content: trimmedContent,
+          category,
+        })
+      : await createNoticeAction({ title: trimmedTitle, content: trimmedContent, category })
     setIsLoading(false)
     if (!result.success) return
-    onSave({ title: title.trim(), content: content.trim(), isActive })
+    onSave({ title: trimmedTitle, content: trimmedContent, isActive })
     onClose()
   }
 
@@ -53,7 +61,9 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
                 <SelectContent>
                   {(Object.keys(NOTICE_CATEGORY) as NoticeCategory[]).map((key) => (
                     <SelectItem key={key} value={key}>
-                      <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${NOTICE_CATEGORY[key].color}`}>
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-xs font-medium ${NOTICE_CATEGORY[key].color}`}
+                      >
                         {NOTICE_CATEGORY[key].label}
                       </span>
                     </SelectItem>
@@ -86,15 +96,24 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
                 비활성화 시 유저에게 노출되지 않습니다
               </p>
             </div>
-            <Switch id="notice-active" checked={isActive} onCheckedChange={setIsActive} />
+            <Switch
+              id="notice-active"
+              className="cursor-pointer"
+              checked={isActive}
+              onCheckedChange={setIsActive}
+            />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} className="cursor-pointer">
             취소
           </Button>
-          <Button onClick={handleSave} disabled={!title.trim() || isLoading} className="cursor-pointer">
-            {isLoading ? '저장 중...' : '저장'}
+          <Button
+            onClick={handleSave}
+            disabled={!title.trim() || isLoading}
+            className="cursor-pointer"
+          >
+            {isLoading ? (notice ? '저장 중...' : '생성 중...') : notice ? '저장' : '생성'}
           </Button>
         </DialogFooter>
       </DialogContent>

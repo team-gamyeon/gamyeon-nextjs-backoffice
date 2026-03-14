@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { deleteNoticeAction } from '@/featured/notices/actions/notices.action'
 import type { Notice } from '@/featured/notices/types'
 
 export function useNotices(initialNotices: Notice[]) {
@@ -29,7 +30,9 @@ export function useNotices(initialNotices: Notice[]) {
     )
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    const result = await deleteNoticeAction(Number(id))
+    if (!result.success) return
     setNotices((prev) => prev.filter((notice) => notice.id !== id))
     if (expandedId === id) setExpandedId(null)
   }

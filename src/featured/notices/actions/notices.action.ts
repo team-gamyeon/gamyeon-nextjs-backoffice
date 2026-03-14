@@ -1,9 +1,9 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getNotices, createNotice, updateNotice } from '@/featured/notices/services/notices.service'
+import { getNotices, createNotice, updateNotice, deleteNotice } from '@/featured/notices/services/notices.service'
 import { mapApiNoticeToNotice } from '@/shared/lib/utils/mappers'
-import type { Notice, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse } from '@/featured/notices/types'
+import type { Notice, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse, DeleteNoticeResponse } from '@/featured/notices/types'
 
 export interface GetNoticesActionState {
   success: boolean
@@ -53,5 +53,22 @@ export async function updateNoticeAction(id: number, body: UpdateNoticeRequest):
   } catch (error: unknown) {
     const apiError = error as { message?: string }
     return { success: false, error: apiError.message ?? '공지사항 수정에 실패했습니다.' }
+  }
+}
+
+export interface DeleteNoticeActionState {
+  success: boolean
+  data?: DeleteNoticeResponse
+  error?: string
+}
+
+export async function deleteNoticeAction(id: number): Promise<DeleteNoticeActionState> {
+  try {
+    const data = await deleteNotice(id)
+    revalidatePath('/notices')
+    return { success: true, data }
+  } catch (error: unknown) {
+    const apiError = error as { message?: string }
+    return { success: false, error: apiError.message ?? '공지사항 삭제에 실패했습니다.' }
   }
 }

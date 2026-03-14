@@ -47,11 +47,16 @@ export interface NoticeListResponse {
   items: ApiNotice[]
 }
 
+export interface DeleteNoticeResponse {
+  id: number
+}
+
 // UI 타입 (NoticesClient 전용)
 export interface Notice {
   id: string
   title: string
   content: string
+  category: NoticeCategory
   isActive: boolean
   createdAt: string
   updatedAt: string

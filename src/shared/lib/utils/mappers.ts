@@ -9,6 +9,7 @@ export function mapApiNoticeToNotice(notice: ApiNotice): Notice {
     id: String(notice.id),
     title: notice.title,
     content: notice.content,
+    category: notice.category,
     isActive: true,
     createdAt: timeAgo(notice.createdAt),
     updatedAt: timeAgo(notice.updatedAt),
