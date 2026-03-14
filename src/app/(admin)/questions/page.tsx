@@ -1,6 +1,7 @@
 import { PageHeader } from "@/shared/components/PageHeader";
 import { QuestionsClient } from "@/featured/questions/components/QuestionsClient";
-import { getQuestions, mapApiQuestionToCommon } from "@/featured/questions/services/questions.service";
+import { getQuestions } from "@/featured/questions/services/questions.service";
+import { mapApiQuestionToCommon } from "@/shared/lib/utils/mappers";
 
 export default async function QuestionsPage() {
   const result = await getQuestions();

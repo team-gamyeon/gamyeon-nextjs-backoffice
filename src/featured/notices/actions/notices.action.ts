@@ -1,7 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getNotices, createNotice, updateNotice, mapApiNoticeToNotice } from '@/featured/notices/services/notices.service'
+import { getNotices, createNotice, updateNotice } from '@/featured/notices/services/notices.service'
+import { mapApiNoticeToNotice } from '@/shared/lib/utils/mappers'
 import type { Notice, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse } from '@/featured/notices/types'
 
 export interface GetNoticesActionState {
