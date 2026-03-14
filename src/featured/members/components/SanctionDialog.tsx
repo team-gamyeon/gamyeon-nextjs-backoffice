@@ -92,7 +92,7 @@ export function SanctionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="flex max-h-[90vh] max-w-md flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className={`rounded-lg p-1.5 ${config.iconBg}`}>
@@ -102,7 +102,7 @@ export function SanctionDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1">
           <p className="text-sm text-muted-foreground">{config.description}</p>
 
           <div className="space-y-1.5">

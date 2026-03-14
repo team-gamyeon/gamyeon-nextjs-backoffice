@@ -7,7 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 import { Switch } from '@/shared/ui/switch'
-import type { Notice } from '@/featured/notices/types'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
+import { createNoticeAction } from '@/featured/notices/actions/notices.action'
+import { NOTICE_CATEGORY } from '@/featured/notices/constants'
+import type { Notice, NoticeCategory } from '@/featured/notices/types'
 
 interface NoticeDialogProps {
   open: boolean
@@ -20,28 +23,50 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
   const [title, setTitle] = useState(notice?.title ?? '')
   const [content, setContent] = useState(notice?.content ?? '')
   const [isActive, setIsActive] = useState(notice?.isActive ?? false)
+  const [category, setCategory] = useState<NoticeCategory>('NOTICE')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) return
+    setIsLoading(true)
+    const result = await createNoticeAction({ title: title.trim(), content: content.trim(), category })
+    setIsLoading(false)
+    if (!result.success) return
     onSave({ title: title.trim(), content: content.trim(), isActive })
     onClose()
   }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col">
         <DialogHeader>
           <DialogTitle>{notice ? '공지사항 수정' : '공지사항 추가'}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-2">
+        <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="notice-title">제목</Label>
-            <Input
-              id="notice-title"
-              placeholder="공지사항 제목을 입력하세요"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-            />
+            <div className="flex items-center gap-2">
+              <Select value={category} onValueChange={(v) => setCategory(v as NoticeCategory)}>
+                <SelectTrigger className="w-auto shrink-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(NOTICE_CATEGORY) as NoticeCategory[]).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${NOTICE_CATEGORY[key].color}`}>
+                        {NOTICE_CATEGORY[key].label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                id="notice-title"
+                placeholder="공지사항 제목을 입력하세요"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="notice-content">내용</Label>
@@ -51,6 +76,7 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
               rows={5}
               value={content}
               onChange={(event) => setContent(event.target.value)}
+              className="resize-none overflow-y-auto"
             />
           </div>
           <div className="border-border/60 flex items-center justify-between rounded-lg border px-4 py-3">
@@ -67,8 +93,8 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
           <Button variant="outline" onClick={onClose} className="cursor-pointer">
             취소
           </Button>
-          <Button onClick={handleSave} disabled={!title.trim()} className="cursor-pointer">
-            저장
+          <Button onClick={handleSave} disabled={!title.trim() || isLoading} className="cursor-pointer">
+            {isLoading ? '저장 중...' : '저장'}
           </Button>
         </DialogFooter>
       </DialogContent>

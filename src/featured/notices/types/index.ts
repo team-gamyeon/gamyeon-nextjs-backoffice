@@ -1,5 +1,18 @@
 // API 응답 타입
-export type NoticeCategory = 'UPDATE' | 'EVENT' | 'MAINTENANCE' | 'ETC'
+export type NoticeCategory = 'NOTICE' | 'UPDATE' | 'GUIDE' | 'EVENT' | 'MAINTENANCE'
+
+export interface CreateNoticeRequest {
+  title: string
+  content: string
+  category: NoticeCategory
+}
+
+export interface CreateNoticeResponse {
+  id: number
+  title: string
+  content: string
+  category: NoticeCategory
+}
 
 export interface ApiNotice {
   id: number
