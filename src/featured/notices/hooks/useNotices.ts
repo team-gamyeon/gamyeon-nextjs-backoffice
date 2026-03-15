@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { deleteNoticeAction } from '@/featured/notices/actions/notices.action'
-import type { Notice } from '@/featured/notices/types'
+import { deleteNoticeAction, updateNoticeAction } from '@/featured/notices/actions/notices.action'
+import type { Notice, NoticeCategory } from '@/featured/notices/types'
 
 export function useNotices(initialNotices: Notice[]) {
   const [notices, setNotices] = useState<Notice[]>(initialNotices)
@@ -24,7 +24,12 @@ export function useNotices(initialNotices: Notice[]) {
   const activeCount = notices.filter((notice) => notice.isActive).length
   const inactiveCount = notices.filter((notice) => !notice.isActive).length
 
-  const handleToggle = (id: string) => {
+  const handleToggle = async (id: string) => {
+    const target = notices.find((notice) => notice.id === id)
+    if (!target) return
+    const nextStatus = target.isActive ? 'INACTIVE' : 'ACTIVE'
+    const result = await updateNoticeAction(Number(id), { status: nextStatus })
+    if (!result.success) return
     setNotices((prev) =>
       prev.map((notice) => (notice.id === id ? { ...notice, isActive: !notice.isActive } : notice)),
     )
@@ -47,7 +52,7 @@ export function useNotices(initialNotices: Notice[]) {
     setDialogOpen(true)
   }
 
-  const handleSave = (data: { title: string; content: string; isActive: boolean }) => {
+  const handleSave = (data: { title: string; content: string; isActive: boolean; category: NoticeCategory }) => {
     if (editTarget) {
       setNotices((prev) =>
         prev.map((notice) =>

@@ -16,7 +16,7 @@ interface NoticeDialogProps {
   open: boolean
   notice?: Notice
   onClose: () => void
-  onSave: (data: { title: string; content: string; isActive: boolean }) => void
+  onSave: (data: { title: string; content: string; isActive: boolean; category: NoticeCategory }) => void
 }
 
 export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProps) {
@@ -40,7 +40,7 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
       : await createNoticeAction({ title: trimmedTitle, content: trimmedContent, category })
     setIsLoading(false)
     if (!result.success) return
-    onSave({ title: trimmedTitle, content: trimmedContent, isActive })
+    onSave({ title: trimmedTitle, content: trimmedContent, isActive, category })
     onClose()
   }
 

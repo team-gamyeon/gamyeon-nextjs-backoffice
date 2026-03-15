@@ -6,87 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/shared/ui/badge'
 import { Progress } from '@/shared/ui/progress'
 import { SearchInput } from '@/shared/components/SearchInput'
-import { InterviewSession } from '../types'
+import type { InterviewSession } from '../types'
 
-const INTERVIEW_TITLES = [
-  '전체',
-  '프론트엔드 기술 면접',
-  '백엔드 기술 면접',
-  '풀스택 실무 면접',
-  '데이터 분석가 면접',
-  'PM 직무 면접',
-  'UX/UI 디자이너 면접',
-  'DevOps 인프라 면접',
-]
-
-const ABANDONED_SESSIONS: InterviewSession[] = [
-  {
-    id: '4897',
-    userId: '7',
-    userNickname: '윤하은',
-    interviewTitle: 'UX/UI 디자이너 면접',
-    status: 'abandoned',
-    questionCount: 5,
-    answeredCount: 2,
-    durationSec: 480,
-    startedAt: '2026.02.26 16:00',
-  },
-  {
-    id: '4895',
-    userId: '3',
-    userNickname: '박준혁',
-    interviewTitle: '풀스택 실무 면접',
-    status: 'abandoned',
-    questionCount: 5,
-    answeredCount: 1,
-    durationSec: 190,
-    startedAt: '2026.02.24 20:30',
-  },
-  {
-    id: '4890',
-    userId: '5',
-    userNickname: '정다현',
-    interviewTitle: '백엔드 기술 면접',
-    status: 'abandoned',
-    questionCount: 5,
-    answeredCount: 3,
-    durationSec: 720,
-    startedAt: '2026.02.22 11:10',
-  },
-  {
-    id: '4882',
-    userId: '8',
-    userNickname: '임서준',
-    interviewTitle: '데이터 분석가 면접',
-    status: 'abandoned',
-    questionCount: 5,
-    answeredCount: 0,
-    durationSec: 45,
-    startedAt: '2026.02.20 09:05',
-  },
-  {
-    id: '4871',
-    userId: '1',
-    userNickname: '김민준',
-    interviewTitle: '프론트엔드 기술 면접',
-    status: 'abandoned',
-    questionCount: 5,
-    answeredCount: 4,
-    durationSec: 1540,
-    startedAt: '2026.02.18 14:50',
-  },
-  {
-    id: '4860',
-    userId: '6',
-    userNickname: '강도윤',
-    interviewTitle: 'PM 직무 면접',
-    status: 'abandoned',
-    questionCount: 5,
-    answeredCount: 2,
-    durationSec: 380,
-    startedAt: '2026.02.15 17:30',
-  },
-]
+const STATUS_LABEL: Record<InterviewSession['status'], { label: string; variant: 'destructive' | 'default' | 'secondary' }> = {
+  abandoned: { label: '중단', variant: 'destructive' },
+  in_progress: { label: '진행 중', variant: 'default' },
+  completed: { label: '완료', variant: 'secondary' },
+}
 
 function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -94,12 +20,26 @@ function formatDuration(seconds: number) {
   return `${minutes}분 ${remainingSeconds}초`
 }
 
-export function InterviewsClient() {
+interface InterviewsClientProps {
+  initialSessions: InterviewSession[]
+}
+
+export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
   const [search, setSearch] = useState('')
   const [selectedTitle, setSelectedTitle] = useState('전체')
 
+  const titles = useMemo(() => {
+    const unique = Array.from(new Set(initialSessions.map((session) => session.interviewTitle)))
+    return ['전체', ...unique]
+  }, [initialSessions])
+
+  const abandonedCount = useMemo(
+    () => initialSessions.filter((session) => session.status === 'abandoned').length,
+    [initialSessions],
+  )
+
   const filtered = useMemo(() => {
-    return ABANDONED_SESSIONS.filter((session) => {
+    return initialSessions.filter((session) => {
       if (
         search &&
         !session.userNickname.toLowerCase().includes(search.toLowerCase()) &&
@@ -109,7 +49,7 @@ export function InterviewsClient() {
       if (selectedTitle !== '전체' && session.interviewTitle !== selectedTitle) return false
       return true
     })
-  }, [search, selectedTitle])
+  }, [initialSessions, search, selectedTitle])
 
   return (
     <motion.div
@@ -123,7 +63,7 @@ export function InterviewsClient() {
           중단
         </Badge>
         <p className="text-muted-foreground text-sm">
-          현재 <span className="text-foreground font-semibold">{ABANDONED_SESSIONS.length}</span>
+          현재 <span className="text-foreground font-semibold">{abandonedCount}</span>
           건의 중단된 면접이 있습니다. 중단 원인을 확인하고 서비스 품질을 개선하세요.
         </p>
       </div>
@@ -141,7 +81,7 @@ export function InterviewsClient() {
             <SelectValue placeholder="면접 제목" />
           </SelectTrigger>
           <SelectContent>
-            {INTERVIEW_TITLES.map((title) => (
+            {titles.map((title) => (
               <SelectItem key={title} value={title}>
                 {title}
               </SelectItem>
@@ -164,16 +104,16 @@ export function InterviewsClient() {
               <th className="text-muted-foreground w-[28%] px-4 py-3 text-left font-medium">
                 면접 제목
               </th>
+              <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
+                상태
+              </th>
               <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
                 시작일시
               </th>
               <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
-                답변 진도
-              </th>
-              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
                 진행 시간
               </th>
-              <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
+              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
                 세션 ID
               </th>
             </tr>
@@ -193,20 +133,14 @@ export function InterviewsClient() {
                   {session.interviewTitle}
                 </td>
 
-                <td className="text-muted-foreground truncate px-4 py-3 text-center">
-                  {session.startedAt}
+                <td className="px-4 py-3 text-center">
+                  <Badge variant={STATUS_LABEL[session.status].variant} className="text-xs">
+                    {STATUS_LABEL[session.status].label}
+                  </Badge>
                 </td>
 
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <Progress
-                      value={(session.answeredCount / session.questionCount) * 100}
-                      className="h-1.5 w-16"
-                    />
-                    <span className="text-muted-foreground text-xs whitespace-nowrap">
-                      {session.answeredCount}/{session.questionCount}
-                    </span>
-                  </div>
+                <td className="text-muted-foreground truncate px-4 py-3 text-center">
+                  {session.startedAt}
                 </td>
 
                 <td className="text-muted-foreground truncate px-4 py-3 text-center">
