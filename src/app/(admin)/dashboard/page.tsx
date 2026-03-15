@@ -18,7 +18,7 @@ export default async function DashboardPage() {
 
       <DashboardCharts
         signupTrend={summary?.signupTrend}
-        interviewCompletion={summary?.interviewCompletion}
+        intvCompletion={summary?.intvCompletion}
         reportAnalysis={summary?.reportAnalysis}
       />
 

@@ -14,7 +14,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r001',
     sessionId: '4901',
     userNickname: '최유진',
-    interviewTitle: 'PM 직무 면접',
+    intvTitle: 'PM 직무 면접',
     status: 'completed',
     score: 88, // 파란색 (75점 이상)
     summary:
@@ -32,7 +32,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r002',
     sessionId: '4900',
     userNickname: '김민준',
-    interviewTitle: '프론트엔드 기술 면접',
+    intvTitle: '프론트엔드 기술 면접',
     status: 'completed',
     score: 45, // 노란색/주황색 (25~49점)
     summary:
@@ -50,7 +50,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r003',
     sessionId: '4898',
     userNickname: '이서연',
-    interviewTitle: '백엔드 기술 면접',
+    intvTitle: '백엔드 기술 면접',
     status: 'completed',
     score: 92, // 파란색 (75점 이상)
     summary:
@@ -64,7 +64,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r004',
     sessionId: '4899',
     userNickname: '강도윤',
-    interviewTitle: '백엔드 기술 면접',
+    intvTitle: '백엔드 기술 면접',
     status: 'analyzing',
     createdAt: '2026.02.27 15:45',
   },
@@ -72,7 +72,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r005',
     sessionId: '4896',
     userNickname: '임서준',
-    interviewTitle: '데이터 분석가 면접',
+    intvTitle: '데이터 분석가 면접',
     status: 'completed',
     score: 18, // 빨간색 (0~24점)
     summary:
@@ -86,7 +86,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r006',
     sessionId: '4894',
     userNickname: '최유진',
-    interviewTitle: 'PM 직무 면접',
+    intvTitle: 'PM 직무 면접',
     status: 'completed',
     score: 65, // 초록색 (50~74점)
     summary:
@@ -100,7 +100,7 @@ const MOCK_REPORTS: AnalysisReport[] = [
     id: 'r007',
     sessionId: '4885',
     userNickname: '정다현',
-    interviewTitle: 'UX/UI 디자이너 면접',
+    intvTitle: 'UX/UI 디자이너 면접',
     status: 'failed',
     createdAt: '2026.02.23 09:00',
   },
@@ -161,7 +161,7 @@ function ReportDetailDialog({ report, open, onClose }: ReportDetailDialogProps) 
           <div className="bg-muted/40 flex flex-col gap-2.5 rounded-lg px-4 py-3">
             <div className="flex items-center gap-3">
               <span className="text-muted-foreground text-sm font-medium">면접 제목</span>
-              <span className="text-base font-semibold">{report.interviewTitle}</span>
+              <span className="text-base font-semibold">{report.intvTitle}</span>
             </div>
 
             <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
@@ -340,7 +340,7 @@ export function ReportsClient() {
                 <td className="truncate px-4 py-3 text-left font-medium">{report.userNickname}</td>
 
                 <td className="text-muted-foreground truncate px-4 py-3 text-left">
-                  {report.interviewTitle}
+                  {report.intvTitle}
                 </td>
 
                 <td className="px-4 py-3 text-center">

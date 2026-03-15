@@ -26,7 +26,7 @@ export interface DashboardSummary {
     period: string
     items: SignupTrendItem[]
   }
-  interviewCompletion: {
+  intvCompletion: {
     completionRate: number
     segments: CompletionSegment[]
   }

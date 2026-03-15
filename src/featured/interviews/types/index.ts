@@ -23,8 +23,8 @@ export interface ApiInterview {
   startedAt: string | null
   finishedAt: string | null
   pausedAt: string | null
-  durationSeconds: number
-  totalPausedSeconds: number
+  durationSeconds: string | number
+  totalPausedSeconds: string | number
   createdAt: string
   updatedAt: string
   user: ApiInterviewUser
@@ -45,13 +45,15 @@ export interface InterviewSession {
   id: string
   userId: string
   userNickname: string
-  interviewTitle: string
+  intvTitle: string
   status: SessionStatus
   questionCount: number
   answeredCount: number
   score?: number
   durationSec: number
-  startedAt: string
+  startedAt: string | null
+  pausedAt: string | null
+  createdAt: string
   endedAt?: string
 }
 
