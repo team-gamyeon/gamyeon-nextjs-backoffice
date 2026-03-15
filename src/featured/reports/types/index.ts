@@ -4,7 +4,7 @@ export interface AnalysisReport {
   id: string
   sessionId: string
   userNickname: string
-  interviewTitle: string
+  intvTitle: string
   status: ReportStatus
   score?: number
   summary?: string

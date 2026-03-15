@@ -4,16 +4,16 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
-import { Button } from '@/shared/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import type { Notice } from '@/featured/notices/types'
+import { NOTICE_CATEGORY } from '@/featured/notices/constants'
+import { NoticeDeleteDialog } from '@/featured/notices/components/NoticeDeleteDialog'
 
 interface NoticeListItemProps {
   notice: Notice
   index: number
   isExpanded: boolean
   onToggleExpand: () => void
-  onToggle: (id: string) => void
+  onToggle: (id: string) => Promise<void>
   onEdit: (notice: Notice) => void
   onDelete: (id: string) => Promise<void>
 }
@@ -56,6 +56,9 @@ export function NoticeListItem({
             ) : (
               <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" />
             )}
+            <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-xs font-medium', NOTICE_CATEGORY[notice.category].color)}>
+              {NOTICE_CATEGORY[notice.category].label}
+            </span>
             <span className="truncate text-sm font-medium">{notice.title}</span>
           </button>
           <div className="flex shrink-0 items-center gap-6 sm:gap-8">
@@ -114,31 +117,13 @@ export function NoticeListItem({
         </AnimatePresence>
       </motion.div>
 
-      <Dialog open={confirmOpen} onOpenChange={(open) => !open && setConfirmOpen(false)}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>공지사항 삭제</DialogTitle>
-          </DialogHeader>
-          <p className="text-muted-foreground text-sm">
-            <span className="text-foreground font-medium">{notice.title}</span>을(를) 삭제하시겠습니까?
-            <br />
-            삭제된 공지사항은 복구할 수 없습니다.
-          </p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} className="cursor-pointer">
-              취소
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="cursor-pointer"
-            >
-              {isDeleting ? '삭제 중...' : '삭제'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NoticeDeleteDialog
+        open={confirmOpen}
+        title={notice.title}
+        isDeleting={isDeleting}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   )
 }

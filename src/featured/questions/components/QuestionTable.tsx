@@ -5,7 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { QuestionDialog } from './QuestionDialog'
-import { deleteQuestionAction, updateQuestionAction } from '@/featured/questions/actions/questions.action'
+import {
+  deleteQuestionAction,
+  updateQuestionAction,
+} from '@/featured/questions/actions/questions.action'
 import { QuestionDeleteDialog } from './QuestionDeleteDialog'
 import type { CommonQuestion } from '@/featured/questions/types'
 
@@ -34,7 +37,7 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
   return (
     <>
       <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-        <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable]">
+        <div className="max-h-180 min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
           <table className="w-full table-fixed text-sm">
             <colgroup>
               <col />
@@ -47,7 +50,9 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
               <tr>
                 <th className="text-muted-foreground px-4 py-3 text-left font-medium">질문 내용</th>
                 <th className="text-muted-foreground px-4 py-3 text-center font-medium">상태</th>
-                <th className="text-muted-foreground px-4 py-3 text-center font-medium">생성일시</th>
+                <th className="text-muted-foreground px-4 py-3 text-center font-medium">
+                  생성일시
+                </th>
                 <th className="text-muted-foreground px-4 py-3 text-center font-medium">수정일</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -69,8 +74,11 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={async () => {
-                          const result = await updateQuestionAction(question.id, { status: question.isActive ? 'INACTIVE' : 'ACTIVE' })
-                          if (result.success) onUpdate({ ...question, isActive: !question.isActive })
+                          const result = await updateQuestionAction(question.id, {
+                            status: question.isActive ? 'INACTIVE' : 'ACTIVE',
+                          })
+                          if (result.success)
+                            onUpdate({ ...question, isActive: !question.isActive })
                         }}
                         className={cn(
                           'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
@@ -125,7 +133,10 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
           question={editTarget}
           open={!!editTarget}
           onClose={() => setEditTarget(null)}
-          onSuccess={(updated) => { onUpdate(updated); setEditTarget(null) }}
+          onSuccess={(updated) => {
+            onUpdate(updated)
+            setEditTarget(null)
+          }}
         />
       )}
 
