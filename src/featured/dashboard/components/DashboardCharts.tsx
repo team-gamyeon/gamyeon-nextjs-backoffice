@@ -34,7 +34,7 @@ const ReportAnalysisCard = dynamic(
 
 interface Props {
   signupTrend?: DashboardSummary["signupTrend"];
-  intvCompletion?: DashboardSummary["intvCompletion"];
+  intvCompletion?: DashboardSummary["interviewCompletion"];
   reportAnalysis?: DashboardSummary["reportAnalysis"];
 }
 

@@ -24,7 +24,7 @@ const renderActiveShape = (props: any) => {
 };
 
 interface Props {
-  intvCompletion?: DashboardSummary["intvCompletion"];
+  intvCompletion?: DashboardSummary["interviewCompletion"];
 }
 
 export function CompletionRateCard({ intvCompletion }: Props) {
