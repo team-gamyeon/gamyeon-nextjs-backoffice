@@ -6,7 +6,6 @@ import type { AnalysisReport, ReportStatus } from '@/featured/reports/types'
 export function useReports(initialReports: AnalysisReport[]) {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<ReportStatus | 'all'>('all')
-  const [selected, setSelected] = useState<AnalysisReport | null>(null)
 
   const filtered = useMemo(() => {
     return initialReports.filter((report) => {
@@ -30,8 +29,6 @@ export function useReports(initialReports: AnalysisReport[]) {
     setSearch,
     activeTab,
     setActiveTab,
-    selected,
-    setSelected,
     filtered,
     totalCount: initialReports.length,
     completedCount,

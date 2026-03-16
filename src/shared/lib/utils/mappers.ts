@@ -56,9 +56,9 @@ export function mapApiUserToMember(user: ApiUser): Member {
 export function mapApiReportToAnalysisReport(report: ApiReport): AnalysisReport {
   return {
     id: report.reportId,
-    sessionId: String(report.interviewId),
-    userNickname: report.nickname,
-    interviewTitle: report.interviewTitle,
+    sessionId: report.intvId,
+    userNickname: report.user.nickname,
+    jobCategory: report.jobCategory,
     status: report.status,
     score: report.score ?? undefined,
     createdAt: timeAgo(report.createdAt),

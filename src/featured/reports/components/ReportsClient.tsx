@@ -1,31 +1,46 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { SearchInput } from '@/shared/components/SearchInput'
 import { useReports } from '@/featured/reports/hooks/useReports'
 import { ReportsTable } from '@/featured/reports/components/ReportsTable'
 import { ReportDetailDialog } from '@/featured/reports/components/ReportDetailDialog'
-import type { AnalysisReport } from '@/featured/reports/types'
+import { getReportDetailAction } from '@/featured/reports/actions/reports.action'
+import type { AnalysisReport, ApiReportDetail } from '@/featured/reports/types'
 
 interface ReportsClientProps {
   initialReports: AnalysisReport[]
 }
 
 export function ReportsClient({ initialReports }: ReportsClientProps) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [reportDetail, setReportDetail] = useState<ApiReportDetail | null>(null)
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
+
   const {
     search,
     setSearch,
     activeTab,
     setActiveTab,
-    selected,
-    setSelected,
     filtered,
     totalCount,
     completedCount,
     analyzingCount,
     failedCount,
   } = useReports(initialReports)
+
+  async function handleSelectReport(report: AnalysisReport) {
+    setDialogOpen(true)
+    setReportDetail(null)
+    setIsLoadingDetail(true)
+    const result = await getReportDetailAction(report.id)
+    if (result.success && result.data) {
+      setReportDetail(result.data)
+    }
+    setIsLoadingDetail(false)
+  }
 
   return (
     <motion.div
@@ -79,16 +94,19 @@ export function ReportsClient({ initialReports }: ReportsClientProps) {
         <SearchInput
           value={search}
           onChange={setSearch}
-          placeholder="유저명 또는 세션 ID 검색..."
+          placeholder="유저명 또는 인터뷰 ID 검색..."
           className="min-w-48 flex-1"
         />
       </div>
 
-      <ReportsTable reports={filtered} onSelect={setSelected} />
+      <ReportsTable reports={filtered} onSelect={handleSelectReport} />
 
-      {selected && (
-        <ReportDetailDialog report={selected} open={!!selected} onClose={() => setSelected(null)} />
-      )}
+      <ReportDetailDialog
+        report={reportDetail}
+        open={dialogOpen}
+        isLoading={isLoadingDetail}
+        onClose={() => setDialogOpen(false)}
+      />
     </motion.div>
   )
 }

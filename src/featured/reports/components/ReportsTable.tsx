@@ -14,9 +14,12 @@ export function ReportsTable({ reports, onSelect }: ReportsTableProps) {
       <table className="w-full table-fixed text-sm">
         <thead className="bg-muted/40">
           <tr>
-            <th className="text-muted-foreground w-[12%] px-4 py-3 text-left font-medium">유저</th>
-            <th className="text-muted-foreground w-[24%] px-4 py-3 text-left font-medium">
-              면접 제목
+            <th className="text-muted-foreground w-[10%] px-4 py-3 text-left font-medium">
+              인터뷰 ID
+            </th>
+            <th className="text-muted-foreground w-[10%] px-4 py-3 text-left font-medium">유저</th>
+            <th className="text-muted-foreground w-[18%] px-4 py-3 text-left font-medium">
+              직무 카테고리
             </th>
             <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
               상태
@@ -26,9 +29,6 @@ export function ReportsTable({ reports, onSelect }: ReportsTableProps) {
             </th>
             <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
               생성일시
-            </th>
-            <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
-              세션 ID
             </th>
             <th className="text-muted-foreground w-[10%] px-4 py-3 text-center font-medium">
               리포트 ID
@@ -45,10 +45,16 @@ export function ReportsTable({ reports, onSelect }: ReportsTableProps) {
               transition={{ delay: index * 0.04 }}
               className="group hover:bg-muted/30 transition-colors"
             >
+              <td className="truncate px-4 py-3 text-left">
+                <span className="text-muted-foreground font-mono text-xs">
+                  #{report.sessionId}
+                </span>
+              </td>
+
               <td className="truncate px-4 py-3 text-left font-medium">{report.userNickname}</td>
 
               <td className="text-muted-foreground truncate px-4 py-3 text-left">
-                {report.interviewTitle}
+                {report.jobCategory}
               </td>
 
               <td className="px-4 py-3 text-center">
@@ -63,12 +69,6 @@ export function ReportsTable({ reports, onSelect }: ReportsTableProps) {
 
               <td className="text-muted-foreground truncate px-4 py-3 text-center">
                 {report.createdAt}
-              </td>
-
-              <td className="truncate px-4 py-3 text-center">
-                <span className="text-muted-foreground font-mono text-xs">
-                  #{report.sessionId}
-                </span>
               </td>
 
               <td className="truncate px-4 py-3 text-center">

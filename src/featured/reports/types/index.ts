@@ -3,16 +3,43 @@ export type ReportStatus = 'COMPLETED' | 'IN_PROGRESS' | 'FAILED'
 export type ReportSortBy = 'completedAt' | 'createdAt' | 'score'
 export type SortOrder = 'asc' | 'desc'
 
+export interface ApiReportUser {
+  id: string
+  email: string
+  nickname: string
+  provider: string
+  providerId: string
+  status: string
+  withdrawnAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export interface ApiReport {
   reportId: string
+  intvId: string
+  userId: string
+  jobCategory: string
   status: ReportStatus
   score: number | null
-  jobCategory: string
-  nickname: string
-  interviewId: number
-  interviewTitle: string
-  createdAt: string
+  feedback: string | null
   completedAt: string | null
+  createdAt: string
+  user: ApiReportUser
+}
+
+export interface ApiQuestionResult {
+  id: string
+  questionId: string
+  question: string
+  answer: string
+  score: number | null
+  feedback: string | null
+  reportId: string
+}
+
+export interface ApiReportDetail extends ApiReport {
+  questionResults: ApiQuestionResult[]
 }
 
 export interface ReportListResponse {
@@ -37,7 +64,7 @@ export interface AnalysisReport {
   id: string
   sessionId: string
   userNickname: string
-  interviewTitle: string
+  jobCategory: string
   status: ReportStatus
   score?: number
   summary?: string
