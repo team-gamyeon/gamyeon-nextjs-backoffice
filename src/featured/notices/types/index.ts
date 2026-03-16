@@ -34,6 +34,7 @@ export interface ApiNotice {
   title: string
   content: string
   category: NoticeCategory
+  status: 'ACTIVE' | 'INACTIVE'
   images: string[]
   createdAt: string
   updatedAt: string

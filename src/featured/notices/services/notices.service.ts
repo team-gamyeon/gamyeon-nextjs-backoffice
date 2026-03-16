@@ -2,7 +2,7 @@ import { serverApi } from '@/shared/lib/api'
 import type { NoticeListResponse, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse, DeleteNoticeResponse } from '@/featured/notices/types'
 
 export async function getNotices() {
-  return serverApi.get<NoticeListResponse>('/api/v1/notices')
+  return serverApi.get<NoticeListResponse>('/api/v1/notices', { cache: 'no-store' })
 }
 
 export async function createNotice(body: CreateNoticeRequest) {

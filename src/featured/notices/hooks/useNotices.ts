@@ -13,12 +13,14 @@ export function useNotices(initialNotices: Notice[]) {
   const [editTarget, setEditTarget] = useState<Notice | undefined>(undefined)
 
   const filtered = useMemo(() => {
-    return notices.filter((notice) => {
-      if (search && !notice.title.toLowerCase().includes(search.toLowerCase())) return false
-      if (activeTab === 'active' && !notice.isActive) return false
-      if (activeTab === 'inactive' && notice.isActive) return false
-      return true
-    })
+    return notices
+      .filter((notice) => {
+        if (search && !notice.title.toLowerCase().includes(search.toLowerCase())) return false
+        if (activeTab === 'active' && !notice.isActive) return false
+        if (activeTab === 'inactive' && notice.isActive) return false
+        return true
+      })
+      .sort((a, b) => Number(b.isActive) - Number(a.isActive))
   }, [notices, search, activeTab])
 
   const activeCount = notices.filter((notice) => notice.isActive).length

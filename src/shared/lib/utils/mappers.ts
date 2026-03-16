@@ -35,7 +35,7 @@ export function mapApiNoticeToNotice(notice: ApiNotice): Notice {
     title: notice.title,
     content: notice.content,
     category: notice.category,
-    isActive: true,
+    isActive: notice.status === 'ACTIVE',
     createdAt: timeAgo(notice.createdAt),
     updatedAt: timeAgo(notice.updatedAt),
   }
