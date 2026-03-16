@@ -97,8 +97,8 @@ export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
             <SelectValue placeholder="정렬 기준" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="createdAt">생성일 순</SelectItem>
             <SelectItem value="endedAt">완료일 순</SelectItem>
-            <SelectItem value="startedAt">생성일 순</SelectItem>
             <SelectItem value="score">점수 순</SelectItem>
           </SelectContent>
         </Select>

@@ -82,7 +82,7 @@ export function ReportsTable({ reports, onSelect }: ReportsTableProps) {
                       type="button"
                       onClick={() => onSelect(report)}
                       title="상세 보기"
-                      className="text-primary hover:bg-primary/10 flex h-7 w-7 items-center justify-center rounded-md transition-opacity"
+                      className="text-primary hover:bg-primary/10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-opacity"
                     >
                       <FileText className="h-4 w-4" />
                     </button>

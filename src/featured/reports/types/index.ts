@@ -39,6 +39,8 @@ export interface ApiQuestionResult {
 }
 
 export interface ApiReportDetail extends ApiReport {
+  strengths: string[]
+  improvements: string[]
   questionResults: ApiQuestionResult[]
 }
 

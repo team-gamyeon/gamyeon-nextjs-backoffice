@@ -48,7 +48,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
         <button
           type="button"
           onClick={onToggle}
-          className="bg-primary text-primary-foreground hover:bg-primary-hover absolute top-5.5 -right-3.5 z-10 flex h-7 w-7 items-center justify-center rounded-full shadow-md transition-colors duration-200"
+          className="bg-primary text-primary-foreground hover:bg-primary-hover absolute top-5.5 -right-3.5 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full shadow-md transition-colors duration-200"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <motion.div
@@ -117,7 +117,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                   'group flex h-10 items-center gap-3 rounded-md px-2 text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-sidebar-accent text-sidebar-primary'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+                    : 'text-sidebar-foreground/70 cursor-pointer hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
                 )}
               >
                 <Icon
@@ -183,7 +183,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
               <TooltipTrigger asChild>
                 <button
                   onClick={logout}
-                  className="text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-destructive flex h-10 w-full items-center gap-3 rounded-md px-2 text-sm font-medium transition-colors"
+                  className="text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-destructive flex h-10 w-full cursor-pointer items-center gap-3 rounded-md px-2 text-sm font-medium transition-colors"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
                 </button>
@@ -195,7 +195,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
           ) : (
             <button
               onClick={logout}
-              className="text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-destructive flex h-10 w-full items-center gap-3 rounded-md px-2 text-sm font-medium transition-colors"
+              className="text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-destructive flex h-10 w-full cursor-pointer items-center gap-3 rounded-md px-2 text-sm font-medium transition-colors"
             >
               <LogOut className="h-5 w-5 shrink-0" />
               <AnimatePresence>

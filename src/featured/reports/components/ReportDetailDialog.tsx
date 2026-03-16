@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, Loader2, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog'
 import { ScoreBadge } from '@/featured/reports/components/ReportBadges'
 import { timeAgo } from '@/shared/lib/utils/timeAgo'
@@ -14,14 +14,18 @@ interface ReportDetailDialogProps {
   onClose: () => void
 }
 
+type Tab = 'questions' | 'feedback'
+
 export function ReportDetailDialog({ report, open, isLoading, onClose }: ReportDetailDialogProps) {
   const [currentPage, setCurrentPage] = useState(0)
+  const [activeTab, setActiveTab] = useState<Tab>('questions')
   const total = report?.questionResults.length ?? 0
   const currentQuestion = report?.questionResults[currentPage]
 
   function handleOpenChange(isOpen: boolean) {
     if (!isOpen) {
       setCurrentPage(0)
+      setActiveTab('questions')
       onClose()
     }
   }
@@ -76,18 +80,44 @@ export function ReportDetailDialog({ report, open, isLoading, onClose }: ReportD
               </div>
             )}
 
-            {/* 질문별 결과 */}
-            {total > 0 && currentQuestion && (
+            {/* 탭 */}
+            <div className="border-b">
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('questions')}
+                  className={`cursor-pointer pb-2 text-sm font-medium transition-colors ${
+                    activeTab === 'questions'
+                      ? 'border-b-primary text-foreground -mb-px border-b-2'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  질문 ({total})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('feedback')}
+                  className={`cursor-pointer pb-2 text-sm font-medium transition-colors ${
+                    activeTab === 'feedback'
+                      ? 'border-b-primary text-foreground -mb-px border-b-2'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  강점 / 개선점
+                </button>
+              </div>
+            </div>
+
+            {/* 질문 탭 */}
+            {activeTab === 'questions' && total > 0 && currentQuestion && (
               <div className="space-y-3">
-                {/* 헤더 + 페이지네이션 컨트롤 */}
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold">질문별 결과</p>
+                <div className="flex items-center justify-end">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setCurrentPage((p) => p - 1)}
                       disabled={currentPage === 0}
-                      className="hover:bg-muted disabled:opacity-30 flex h-6 w-6 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed"
+                      className="hover:bg-muted disabled:opacity-30 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -98,14 +128,13 @@ export function ReportDetailDialog({ report, open, isLoading, onClose }: ReportD
                       type="button"
                       onClick={() => setCurrentPage((p) => p + 1)}
                       disabled={currentPage === total - 1}
-                      className="hover:bg-muted disabled:opacity-30 flex h-6 w-6 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed"
+                      className="hover:bg-muted disabled:opacity-30 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
 
-                {/* 질문 카드 */}
                 <div className="bg-muted/30 space-y-2 rounded-lg px-4 py-3">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium">
@@ -126,6 +155,45 @@ export function ReportDetailDialog({ report, open, isLoading, onClose }: ReportD
                     </p>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* 강점/개선점 탭 */}
+            {activeTab === 'feedback' && (
+              <div className="space-y-4">
+                {/* 강점 */}
+                {report.strengths.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="font-semibold">강점</p>
+                    <ul className="space-y-2">
+                      {report.strengths.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <CheckCircle2 className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                          <span className="text-muted-foreground leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* 개선점 */}
+                {report.improvements.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="font-semibold">개선 필요</p>
+                    <ul className="space-y-2">
+                      {report.improvements.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <AlertCircle className="text-amber-500 mt-0.5 h-4 w-4 shrink-0" />
+                          <span className="text-muted-foreground leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {report.strengths.length === 0 && report.improvements.length === 0 && (
+                  <p className="text-muted-foreground text-center">데이터가 없습니다.</p>
+                )}
               </div>
             )}
           </div>
