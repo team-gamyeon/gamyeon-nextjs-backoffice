@@ -19,7 +19,7 @@ interface InterviewsTableProps {
 export function InterviewsTable({ sessions }: InterviewsTableProps) {
   return (
     <div className="border-border/60 overflow-hidden rounded-lg border">
-      <div className="max-h-180 w-full overflow-auto [scrollbar-gutter:stable]">
+      <div className="max-h-140 w-full overflow-auto [scrollbar-gutter:stable]">
         <table className="w-full min-w-200 text-sm">
           <thead className="bg-muted sticky top-0 z-10">
             <tr>
@@ -61,9 +61,7 @@ export function InterviewsTable({ sessions }: InterviewsTableProps) {
 
                 <td className="truncate px-6 py-3 font-medium">{session.userNickname}</td>
 
-                <td className="text-muted-foreground truncate px-6 py-3">
-                  {session.intvTitle}
-                </td>
+                <td className="text-muted-foreground truncate px-6 py-3">{session.intvTitle}</td>
 
                 <td className="px-6 py-3 text-center">
                   <div className="flex justify-center">
