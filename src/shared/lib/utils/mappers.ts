@@ -4,6 +4,7 @@ import type { ApiNotice, Notice } from '@/featured/notices/types'
 import type { ApiUser, Member } from '@/featured/members/types'
 import type { ApiQuestion, CommonQuestion } from '@/featured/questions/types'
 import type { ApiInterview, InterviewSession, InterviewStatus, SessionStatus } from '@/featured/interviews/types'
+import type { ApiReport, AnalysisReport } from '@/featured/reports/types'
 
 function mapInterviewStatus(status: InterviewStatus): SessionStatus {
   if (status === 'FINISHED') return 'completed'
@@ -51,6 +52,19 @@ export function mapApiUserToMember(user: ApiUser): Member {
     lastActiveAt: timeAgo(user.updatedAt),
     sessionCount: 0,
     sanctionHistory: [],
+  }
+}
+
+export function mapApiReportToAnalysisReport(report: ApiReport): AnalysisReport {
+  return {
+    id: report.reportId,
+    sessionId: report.intvId,
+    userNickname: report.user.nickname,
+    jobCategory: report.jobCategory,
+    status: report.status,
+    score: report.score ?? undefined,
+    createdAt: timeAgo(report.createdAt),
+    completedAt: report.completedAt ? timeAgo(report.completedAt) : undefined,
   }
 }
 
