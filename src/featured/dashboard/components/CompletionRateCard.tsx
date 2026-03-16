@@ -24,11 +24,11 @@ const renderActiveShape = (props: any) => {
 };
 
 interface Props {
-  interviewCompletion?: DashboardSummary["interviewCompletion"];
+  intvCompletion?: DashboardSummary["interviewCompletion"];
 }
 
-export function CompletionRateCard({ interviewCompletion }: Props) {
-  const data = (interviewCompletion?.segments ?? [])
+export function CompletionRateCard({ intvCompletion }: Props) {
+  const data = (intvCompletion?.segments ?? [])
     .filter((segment) => segment.label !== "READY" && INTERVIEW_SEGMENT_MAP[segment.label])
     .map((segment) => ({
       name: INTERVIEW_SEGMENT_MAP[segment.label].name,
@@ -39,7 +39,7 @@ export function CompletionRateCard({ interviewCompletion }: Props) {
     }))
     .sort((segmentA, segmentB) => segmentA.order - segmentB.order);
 
-  const completionRate = interviewCompletion?.completionRate ?? 0;
+  const completionRate = intvCompletion?.completionRate ?? 0;
 
   const { setActiveIndex, active } = useDonutChart(data);
 

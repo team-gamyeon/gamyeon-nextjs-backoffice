@@ -20,7 +20,7 @@ export function DashboardMetrics({ kpi }: Props) {
     },
     {
       title: "활성화 중인 질문",
-      value: "8",
+      value: (kpi?.activeQuestions.value ?? 0).toLocaleString(),
       change: 0,
       changeLabel: "변동 없음",
       icon: <HelpCircle className="h-5 w-5" />,

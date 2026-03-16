@@ -12,8 +12,24 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'setup',
+      testMatch: '**/auth.setup.ts',
+    },
+    {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: false,
+        slowMo: 400,
+        storageState: 'tests/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
   ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: true,
+    timeout: 120000,
+  },
 })

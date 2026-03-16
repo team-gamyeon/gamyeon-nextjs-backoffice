@@ -34,17 +34,17 @@ const ReportAnalysisCard = dynamic(
 
 interface Props {
   signupTrend?: DashboardSummary["signupTrend"];
-  interviewCompletion?: DashboardSummary["interviewCompletion"];
+  intvCompletion?: DashboardSummary["interviewCompletion"];
   reportAnalysis?: DashboardSummary["reportAnalysis"];
 }
 
-export function DashboardCharts({ signupTrend, interviewCompletion, reportAnalysis }: Props) {
+export function DashboardCharts({ signupTrend, intvCompletion, reportAnalysis }: Props) {
   return (
     <div className="grid grid-cols-5 gap-4 items-stretch">
       <div className="col-span-3 flex">
         <DauChart signupTrend={signupTrend} />
       </div>
-      <CompletionRateCard interviewCompletion={interviewCompletion} />
+      <CompletionRateCard intvCompletion={intvCompletion} />
       <ReportAnalysisCard reportAnalysis={reportAnalysis} />
     </div>
   );

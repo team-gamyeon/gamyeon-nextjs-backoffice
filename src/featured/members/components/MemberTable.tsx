@@ -39,7 +39,7 @@ export function MemberTable({ members }: MemberTableProps) {
   return (
     <>
       <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-        <div className="overflow-y-auto flex-1 min-h-0 [scrollbar-gutter:stable]">
+        <div className="max-h-180 min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
           <table className="w-full table-fixed text-sm">
             <colgroup>
               <col className="w-[15%]" />
@@ -55,7 +55,9 @@ export function MemberTable({ members }: MemberTableProps) {
                 <th className="text-muted-foreground px-6 py-4 text-left font-medium">닉네임</th>
                 <th className="text-muted-foreground px-6 py-4 text-left font-medium">이메일</th>
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">가입일</th>
-                <th className="text-muted-foreground px-6 py-4 text-center font-medium">마지막 활동</th>
+                <th className="text-muted-foreground px-6 py-4 text-center font-medium">
+                  마지막 활동
+                </th>
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">세션 수</th>
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">상태</th>
                 <th className="px-6 py-4" />

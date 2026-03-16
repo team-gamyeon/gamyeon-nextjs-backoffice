@@ -17,12 +17,14 @@ export function mapApiInterviewToSession(interview: ApiInterview): InterviewSess
     id: String(interview.id),
     userId: String(interview.userId),
     userNickname: interview.user.nickname,
-    interviewTitle: interview.title,
+    intvTitle: interview.title,
     status: mapInterviewStatus(interview.status),
     questionCount: 0,
     answeredCount: 0,
-    durationSec: interview.durationSeconds,
-    startedAt: interview.startedAt ? timeAgo(interview.startedAt) : '-',
+    durationSec: Number(interview.durationSeconds),
+    startedAt: interview.startedAt ? timeAgo(interview.startedAt) : null,
+    pausedAt: interview.pausedAt ? timeAgo(interview.pausedAt) : null,
+    createdAt: timeAgo(interview.createdAt),
     endedAt: interview.finishedAt ? timeAgo(interview.finishedAt) : undefined,
   }
 }

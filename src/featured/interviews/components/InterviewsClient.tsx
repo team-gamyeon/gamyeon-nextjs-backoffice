@@ -1,55 +1,35 @@
 'use client'
 
-import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Badge } from '@/shared/ui/badge'
-import { Progress } from '@/shared/ui/progress'
+import { Button } from '@/shared/ui/button'
 import { SearchInput } from '@/shared/components/SearchInput'
-import type { InterviewSession } from '../types'
-
-const STATUS_LABEL: Record<InterviewSession['status'], { label: string; variant: 'destructive' | 'default' | 'secondary' }> = {
-  abandoned: { label: '중단', variant: 'destructive' },
-  in_progress: { label: '진행 중', variant: 'default' },
-  completed: { label: '완료', variant: 'secondary' },
-}
-
-function formatDuration(seconds: number) {
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = seconds % 60
-  return `${minutes}분 ${remainingSeconds}초`
-}
+import { useInterviews, type InterviewSortBy } from '@/featured/interviews/hooks/useInterviews'
+import { InterviewsTable } from '@/featured/interviews/components/InterviewsTable'
+import type { InterviewSession, SessionStatus } from '@/featured/interviews/types'
 
 interface InterviewsClientProps {
   initialSessions: InterviewSession[]
 }
 
 export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
-  const [search, setSearch] = useState('')
-  const [selectedTitle, setSelectedTitle] = useState('전체')
-
-  const titles = useMemo(() => {
-    const unique = Array.from(new Set(initialSessions.map((session) => session.interviewTitle)))
-    return ['전체', ...unique]
-  }, [initialSessions])
-
-  const abandonedCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'abandoned').length,
-    [initialSessions],
-  )
-
-  const filtered = useMemo(() => {
-    return initialSessions.filter((session) => {
-      if (
-        search &&
-        !session.userNickname.toLowerCase().includes(search.toLowerCase()) &&
-        !session.id.includes(search)
-      )
-        return false
-      if (selectedTitle !== '전체' && session.interviewTitle !== selectedTitle) return false
-      return true
-    })
-  }, [initialSessions, search, selectedTitle])
+  const {
+    search,
+    setSearch,
+    selectedStatus,
+    setSelectedStatus,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    filtered,
+    totalCount,
+    completedCount,
+    inProgressCount,
+    abandonedCount,
+    resetFilters,
+  } = useInterviews(initialSessions)
 
   return (
     <motion.div
@@ -68,6 +48,27 @@ export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
         </p>
       </div>
 
+      {/* Stats */}
+      <div className="flex items-center gap-4 text-sm">
+        <span className="text-muted-foreground">
+          총 <span className="text-foreground mr-1 font-semibold">{totalCount}</span>건
+        </span>
+        <span className="text-muted-foreground">
+          완료{' '}
+          <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
+            {completedCount}
+          </span>
+          건
+        </span>
+        <span className="text-muted-foreground">
+          진행 중 <span className="text-primary mr-1 font-semibold">{inProgressCount}</span>건
+        </span>
+        <span className="text-muted-foreground">
+          중단 <span className="text-destructive mr-1 font-semibold">{abandonedCount}</span>건
+        </span>
+      </div>
+
+      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <SearchInput
           value={search}
@@ -76,91 +77,48 @@ export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
           className="min-w-52 flex-1"
         />
 
-        <Select value={selectedTitle} onValueChange={setSelectedTitle}>
-          <SelectTrigger className="h-9 w-48">
-            <SelectValue placeholder="면접 제목" />
+        <Select
+          value={selectedStatus}
+          onValueChange={(value) => setSelectedStatus(value as SessionStatus | 'all')}
+        >
+          <SelectTrigger className="h-9 w-28">
+            <SelectValue placeholder="상태" />
           </SelectTrigger>
           <SelectContent>
-            {titles.map((title) => (
-              <SelectItem key={title} value={title}>
-                {title}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">전체</SelectItem>
+            <SelectItem value="abandoned">중단</SelectItem>
+            <SelectItem value="in_progress">진행 중</SelectItem>
+            <SelectItem value="completed">완료</SelectItem>
           </SelectContent>
         </Select>
 
-        <p className="text-muted-foreground text-sm">
-          총 <span className="text-foreground font-semibold">{filtered.length}</span>건
-        </p>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as InterviewSortBy)}>
+          <SelectTrigger className="h-9 w-32">
+            <SelectValue placeholder="정렬 기준" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="endedAt">완료일 순</SelectItem>
+            <SelectItem value="startedAt">생성일 순</SelectItem>
+            <SelectItem value="score">점수 순</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}>
+          <SelectTrigger className="h-9 w-28">
+            <SelectValue placeholder="정렬 순서" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">최신순</SelectItem>
+            <SelectItem value="asc">오래된순</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button variant="outline" size="sm" className="h-9" onClick={resetFilters}>
+          초기화
+        </Button>
       </div>
 
-      <div className="border-border/60 overflow-hidden rounded-lg border">
-        <table className="w-full table-fixed text-sm">
-          <thead className="bg-muted/40">
-            <tr>
-              <th className="text-muted-foreground w-[12%] px-4 py-3 text-left font-medium">
-                유저
-              </th>
-              <th className="text-muted-foreground w-[28%] px-4 py-3 text-left font-medium">
-                면접 제목
-              </th>
-              <th className="text-muted-foreground w-[12%] px-4 py-3 text-center font-medium">
-                상태
-              </th>
-              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
-                시작일시
-              </th>
-              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
-                진행 시간
-              </th>
-              <th className="text-muted-foreground w-[16%] px-4 py-3 text-center font-medium">
-                세션 ID
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-border/40 bg-background divide-y">
-            {filtered.map((session, index) => (
-              <motion.tr
-                key={session.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.04 }}
-                className="hover:bg-muted/30 transition-colors"
-              >
-                <td className="truncate px-4 py-3 text-left font-medium">{session.userNickname}</td>
-
-                <td className="text-muted-foreground truncate px-4 py-3 text-left">
-                  {session.interviewTitle}
-                </td>
-
-                <td className="px-4 py-3 text-center">
-                  <Badge variant={STATUS_LABEL[session.status].variant} className="text-xs">
-                    {STATUS_LABEL[session.status].label}
-                  </Badge>
-                </td>
-
-                <td className="text-muted-foreground truncate px-4 py-3 text-center">
-                  {session.startedAt}
-                </td>
-
-                <td className="text-muted-foreground truncate px-4 py-3 text-center">
-                  {formatDuration(session.durationSec)}
-                </td>
-
-                <td className="truncate px-4 py-3 text-center">
-                  <span className="text-muted-foreground font-mono text-xs">#{session.id}</span>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-
-        {filtered.length === 0 && (
-          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-            검색 결과가 없습니다.
-          </div>
-        )}
-      </div>
+      <InterviewsTable sessions={filtered} />
     </motion.div>
   )
 }

@@ -15,7 +15,7 @@ interface NoticeTableProps {
 export function NoticeTable({ notices, onToggle, onEdit, onDelete }: NoticeTableProps) {
   return (
     <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-      <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable]">
+      <div className="max-h-180 min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
         <table className="w-full table-fixed text-sm">
           <colgroup>
             <col className="w-[30%]" />

@@ -18,6 +18,7 @@ export interface ActivityItem {
 export interface DashboardSummary {
   kpi: {
     totalUsers: { value: number }
+    activeQuestions: { value: number }
     totalNotices: { value: number }
     pausedInterviews: { value: number }
     analyzingReports: { value: number }
