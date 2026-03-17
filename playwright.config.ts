@@ -20,7 +20,9 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         headless: false,
-        slowMo: 400,
+        launchOptions: {
+          slowMo: 400,
+        },
         storageState: 'tests/.auth/user.json',
       },
       dependencies: ['setup'],

@@ -30,7 +30,7 @@ export function useAdminLogin() {
       password === ADMIN_CREDENTIALS.password
     ) {
       document.cookie = "admin_token=mock_jwt_token; path=/; max-age=86400";
-      setAdmin({ id: "1", name: "관리자", email });
+      setAdmin({ email, role: "admin" });
       router.push("/dashboard");
     } else {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
