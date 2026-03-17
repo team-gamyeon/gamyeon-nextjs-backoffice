@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Toaster } from "sonner";
 import { AdminSidebar } from "@/shared/components/AdminSidebar";
 import { AdminHeader } from "@/shared/components/AdminHeader";
 
@@ -13,6 +14,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      <Toaster position="top-right" richColors />
       <AdminSidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((prev) => !prev)}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { QuestionForm } from './QuestionForm'
@@ -37,8 +38,10 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
       setIsSubmitting(false)
       if (!result.success) {
         setError(result.error ?? '질문 생성에 실패했습니다.')
+        toast.error(result.error ?? '질문 생성에 실패했습니다.')
         return
       }
+      toast.success('질문이 생성되었습니다.')
       if (result.data) {
         onSuccess?.({
           id: result.data.id,
@@ -61,8 +64,10 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
     setIsSubmitting(false)
     if (!result.success) {
       setError(result.error ?? '질문 수정에 실패했습니다.')
+      toast.error(result.error ?? '질문 수정에 실패했습니다.')
       return
     }
+    toast.success('질문이 수정되었습니다.')
     onSuccess?.({ ...question!, content: formData.content, isActive: formData.isActive })
     onClose()
   }

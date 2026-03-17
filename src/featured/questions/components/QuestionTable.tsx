@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { QuestionDialog } from './QuestionDialog'
@@ -29,8 +30,11 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
     const result = await deleteQuestionAction(deleteTarget.id)
     setIsDeleting(false)
     if (result.success) {
+      toast.success('질문이 삭제되었습니다.')
       onDelete(deleteTarget.id)
       setDeleteTarget(null)
+    } else {
+      toast.error('질문 삭제에 실패했습니다.')
     }
   }
 
@@ -77,8 +81,12 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
                           const result = await updateQuestionAction(question.id, {
                             status: question.isActive ? 'INACTIVE' : 'ACTIVE',
                           })
-                          if (result.success)
+                          if (result.success) {
+                            toast.success(`질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`)
                             onUpdate({ ...question, isActive: !question.isActive })
+                          } else {
+                            toast.error('상태 변경에 실패했습니다.')
+                          }
                         }}
                         className={cn(
                           'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { deleteNoticeAction, updateNoticeAction, getNoticesAction } from '@/featured/notices/actions/notices.action'
 import type { Notice } from '@/featured/notices/types'
 
@@ -31,7 +32,11 @@ export function useNotices(initialNotices: Notice[]) {
     if (!target) return
     const nextStatus = target.isActive ? 'INACTIVE' : 'ACTIVE'
     const result = await updateNoticeAction(Number(id), { status: nextStatus })
-    if (!result.success) return
+    if (!result.success) {
+      toast.error('상태 변경에 실패했습니다.')
+      return
+    }
+    toast.success(`공지사항이 ${target.isActive ? '비활성화' : '활성화'}되었습니다.`)
     setNotices((prev) =>
       prev.map((notice) => (notice.id === id ? { ...notice, isActive: !notice.isActive } : notice)),
     )
@@ -39,7 +44,11 @@ export function useNotices(initialNotices: Notice[]) {
 
   const handleDelete = async (id: string) => {
     const result = await deleteNoticeAction(Number(id))
-    if (!result.success) return
+    if (!result.success) {
+      toast.error('공지사항 삭제에 실패했습니다.')
+      return
+    }
+    toast.success('공지사항이 삭제되었습니다.')
     setNotices((prev) => prev.filter((notice) => notice.id !== id))
     if (expandedId === id) setExpandedId(null)
   }

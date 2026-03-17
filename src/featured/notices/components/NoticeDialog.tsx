@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
@@ -39,7 +40,11 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
         })
       : await createNoticeAction({ title: trimmedTitle, content: trimmedContent, category })
     setIsLoading(false)
-    if (!result.success) return
+    if (!result.success) {
+      toast.error(notice ? '공지사항 수정에 실패했습니다.' : '공지사항 생성에 실패했습니다.')
+      return
+    }
+    toast.success(notice ? '공지사항이 수정되었습니다.' : '공지사항이 생성되었습니다.')
     onSave()
     onClose()
   }
