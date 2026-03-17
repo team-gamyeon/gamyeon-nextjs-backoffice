@@ -58,7 +58,7 @@ export function AdminLoginForm() {
       >
         <div className="mb-4 text-center">
           <Link
-            href="/admin/dashboard"
+            href="/dashboard"
             className="text-foreground flex items-center justify-center gap-0.5"
           >
             <Image
@@ -144,7 +144,7 @@ export function AdminLoginForm() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(event) => setRememberMe(event.target.checked)}
-                  className="h-4 w-4 cursor-pointer accent-primary"
+                  className="accent-primary h-4 w-4 cursor-pointer"
                 />
                 <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
                   로그인 정보 저장
