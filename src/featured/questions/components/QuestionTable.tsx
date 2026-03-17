@@ -34,7 +34,7 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
       onDelete(deleteTarget.id)
       setDeleteTarget(null)
     } else {
-      toast.error('질문 삭제에 실패했습니다.')
+      toast.error(result.error ?? '질문 삭제에 실패했습니다.')
     }
   }
 
@@ -85,7 +85,7 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
                             toast.success(`질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`)
                             onUpdate({ ...question, isActive: !question.isActive })
                           } else {
-                            toast.error('상태 변경에 실패했습니다.')
+                            toast.error(result.error ?? '상태 변경에 실패했습니다.')
                           }
                         }}
                         className={cn(

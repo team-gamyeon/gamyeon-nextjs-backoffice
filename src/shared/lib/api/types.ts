@@ -10,7 +10,14 @@ export class ApiError extends Error {
   readonly raw: Record<string, unknown>
 
   constructor(status: number, raw: Record<string, unknown>) {
-    super(typeof raw['message'] === 'string' ? raw['message'] : '오류가 발생했습니다.')
+    const errorObj = raw['error'] as Record<string, unknown> | undefined
+    const message =
+      typeof raw['message'] === 'string'
+        ? raw['message']
+        : typeof errorObj?.['message'] === 'string'
+          ? errorObj['message']
+          : '오류가 발생했습니다.'
+    super(message)
     this.name = 'ApiError'
     this.status = status
     this.raw = raw
