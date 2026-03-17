@@ -62,10 +62,10 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
                 {questions.map((question) => (
                   <motion.tr
                     key={question.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
+                    transition={{ duration: 0.2 }}
                     className="group hover:bg-muted/30 transition-colors"
                   >
                     <td className="max-w-md px-4 py-3">
