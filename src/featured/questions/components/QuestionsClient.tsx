@@ -37,6 +37,10 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
     setQuestions((prev) => prev.filter((question) => question.id !== id))
   }
 
+  const handleAdd = (created: CommonQuestion) => {
+    setQuestions((prev) => [created, ...prev])
+  }
+
   const handleUpdate = (updated: CommonQuestion) => {
     setQuestions((prev) => prev.map((question) => question.id === updated.id ? updated : question))
   }
@@ -105,6 +109,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
       <QuestionDialog
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
+        onSuccess={handleAdd}
       />
     </motion.div>
   )

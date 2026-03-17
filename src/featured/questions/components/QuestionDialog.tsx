@@ -39,6 +39,17 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
         setError(result.error ?? '질문 생성에 실패했습니다.')
         return
       }
+      if (result.data) {
+        onSuccess?.({
+          id: result.data.id,
+          content: result.data.content,
+          category: '자기소개',
+          isActive: result.data.status === 'ACTIVE',
+          usageCount: 0,
+          createdAt: '방금 전',
+          updatedAt: '방금 전',
+        })
+      }
       onClose()
       return
     }
