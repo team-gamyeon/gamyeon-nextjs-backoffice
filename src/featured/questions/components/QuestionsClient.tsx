@@ -20,6 +20,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive'>('all')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [dialogKey, setDialogKey] = useState(0)
 
   const debouncedSearch = useDebounce(search, 200)
 
@@ -95,7 +96,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
         <Button
           size="sm"
           className="h-9 cursor-pointer gap-1.5"
-          onClick={() => setIsDialogOpen(true)}
+          onClick={() => { setDialogKey((prev) => prev + 1); setIsDialogOpen(true) }}
         >
           <Plus className="h-4 w-4" />
           질문 추가
@@ -107,6 +108,7 @@ export function QuestionsClient({ initialQuestions }: QuestionsClientProps) {
       </div>
 
       <QuestionDialog
+        key={dialogKey}
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSuccess={handleAdd}
