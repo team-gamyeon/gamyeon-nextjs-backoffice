@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { deleteNoticeAction, updateNoticeAction } from '@/featured/notices/actions/notices.action'
-import type { Notice, NoticeCategory } from '@/featured/notices/types'
+import { deleteNoticeAction, updateNoticeAction, getNoticesAction } from '@/featured/notices/actions/notices.action'
+import type { Notice } from '@/featured/notices/types'
 
 export function useNotices(initialNotices: Notice[]) {
   const [notices, setNotices] = useState<Notice[]>(initialNotices)
@@ -54,21 +54,10 @@ export function useNotices(initialNotices: Notice[]) {
     setDialogOpen(true)
   }
 
-  const handleSave = (data: { title: string; content: string; isActive: boolean; category: NoticeCategory }) => {
-    if (editTarget) {
-      setNotices((prev) =>
-        prev.map((notice) =>
-          notice.id === editTarget.id ? { ...notice, ...data, updatedAt: '2026.03.07' } : notice,
-        ),
-      )
-    } else {
-      const newNotice: Notice = {
-        id: String(Date.now()),
-        ...data,
-        createdAt: '2026.03.07',
-        updatedAt: '2026.03.07',
-      }
-      setNotices((prev) => [newNotice, ...prev])
+  const handleSave = async () => {
+    const result = await getNoticesAction()
+    if (result.success && result.data) {
+      setNotices(result.data)
     }
   }
 
