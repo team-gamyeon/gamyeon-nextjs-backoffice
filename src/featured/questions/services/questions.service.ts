@@ -8,8 +8,12 @@ import type {
   UpdateQuestionResponse,
 } from '@/featured/questions/types'
 
-export async function getQuestions() {
-  return serverApi.get<QuestionListResponse>('/api/v1/questions')
+export async function getQuestions(): Promise<QuestionListResponse | null> {
+  try {
+    return await serverApi.get<QuestionListResponse>('/api/v1/questions')
+  } catch {
+    return null
+  }
 }
 
 export async function createQuestion(body: CreateQuestionRequest) {
