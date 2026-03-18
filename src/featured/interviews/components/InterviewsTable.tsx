@@ -5,11 +5,15 @@ import type { InterviewSession } from '@/featured/interviews/types'
 
 const STATUS_LABEL: Record<
   InterviewSession['status'],
-  { label: string; variant: 'destructive' | 'default' | 'secondary' }
+  { label: string; variant: 'destructive' | 'default' | 'secondary'; className?: string }
 > = {
   abandoned: { label: '중단', variant: 'destructive' },
   in_progress: { label: '진행 중', variant: 'default' },
-  completed: { label: '완료', variant: 'secondary' },
+  completed: {
+    label: '완료',
+    variant: 'secondary',
+    className: 'bg-green-600 text-white dark:bg-green-400 dark:text-white',
+  },
 }
 
 interface InterviewsTableProps {
@@ -65,7 +69,10 @@ export function InterviewsTable({ sessions }: InterviewsTableProps) {
 
                 <td className="px-6 py-3 text-center">
                   <div className="flex justify-center">
-                    <Badge variant={STATUS_LABEL[session.status].variant} className="text-xs">
+                    <Badge
+                      variant={STATUS_LABEL[session.status].variant}
+                      className={`text-xs ${STATUS_LABEL[session.status].className ?? ''}`}
+                    >
                       {STATUS_LABEL[session.status].label}
                     </Badge>
                   </div>
