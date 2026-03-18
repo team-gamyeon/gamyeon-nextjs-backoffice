@@ -27,6 +27,18 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
   const [category, setCategory] = useState<NoticeCategory>(notice?.category ?? 'NOTICE')
   const [isLoading, setIsLoading] = useState(false)
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter') return
+    const target = e.target as HTMLElement
+    const isInput = target.tagName === 'INPUT'
+    const isTextarea = target.tagName === 'TEXTAREA'
+    if (!isInput && !isTextarea) return
+    if (isTextarea && !(e.ctrlKey || e.metaKey)) return
+    if (!title.trim() || isLoading) return
+    e.preventDefault()
+    handleSave()
+  }
+
   const handleSave = async () => {
     const trimmedTitle = title.trim()
     const trimmedContent = content.trim()
@@ -55,7 +67,7 @@ export function NoticeDialog({ open, notice, onClose, onSave }: NoticeDialogProp
         <DialogHeader>
           <DialogTitle>{notice ? '공지사항 수정' : '공지사항 추가'}</DialogTitle>
         </DialogHeader>
-        <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1 py-2">
+        <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1 py-2" onKeyDown={handleKeyDown}>
           <div className="space-y-1.5">
             <Label htmlFor="notice-title">제목</Label>
             <div className="flex items-center gap-2">

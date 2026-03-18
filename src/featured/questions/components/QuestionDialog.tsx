@@ -26,6 +26,14 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      if (!formData.content.trim() || isSubmitting) return
+      e.preventDefault()
+      handleSave()
+    }
+  }
+
   const handleSave = async () => {
     setIsSubmitting(true)
     setError(null)
@@ -81,7 +89,7 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
           <DialogTitle>{isEdit ? '질문 수정' : '새 질문 추가'}</DialogTitle>
         </DialogHeader>
 
-        <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
+        <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1" onKeyDown={handleKeyDown}>
           <QuestionForm initial={question} onChange={setFormData} />
           {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
         </div>
