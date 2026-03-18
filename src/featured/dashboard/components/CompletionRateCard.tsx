@@ -28,18 +28,32 @@ interface Props {
 }
 
 export function CompletionRateCard({ intvCompletion }: Props) {
-  const data = (intvCompletion?.segments ?? [])
-    .filter((segment) => segment.label !== "READY" && INTERVIEW_SEGMENT_MAP[segment.label])
-    .map((segment) => ({
+  const filtered = (intvCompletion?.segments ?? []).filter(
+    (segment) => segment.label !== "READY" && INTERVIEW_SEGMENT_MAP[segment.label]
+  );
+  const totalCount = filtered.reduce((sum, s) => sum + s.count, 0);
+
+  const withRemainder = filtered.map((segment) => {
+    const exact = totalCount > 0 ? (segment.count / totalCount) * 100 : 0;
+    return { segment, floor: Math.floor(exact), remainder: exact - Math.floor(exact) };
+  });
+  const remainderToDistribute = 100 - withRemainder.reduce((sum, x) => sum + x.floor, 0);
+  withRemainder
+    .sort((a, b) => b.remainder - a.remainder)
+    .slice(0, remainderToDistribute)
+    .forEach((x) => x.floor++);
+
+  const data = withRemainder
+    .map(({ segment, floor }) => ({
       name: INTERVIEW_SEGMENT_MAP[segment.label].name,
-      value: segment.percentage,
+      value: floor,
       count: segment.count,
       color: INTERVIEW_SEGMENT_MAP[segment.label].color,
       order: INTERVIEW_SEGMENT_MAP[segment.label].order,
     }))
-    .sort((segmentA, segmentB) => segmentA.order - segmentB.order);
+    .sort((a, b) => a.order - b.order);
 
-  const completionRate = intvCompletion?.completionRate ?? 0;
+  const completionRate = data.find((d) => d.name === INTERVIEW_SEGMENT_MAP["FINISHED"].name)?.value ?? 0;
 
   const { setActiveIndex, active } = useDonutChart(data);
 
