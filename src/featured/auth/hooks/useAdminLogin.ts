@@ -18,19 +18,19 @@ export function useAdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
     setIsLoading(true);
 
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     if (
       email === ADMIN_CREDENTIALS.email &&
       password === ADMIN_CREDENTIALS.password
     ) {
       document.cookie = "admin_token=mock_jwt_token; path=/; max-age=86400";
-      setAdmin({ id: "1", name: "관리자", email });
+      setAdmin({ email, role: "admin" });
       router.push("/dashboard");
     } else {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");

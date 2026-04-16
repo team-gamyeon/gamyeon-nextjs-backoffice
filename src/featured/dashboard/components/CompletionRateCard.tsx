@@ -1,64 +1,132 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Sector } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import type { DashboardSummary } from "@/featured/dashboard/types";
+import { INTERVIEW_SEGMENT_MAP } from "@/featured/dashboard/constants";
+import { useDonutChart } from "@/featured/dashboard/hooks/useDonutChart";
 
-const data = [
-  { name: "완료", value: 68, color: "oklch(0.55 0.15 180)" },
-  { name: "진행중", value: 15, color: "oklch(0.72 0.18 150)" },
-  { name: "이탈", value: 17, color: "oklch(0.92 0.01 180)" },
-];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const renderActiveShape = (props: any) => {
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  return (
+    <Sector
+      cx={cx}
+      cy={cy}
+      innerRadius={innerRadius}
+      outerRadius={outerRadius + 5}
+      startAngle={startAngle}
+      endAngle={endAngle}
+      fill={fill}
+    />
+  );
+};
 
-export function CompletionRateCard() {
+interface Props {
+  intvCompletion?: DashboardSummary["interviewCompletion"];
+}
+
+export function CompletionRateCard({ intvCompletion }: Props) {
+  const filtered = (intvCompletion?.segments ?? []).filter(
+    (segment) => segment.label !== "READY" && INTERVIEW_SEGMENT_MAP[segment.label]
+  );
+  const totalCount = filtered.reduce((sum, s) => sum + s.count, 0);
+
+  const withRemainder = filtered.map((segment) => {
+    const exact = totalCount > 0 ? (segment.count / totalCount) * 100 : 0;
+    return { segment, floor: Math.floor(exact), remainder: exact - Math.floor(exact) };
+  });
+  const remainderToDistribute = 100 - withRemainder.reduce((sum, x) => sum + x.floor, 0);
+  withRemainder
+    .sort((a, b) => b.remainder - a.remainder)
+    .slice(0, remainderToDistribute)
+    .forEach((x) => x.floor++);
+
+  const data = withRemainder
+    .map(({ segment, floor }) => ({
+      name: INTERVIEW_SEGMENT_MAP[segment.label].name,
+      value: floor,
+      count: segment.count,
+      color: INTERVIEW_SEGMENT_MAP[segment.label].color,
+      order: INTERVIEW_SEGMENT_MAP[segment.label].order,
+    }))
+    .sort((a, b) => a.order - b.order);
+
+  const completionRate = data.find((d) => d.name === INTERVIEW_SEGMENT_MAP["FINISHED"].name)?.value ?? 0;
+
+  const { setActiveIndex, active } = useDonutChart(data);
+
+  const pieData = data.length > 0 ? data : [{ name: "", value: 1, color: "oklch(0.9 0 0)", order: 0 }];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
+      className="flex"
+      suppressHydrationWarning
     >
-      <Card className="border-border/60">
+      <Card className="border-border/60 h-full w-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold">면접 완료율</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center">
-            <div className="relative">
-              <ResponsiveContainer width={200} height={160}>
-                <PieChart>
+            <div>
+              <PieChart width={200} height={180} onMouseLeave={() => setActiveIndex(null)}>
                   <Pie
-                    data={data}
+                    data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={3}
+                    innerRadius={54}
+                    outerRadius={80}
+                    paddingAngle={data.length > 0 ? 3 : 0}
                     dataKey="value"
                     startAngle={90}
                     endAngle={-270}
+                    activeShape={renderActiveShape}
+                    onMouseEnter={(_, index) => data.length > 0 && setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
                   >
-                    {data.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} strokeWidth={0} />
+                    {pieData.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={entry.color}
+                        strokeWidth={0}
+                        opacity={active && active.name !== entry.name ? 0.4 : 1}
+                        style={{ transition: "opacity 0.2s" }}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, ""]}
-                    contentStyle={{
-                      fontSize: "12px",
-                      borderRadius: "8px",
-                      border: "1px solid oklch(0.91 0.01 180)",
+                  <text
+                    x={100}
+                    y={84}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      fill: active ? active.color : "currentColor",
+                      transition: "fill 0.15s",
                     }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold">68%</span>
-                <span className="text-xs text-muted-foreground">완료율</span>
-              </div>
+                  >
+                    {active ? `${active.count}건` : `${completionRate}%`}
+                  </text>
+                  <text
+                    x={100}
+                    y={103}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    style={{ fontSize: "0.75rem", fill: "currentColor", opacity: 0.5 }}
+                  >
+                    {active ? active.name : "완료율"}
+                  </text>
+              </PieChart>
             </div>
           </div>
 
-          <div className="mt-2 space-y-2">
+          <div className="mt-3 space-y-2">
             {data.map((item) => (
               <div key={item.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">

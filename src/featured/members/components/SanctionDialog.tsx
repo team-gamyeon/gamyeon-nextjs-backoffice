@@ -54,7 +54,7 @@ export function SanctionDialog({
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
     setIsSubmitting(false);
     onClose();
   };
@@ -92,7 +92,7 @@ export function SanctionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="flex max-h-[90vh] max-w-md flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className={`rounded-lg p-1.5 ${config.iconBg}`}>
@@ -102,7 +102,7 @@ export function SanctionDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1">
           <p className="text-sm text-muted-foreground">{config.description}</p>
 
           <div className="space-y-1.5">
@@ -112,9 +112,9 @@ export function SanctionDialog({
                 <SelectValue placeholder="사유를 선택하세요" />
               </SelectTrigger>
               <SelectContent>
-                {config.reasons.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r}
+                {config.reasons.map((reason) => (
+                  <SelectItem key={reason} value={reason}>
+                    {reason}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -129,7 +129,7 @@ export function SanctionDialog({
             <Textarea
               placeholder="추가 메모를 입력하세요..."
               value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
+              onChange={(event) => setAdminNote(event.target.value)}
               className="resize-none"
               rows={3}
             />

@@ -1,27 +1,42 @@
-export interface DauDataPoint {
-  date: string;
-  dau: number;
+export interface SignupTrendItem {
+  date: string
+  count: number
 }
 
-export interface MetricCardData {
-  title: string;
-  value: string | number;
-  change: number;
-  changeLabel: string;
-  icon: string;
+export interface CompletionSegment {
+  label: string
+  count: number
+  percentage: number
 }
 
-export interface CompletionStats {
-  completed: number;
-  inProgress: number;
-  abandoned: number;
-  total: number;
-  completionRate: number;
+export interface ActivityItem {
+  type: string
+  message: string
+  createdAt: string
 }
 
-export interface RecentActivity {
-  id: string;
-  type: "join" | "session_complete" | "sanction" | "report";
-  message: string;
-  time: string;
+export interface DashboardSummary {
+  kpi: {
+    totalUsers: { value: number }
+    activeQuestions: { value: number }
+    totalNotices: { value: number }
+    pausedInterviews: { value: number }
+    analyzingReports: { value: number }
+  }
+  signupTrend: {
+    period: string
+    items: SignupTrendItem[]
+  }
+  interviewCompletion: {
+    completionRate: number
+    segments: CompletionSegment[]
+  }
+  reportAnalysis: {
+    completionRate: number
+    totalCount: number
+    segments: CompletionSegment[]
+  }
+  recentActivities: {
+    items: ActivityItem[]
+  }
 }
