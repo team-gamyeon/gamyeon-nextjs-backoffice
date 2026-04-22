@@ -3,7 +3,7 @@ import { serverApi } from '@/shared/lib/api'
 import type { Admin, AdminLoginPayload, LoginResponse } from '@/featured/auth/types'
 
 export async function login(payload: AdminLoginPayload) {
-  const result = await serverApi.post<LoginResponse>('/api/v1/auth/login', payload)
+  const result = await serverApi.post<LoginResponse>('/api/v1/auth/login', payload, { auth: false })
   if (!result) return
 
   const isProd = process.env.NODE_ENV === 'production'
