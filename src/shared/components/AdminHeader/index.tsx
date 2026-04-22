@@ -12,9 +12,9 @@ export function AdminHeader() {
 
   useEffect(() => {
     useAdminStore.persist.rehydrate()
-    fetch('/api/auth/me')
-      .then((res) => res.json())
-      .then((json) => { if (json?.data) setAdmin(json.data as Admin) })
+    // fetch('/api/auth/me')
+    //   .then((res) => res.json())
+    //   .then((json) => { if (json?.data) setAdmin(json.data as Admin) })
   }, [setAdmin])
 
   return (

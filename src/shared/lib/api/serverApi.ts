@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { NetworkError } from './types'
 import type { RequestConfig } from './types'
 import { buildUrl, parseApiResponse } from './_utils'
@@ -55,15 +54,15 @@ async function serverFetch<T>(
   body?: unknown,
   config?: RequestConfig,
 ): Promise<T> {
-  const cookieStore = await cookies()
+  const useAuth = config?.auth !== false
   const url = buildUrl(endpoint, config?.params)
   const jsonBody = body !== undefined ? JSON.stringify(body) : undefined
 
-  const doFetch = (accessToken: string) =>
+  const doFetch = (accessToken?: string) =>
     fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         ...(jsonBody !== undefined && { 'Content-Type': 'application/json' }),
         ...config?.headers,
       },
@@ -72,6 +71,20 @@ async function serverFetch<T>(
       next: config?.next,
     })
 
+  if (!useAuth) {
+    let res: Response
+    try {
+      res = await doFetch()
+    } catch {
+      throw new NetworkError()
+    }
+    const { data, error } = await parseApiResponse<T>(res)
+    console.log('[serverApi]', method, endpoint, { status: res.status, data, error })
+    if (error) throw error
+    return data as T
+  }
+
+  const cookieStore = await cookies()
   const accessToken = cookieStore.get('accessToken')?.value ?? ''
 
   let res: Response
@@ -83,7 +96,7 @@ async function serverFetch<T>(
 
   if (res.status === 401) {
     const newAccessToken = await tryRefresh(cookieStore)
-    if (!newAccessToken) redirect('/login')
+    if (!newAccessToken) return null as T // redirect('/login')
 
     try {
       res = await doFetch(newAccessToken)
