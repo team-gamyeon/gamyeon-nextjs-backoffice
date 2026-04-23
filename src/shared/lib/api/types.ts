@@ -39,6 +39,8 @@ export type ApiResult<T> = { data: T | null; error: null } | { data: null; error
 export interface RequestConfig {
   /** true이면 에러 toast를 띄우지 않음 */
   silent?: boolean
+  /** false이면 Authorization 헤더 미포함, 401 redirect 스킵 (기본값: true) */
+  auth?: boolean
   /** URL 쿼리 파라미터 */
   params?: Record<string, string | number | boolean>
   headers?: Record<string, string>

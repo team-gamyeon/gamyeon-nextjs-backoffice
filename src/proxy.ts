@@ -8,10 +8,10 @@ export function proxy(request: NextRequest) {
 
   if (isPublic) return NextResponse.next()
 
-  const refreshToken = request.cookies.get('refreshToken')?.value
-  if (!refreshToken) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
+  // const refreshToken = request.cookies.get('refreshToken')?.value
+  // if (!refreshToken) {
+  //   return NextResponse.redirect(new URL('/login', request.url))
+  // }
 
   return NextResponse.next()
 }
