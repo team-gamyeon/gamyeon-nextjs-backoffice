@@ -13,6 +13,7 @@ import {
   FileBarChart2,
   ChevronsLeft,
   LogOut,
+  ArrowDownUp,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAdminStore } from '@/featured/auth/store'
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/notices', label: '공지사항 관리', icon: Megaphone },
   { href: '/interviews', label: '면접 관리', icon: Video },
   { href: '/reports', label: '리포트 관리', icon: FileBarChart2 },
+  { href: '/traffic', label: '유입/이탈 관리', icon: ArrowDownUp },
 ]
 
 interface AdminSidebarProps {
