@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Flame, AlertTriangle, TrendingDown } from 'lucide-react'
+import { Flame, AlertTriangle, TrendingDown, ShieldCheck } from 'lucide-react'
+import { EmptyState } from '@/shared/components/EmptyState'
 import { FrictionRanking } from '../types/index'
 
 interface FrictionBoardProps {
@@ -32,9 +33,11 @@ export function FrictionBoard({ data }: FrictionBoardProps) {
       <div className="flex min-h-0 flex-1 flex-col space-y-4">
         {/* 데이터가 없을 때 */}
         {data.length === 0 ? (
-          <p className="text-muted-foreground py-8 text-center text-sm">
-            현재 수집된 이탈률 데이터가 없습니다.
-          </p>
+          <EmptyState
+            icon={ShieldCheck}
+            title="마찰 데이터가 없습니다"
+            description="이탈률 데이터가 수집되면 순위가 표시됩니다"
+          />
         ) : (
           data.map((stat, index) => {
             // 외부로 뺀 함수를 여기서 호출해서 사용

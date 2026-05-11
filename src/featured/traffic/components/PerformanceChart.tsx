@@ -10,7 +10,9 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
+import { BarChart2 } from 'lucide-react'
 import type { PagePerformanceData } from '@/featured/traffic/types'
+import { EmptyState } from '@/shared/components/EmptyState'
 
 interface PerformanceChartProps {
   data: PagePerformanceData[]
@@ -59,6 +61,16 @@ function CustomTooltip({
 }
 
 export function PerformanceChartContent({ data }: PerformanceChartProps) {
+  if (data.length === 0) {
+    return (
+      <EmptyState
+        icon={BarChart2}
+        title="데이터가 없습니다"
+        description="GA4 연동 후 페이지별 성과 데이터가 표시됩니다"
+      />
+    )
+  }
+
   const chartData = data.map((item) => ({
     name: shortenPath(item.routePage),
     fullPath: item.routePage,
@@ -72,15 +84,24 @@ export function PerformanceChartContent({ data }: PerformanceChartProps) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          layout="vertical"
-          margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+          margin={{ top: 4, right: 8, left: 0, bottom: 4 }}
+          barGap={2}
+          barCategoryGap="30%"
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            horizontal={false}
+            vertical={false}
             stroke="oklch(0.91 0.01 180 / 0.5)"
           />
           <XAxis
+            type="category"
+            dataKey="name"
+            tick={{ fontSize: 10 }}
+            tickLine={false}
+            axisLine={false}
+            interval={0}
+          />
+          <YAxis
             type="number"
             tick={{ fontSize: 10 }}
             tickLine={false}
@@ -88,14 +109,7 @@ export function PerformanceChartContent({ data }: PerformanceChartProps) {
             tickFormatter={(value: number) =>
               value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value)
             }
-          />
-          <YAxis
-            type="category"
-            dataKey="name"
-            tick={{ fontSize: 10 }}
-            tickLine={false}
-            axisLine={false}
-            width={96}
+            width={36}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'oklch(0.96 0.01 180 / 0.3)' }} />
           <Legend
@@ -106,14 +120,14 @@ export function PerformanceChartContent({ data }: PerformanceChartProps) {
           <Bar
             dataKey="pageViews"
             fill="oklch(0.55 0.15 180)"
-            radius={[0, 3, 3, 0]}
-            maxBarSize={10}
+            radius={[3, 3, 0, 0]}
+            maxBarSize={16}
           />
           <Bar
             dataKey="activeUsers"
             fill="oklch(0.72 0.18 150)"
-            radius={[0, 3, 3, 0]}
-            maxBarSize={10}
+            radius={[3, 3, 0, 0]}
+            maxBarSize={16}
           />
         </BarChart>
       </ResponsiveContainer>
