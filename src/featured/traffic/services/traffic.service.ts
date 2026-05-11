@@ -1,4 +1,5 @@
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
+import { FrictionRanking } from '../types/index'
 
 const privateKey = process.env.GA_PRIVATE_KEY?.replace(/\\n/g, '\n')
 
@@ -53,4 +54,65 @@ export async function getPagePerformance() {
     activeUsers: Number(row.metricValues?.[1].value), // 사용자수
     userDurations: Number(row.metricValues?.[2].value), // 총 시간(초)
   }))
+}
+
+// 이탈 랭킹 서비스 함수 추가 - GA4 이벤트 데이터를 기반으로 마찰 지수 계산
+export async function getFrictionIndex(): Promise<FrictionRanking[]> {
+  try {
+    const [response] = await client.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dimensions: [{ name: 'eventName' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'eventName',
+          inListFilter: {
+            values: [
+              'question_gen_start',
+              'question_gen_complete',
+              'report_gen_start',
+              'report_gen_complete',
+            ],
+          },
+        },
+      },
+    })
+
+    const counts = {
+      question_gen_start: 0,
+      question_gen_complete: 0,
+      report_gen_start: 0,
+      report_gen_complete: 0,
+    }
+
+    response.rows?.forEach((row) => {
+      const eventName = row.dimensionValues?.[0].value as keyof typeof counts
+      if (counts[eventName] !== undefined) {
+        counts[eventName] = Number(row.metricValues?.[0].value)
+      }
+    })
+
+    const calcDropOff = (start: number, complete: number) =>
+      start > 0 ? Number((((start - complete) / start) * 100).toFixed(1)) : 0
+
+    const rankings: FrictionRanking[] = [
+      {
+        id: 1,
+        title: '면접 전 질문 생성 대기',
+        dropOffRate: calcDropOff(counts.question_gen_start, counts.question_gen_complete),
+      },
+      {
+        id: 2,
+        title: '면접 후 AI 리포트 분석',
+        dropOffRate: calcDropOff(counts.report_gen_start, counts.report_gen_complete),
+      },
+    ]
+
+    return rankings.sort((a, b) => b.dropOffRate - a.dropOffRate)
+  } catch (error) {
+    // 3. 에러 발생 시 로그를 남기고 빈 배열을 반환해 UI 렌더링 중단을 방지합니다
+    console.error('GA4 마찰 지수 데이터 호출 에러:', error)
+    return []
+  }
 }
