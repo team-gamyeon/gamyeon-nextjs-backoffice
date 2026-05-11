@@ -6,10 +6,10 @@ import { Card } from '@/shared/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import type { ChannelData, PagePerformanceData } from '@/featured/traffic/types'
 
-const DoughnutChartContent = dynamic(
+const InflowChannelChartContent = dynamic(
   () =>
-    import('@/featured/traffic/components/DoughnutChart').then((module) => ({
-      default: module.DoughnutChartContent,
+    import('@/featured/traffic/components/InflowChannelChart').then((module) => ({
+      default: module.InflowChannelChartContent,
     })),
   { ssr: false },
 )
@@ -52,7 +52,7 @@ export function ChannelPerformanceTabs({
           {/* flex-1 + min-h-0으로 남은 높이를 채우되 overflow 방지 */}
           <div className="min-h-0 flex-1 px-5 pb-4">
             <TabsContent value="channel" className="h-full">
-              <DoughnutChartContent data={channelData} />
+              <InflowChannelChartContent data={channelData} />
             </TabsContent>
             <TabsContent value="performance" className="h-full">
               <PerformanceChartContent data={performanceData} />

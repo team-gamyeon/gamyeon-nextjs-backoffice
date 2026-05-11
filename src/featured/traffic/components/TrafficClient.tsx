@@ -41,7 +41,7 @@ export function TrafficClient({
   return (
     <div className="mt-4 space-y-3 px-4">
       {/* Row 1 */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid h-full grid-cols-2 gap-3">
         {/* Section 1: 유입채널 + 페이지별 성과 (탭) */}
         <ChannelPerformanceTabs
           channelData={firstChannelResult}
@@ -53,7 +53,7 @@ export function TrafficClient({
       </div>
 
       {/* Row 2 - 마찰 랭킹 및 이탈률 관련 영역*/}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid h-full grid-cols-2 grid-rows-1 gap-3">
         {/* 1. 마찰 지수 보드 (왼쪽 절반) */}
         <div className="min-w-0 flex-1">
           <FrictionBoard data={frictionIndexResult} />

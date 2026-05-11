@@ -2,7 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, Sector } from 'recharts'
+import { PieChart as PieChartIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { EmptyState } from '@/shared/components/EmptyState'
 import { useDonutChart } from '@/featured/dashboard/hooks/useDonutChart'
 import type { ChannelData } from '@/featured/traffic/types'
 
@@ -14,7 +16,7 @@ const CHANNEL_COLORS = [
   'oklch(0.65 0.14 60)',
 ]
 
-interface DoughnutChartProps {
+interface InflowChannelChartProps {
   data: ChannelData[]
 }
 
@@ -34,7 +36,17 @@ const renderActiveShape = (props: any) => {
   )
 }
 
-export function DoughnutChartContent({ data }: DoughnutChartProps) {
+export function InflowChannelChartContent({ data }: InflowChannelChartProps) {
+  if (data.length === 0) {
+    return (
+      <EmptyState
+        icon={PieChartIcon}
+        title="데이터가 없습니다"
+        description="GA4 연동 후 유입 채널 데이터가 표시됩니다"
+      />
+    )
+  }
+
   const total = data.reduce((sum, item) => sum + item.totalUsers, 0)
 
   const chartData = data.map((item, index) => ({
@@ -123,7 +135,7 @@ export function DoughnutChartContent({ data }: DoughnutChartProps) {
   )
 }
 
-export default function DoughnutChart({ data }: DoughnutChartProps) {
+export default function InflowChannelChart({ data }: InflowChannelChartProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,7 +150,7 @@ export default function DoughnutChart({ data }: DoughnutChartProps) {
           <p className="text-muted-foreground text-xs">최근 30일 · GA4</p>
         </CardHeader>
         <CardContent className="px-5 pt-0 pb-4">
-          <DoughnutChartContent data={data} />
+          <InflowChannelChartContent data={data} />
         </CardContent>
       </Card>
     </motion.div>
