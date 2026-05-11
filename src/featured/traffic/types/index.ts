@@ -9,3 +9,11 @@ export type PagePerformanceData = {
   activeUsers: number
   userDurations: number
 }
+
+export type FrictionRanking = {
+  id: number
+  title: string
+  dropOffRate: number
+}
+
+
