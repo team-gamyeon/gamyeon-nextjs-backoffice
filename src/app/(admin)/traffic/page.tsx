@@ -1,11 +1,12 @@
-import { PageHeader } from '@/shared/components/PageHeader'
 import { TrafficClient } from '@/featured/traffic/components/TrafficClient'
 import {
   getFirstUserChannel,
   getPagePerformance,
   getFrictionIndex,
 } from '@/featured/traffic/services/traffic.service'
+import { PageHeader } from '@/shared/components/PageHeader'
 
+// src/app/(admin)/traffic/page.tsx
 export default async function TrafficPage() {
   const [firstChannelResult, pagePerformanceResult, frictionIndexResult] = await Promise.all([
     getFirstUserChannel(),
@@ -21,12 +22,11 @@ export default async function TrafficPage() {
       <div className="-mx-6">
         <TrafficClient
           firstChannelResult={firstChannelResult ?? []}
-          pagePerformanceResult={
-            (pagePerformanceResult ?? []).map((row) => ({
-              ...row,
-              routePage: row.routePage ?? '',
-            }))
-          }
+          pagePerformanceResult={(pagePerformanceResult ?? []).map((row) => ({
+            ...row,
+            routePage: row.routePage ?? '',
+          }))}
+          frictionIndexResult={frictionIndexResult ?? []}
         />
       </div>
     </div>
