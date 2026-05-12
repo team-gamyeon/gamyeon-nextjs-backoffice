@@ -24,7 +24,8 @@ function formatTime(seconds: number): string {
   return `${minutes}분 ${remainSeconds}초`
 }
 
-function shortenPath(path: string): string {
+function shortenPath(path?: string): string {
+  if (!path) return '' // null이나 undefined일 경우 빈 문자열 반환
   if (path.length <= 22) return path
   return '…' + path.slice(-19)
 }
