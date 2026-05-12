@@ -43,16 +43,12 @@ export async function getPagePerformance() {
     ],
     limit: 10,
   })
-  console.log(
-    data.rows?.map((row) => ({
-      route: row.dimensionValues?.[0].value,
-    })),
-  )
+
   return data.rows?.map((row) => ({
-    routePage: row.dimensionValues?.[0].value, // 페이지 경로
-    pageViews: Number(row.metricValues?.[0].value), // 조회수
-    activeUsers: Number(row.metricValues?.[1].value), // 사용자수
-    userDurations: Number(row.metricValues?.[2].value), // 총 시간(초)
+    pagePath: row.dimensionValues?.[0].value,
+    pageViews: Number(row.metricValues?.[0].value),
+    activeUsers: Number(row.metricValues?.[1].value),
+    userDurations: Number(row.metricValues?.[2].value),
   }))
 }
 
