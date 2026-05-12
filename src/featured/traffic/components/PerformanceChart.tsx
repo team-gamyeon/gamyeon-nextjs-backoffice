@@ -73,8 +73,8 @@ export function PerformanceChartContent({ data }: PerformanceChartProps) {
   }
 
   const chartData = data.map((item) => ({
-    name: shortenPath(item.routePage),
-    fullPath: item.routePage,
+    name: shortenPath(item.pagePath),
+    fullPath: item.pagePath,
     pageViews: item.pageViews,
     activeUsers: item.activeUsers,
     avgDuration: item.activeUsers > 0 ? Math.round(item.userDurations / item.activeUsers) : 0,
