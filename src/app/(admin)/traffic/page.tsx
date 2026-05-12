@@ -24,7 +24,7 @@ export default async function TrafficPage() {
           firstChannelResult={firstChannelResult ?? []}
           pagePerformanceResult={(pagePerformanceResult ?? []).map((row) => ({
             ...row,
-            routePage: row.routePage ?? '',
+            pagePath: row.pagePath ?? '',
           }))}
           frictionIndexResult={frictionIndexResult ?? []}
         />
