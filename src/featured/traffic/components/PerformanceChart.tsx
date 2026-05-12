@@ -24,7 +24,8 @@ function formatTime(seconds: number): string {
   return `${minutes}분 ${remainSeconds}초`
 }
 
-function shortenPath(path: string): string {
+function shortenPath(path?: string): string {
+  if (!path) return '' // null이나 undefined일 경우 빈 문자열 반환
   if (path.length <= 22) return path
   return '…' + path.slice(-19)
 }
@@ -72,8 +73,8 @@ export function PerformanceChartContent({ data }: PerformanceChartProps) {
   }
 
   const chartData = data.map((item) => ({
-    name: shortenPath(item.routePage),
-    fullPath: item.routePage,
+    name: shortenPath(item.pagePath),
+    fullPath: item.pagePath,
     pageViews: item.pageViews,
     activeUsers: item.activeUsers,
     avgDuration: item.activeUsers > 0 ? Math.round(item.userDurations / item.activeUsers) : 0,
