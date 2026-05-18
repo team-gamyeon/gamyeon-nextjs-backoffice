@@ -6,12 +6,18 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p))
 
-  if (isPublic) return NextResponse.next()
+  const refreshToken = request.cookies.get('refreshToken')?.value
 
-  // const refreshToken = request.cookies.get('refreshToken')?.value
-  // if (!refreshToken) {
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
+  if (isPublic) {
+    if (refreshToken) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  if (!refreshToken) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   return NextResponse.next()
 }

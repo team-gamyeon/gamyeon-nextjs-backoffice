@@ -9,6 +9,16 @@
 # testing
 /coverage
 
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+tests/.auth/
+tests/e2e/auth.setup.ts
+tests/e2e/api-health.spec.ts
+tests/helpers/
+
 # next.js
 /.next/
 /out/
