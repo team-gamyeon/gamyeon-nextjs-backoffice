@@ -37,6 +37,8 @@ export function NoticeListItem({
     setConfirmOpen(false)
   }
 
+  const categoryMeta = NOTICE_CATEGORY[notice.category]
+
   return (
     <>
       <motion.div
@@ -56,13 +58,20 @@ export function NoticeListItem({
             ) : (
               <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" />
             )}
-            <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-xs font-medium', NOTICE_CATEGORY[notice.category].color)}>
-              {NOTICE_CATEGORY[notice.category].label}
+            <span
+              className={cn(
+                'shrink-0 rounded px-1.5 py-0.5 text-xs font-medium',
+                categoryMeta?.color,
+              )}
+            >
+              {categoryMeta?.label ?? notice.category}
             </span>
             <span className="truncate text-sm font-medium">{notice.title}</span>
           </button>
           <div className="flex shrink-0 items-center gap-6 sm:gap-8">
-            <span className="text-muted-foreground w-24 text-center text-xs">{notice.createdAt}</span>
+            <span className="text-muted-foreground w-24 text-center text-xs">
+              {notice.createdAt}
+            </span>
             <button
               type="button"
               onClick={() => onToggle(notice.id)}
@@ -110,7 +119,9 @@ export function NoticeListItem({
                 <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
                   {notice.content || '내용이 없습니다.'}
                 </p>
-                <p className="text-muted-foreground/60 mt-2 text-xs">최종 수정: {notice.updatedAt}</p>
+                <p className="text-muted-foreground/60 mt-2 text-xs">
+                  최종 수정: {notice.updatedAt}
+                </p>
               </div>
             </motion.div>
           )}

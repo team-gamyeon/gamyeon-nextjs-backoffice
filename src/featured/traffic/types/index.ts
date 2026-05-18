@@ -4,7 +4,7 @@ export type ChannelData = {
 }
 
 export type PagePerformanceData = {
-  routePage: string
+  pagePath: string
   pageViews: number
   activeUsers: number
   userDurations: number
@@ -15,5 +15,3 @@ export type FrictionRanking = {
   title: string
   dropOffRate: number
 }
-
-
