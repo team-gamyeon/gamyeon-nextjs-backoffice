@@ -50,10 +50,10 @@ export function PerformanceTable({ data }: PerformanceTableProps) {
               <tbody>
                 {data.map((row) => (
                   <tr
-                    key={row.routePage}
+                    key={row.pagePath}
                     className="border-border/40 hover:bg-muted/40 border-b transition-colors last:border-0"
                   >
-                    <td className="px-4 py-2 font-mono text-xs">{row.routePage}</td>
+                    <td className="px-4 py-2 font-mono text-xs">{row.pagePath}</td>
                     <td className="px-4 py-2 text-right text-sm font-medium">
                       {row.pageViews.toLocaleString()}
                     </td>
