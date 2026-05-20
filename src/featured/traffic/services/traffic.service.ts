@@ -69,6 +69,7 @@ export async function getFrictionIndex(): Promise<FrictionRanking[]> {
               'question_gen_complete',
               'report_gen_start',
               'report_gen_complete',
+              'loading_tab_leave',
             ],
           },
         },
@@ -80,6 +81,7 @@ export async function getFrictionIndex(): Promise<FrictionRanking[]> {
       question_gen_complete: 0,
       report_gen_start: 0,
       report_gen_complete: 0,
+      loading_tab_leave: 0,
     }
 
     response.rows?.forEach((row) => {
