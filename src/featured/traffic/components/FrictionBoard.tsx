@@ -22,9 +22,9 @@ export function FrictionBoard({ data }: FrictionBoardProps) {
     <div className="border-border bg-card flex h-full flex-col rounded-2xl border p-6">
       {/* 헤더 영역 */}
       <div className="mb-6 shrink-0">
-        <h2 className="text-foreground text-xl font-bold">UX 마찰 랭킹 리스트</h2>
+        <h2 className="text-foreground text-xl font-bold">AI 분석 대기 이탈 top3 </h2>
         <p className="text-muted-foreground mt-1.5 text-sm break-keep">
-          가장 마찰(이탈)이 심한 화면을 순위제로 노출하여, 다음 스프린트의 최우선 해결 과제로
+          가장 이탈이 심한 화면을 순위로 노출하여, 다음 스프린트의 최우선 해결 과제로
           삼습니다.
         </p>
       </div>
