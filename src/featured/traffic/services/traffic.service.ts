@@ -112,7 +112,7 @@ export async function getFrictionIndex(): Promise<FrictionRanking[]> {
       },
       {
         id: 3,
-        title: '비활성 탭 전환 (지루함)',
+        title: '리포트 대기 중 화면 이탈',
         dropOffRate: calcTabLeaveRate(counts.report_gen_start, counts.loading_tab_leave),
       },
       // 나중에 초단기 이탈(id: 4), 분노의 클릭(id: 5)도 추가 예정
