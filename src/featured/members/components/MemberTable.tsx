@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { RefObject } from 'react'
 import { motion } from 'framer-motion'
 import { MoreHorizontal, Shield, ShieldOff } from 'lucide-react'
@@ -37,20 +37,10 @@ export function MemberTable({
   isPaused,
   onLoadMore,
 }: MemberTableProps) {
-  const [isMounted, setIsMounted] = useState(false)
-
   const [sanctionTarget, setSanctionTarget] = useState<{
     member: Member
     type: 'warning' | 'suspended' | 'release'
   } | null>(null)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  if (!isMounted) {
-    return null
-  }
 
   return (
     <>
