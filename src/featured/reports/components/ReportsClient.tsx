@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { Button } from '@/shared/ui/button'
@@ -49,13 +49,8 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
     loadMoreError,
     hasMore,
     loadMore,
-    queryKey,
+    scrollRootRef,
   } = useReports(initialReports, meta, query, hasLoadError)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    scrollContainerRef.current?.scrollTo({ top: 0 })
-  }, [queryKey])
 
   async function handleSelectReport(report: AnalysisReport) {
     setDialogOpen(true)
@@ -149,7 +144,7 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
         <ReportsTable
           reports={reports}
           onSelect={handleSelectReport}
-          scrollRootRef={scrollContainerRef}
+          scrollRootRef={scrollRootRef}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           loadMoreError={loadMoreError}

@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Button } from '@/shared/ui/button'
@@ -22,7 +21,12 @@ interface InterviewsClientProps {
   hasLoadError?: boolean
 }
 
-export function InterviewsClient({ initialSessions, meta, query, hasLoadError }: InterviewsClientProps) {
+export function InterviewsClient({
+  initialSessions,
+  meta,
+  query,
+  hasLoadError,
+}: InterviewsClientProps) {
   const {
     sessions,
     meta: currentMeta,
@@ -41,20 +45,13 @@ export function InterviewsClient({ initialSessions, meta, query, hasLoadError }:
     isPending,
     isPaused,
     resetFilters,
-  } = useInterviews({ initialSessions, initialMeta: meta, query, hasInitialLoadError: hasLoadError })
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const queryKey = [
-    query.search,
-    query.status,
-    query.sortBy,
-    query.sortOrder,
-    query.from,
-    query.to,
-  ].join('|')
-
-  useEffect(() => {
-    scrollContainerRef.current?.scrollTo({ top: 0 })
-  }, [queryKey])
+    scrollRootRef,
+  } = useInterviews({
+    initialSessions,
+    initialMeta: meta,
+    query,
+    hasInitialLoadError: hasLoadError,
+  })
 
   return (
     <motion.div
@@ -149,7 +146,7 @@ export function InterviewsClient({ initialSessions, meta, query, hasLoadError }:
       <div className={isPending ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
         <InterviewsTable
           sessions={sessions}
-          scrollContainerRef={scrollContainerRef}
+          scrollContainerRef={scrollRootRef}
           hasMore={hasMore}
           isLoading={isLoadingMore}
           hasError={loadMoreError}

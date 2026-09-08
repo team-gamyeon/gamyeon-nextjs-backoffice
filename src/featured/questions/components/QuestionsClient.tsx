@@ -37,6 +37,7 @@ export function QuestionsClient({
     setActiveTab,
     isFiltered,
     isPending: isSearchPending,
+    isPaused,
     isLoadingMore,
     loadMoreError,
     hasMore,
@@ -131,7 +132,7 @@ export function QuestionsClient({
           scrollRootRef={scrollRootRef}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
-          isLoadMorePaused={isSearchPending}
+          isLoadMorePaused={isPaused}
           loadMoreError={loadMoreError}
           onLoadMore={loadMore}
         />
