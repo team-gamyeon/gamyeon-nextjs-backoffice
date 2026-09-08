@@ -5,14 +5,17 @@ import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { QuestionForm } from './QuestionForm'
-import { createQuestionAction, updateQuestionAction } from '@/featured/questions/actions/questions.action'
+import {
+  createQuestionAction,
+  updateQuestionAction,
+} from '@/featured/questions/actions/questions.action'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionDialogProps {
   question?: CommonQuestion
   open: boolean
   onClose: () => void
-  onSuccess?: (updated: CommonQuestion) => void
+  onSuccess?: () => void
 }
 
 export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionDialogProps) {
@@ -50,17 +53,7 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
         return
       }
       toast.success('질문이 생성되었습니다.')
-      if (result.data) {
-        onSuccess?.({
-          id: result.data.id,
-          content: result.data.content,
-          category: '자기소개',
-          isActive: result.data.status === 'ACTIVE',
-          usageCount: 0,
-          createdAt: '방금 전',
-          updatedAt: '방금 전',
-        })
-      }
+      onSuccess?.()
       onClose()
       return
     }
@@ -76,7 +69,7 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
       return
     }
     toast.success('질문이 수정되었습니다.')
-    onSuccess?.({ ...question!, content: formData.content, isActive: formData.isActive })
+    onSuccess?.()
     onClose()
   }
 
@@ -91,7 +84,7 @@ export function QuestionDialog({ question, open, onClose, onSuccess }: QuestionD
 
         <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1" onKeyDown={handleKeyDown}>
           <QuestionForm initial={question} onChange={setFormData} />
-          {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+          {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
         </div>
 
         <DialogFooter>

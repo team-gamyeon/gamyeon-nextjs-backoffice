@@ -1,8 +1,54 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createQuestion, deleteQuestion, updateQuestion } from '@/featured/questions/services/questions.service'
-import type { CreateQuestionResponse, DeleteQuestionResponse, QuestionStatus, UpdateQuestionResponse } from '@/featured/questions/types'
+import {
+  createQuestion,
+  deleteQuestion,
+  getQuestions,
+  updateQuestion,
+} from '@/featured/questions/services/questions.service'
+import { QUESTION_LIST_QUERY_CONFIG } from '@/featured/questions/constants'
+import { mapApiQuestionToCommon } from '@/shared/lib/utils/mappers'
+import { parseListQuery } from '@/shared/lib/validation/listQuery'
+import type { ActionResult } from '@/shared/types/action'
+import type {
+  CreateQuestionResponse,
+  DeleteQuestionResponse,
+  QuestionListData,
+  QuestionListQuery,
+  QuestionStatus,
+  UpdateQuestionResponse,
+} from '@/featured/questions/types'
+
+export type GetQuestionsActionState = ActionResult<QuestionListData>
+
+export async function getQuestionsAction(params: unknown): Promise<GetQuestionsActionState> {
+  const parsed = parseListQuery(params, QUESTION_LIST_QUERY_CONFIG)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error }
+  }
+
+  try {
+    const data = await getQuestions(parsed.data satisfies QuestionListQuery)
+    if (!data) {
+      return { success: false, error: '질문 조회에 실패했습니다.' }
+    }
+
+    return {
+      success: true,
+      data: {
+        totalCount: data.totalCount,
+        filteredCount: data.filteredCount,
+        page: data.page,
+        limit: data.limit,
+        items: data.items.map(mapApiQuestionToCommon),
+      },
+    }
+  } catch (error: unknown) {
+    const apiError = error as { message?: string }
+    return { success: false, error: apiError.message ?? '질문 조회에 실패했습니다.' }
+  }
+}
 
 export interface CreateQuestionActionState {
   success: boolean

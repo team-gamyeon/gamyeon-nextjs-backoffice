@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { RefObject } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Pencil, Trash2 } from 'lucide-react'
@@ -11,15 +12,34 @@ import {
   updateQuestionAction,
 } from '@/featured/questions/actions/questions.action'
 import { QuestionDeleteDialog } from './QuestionDeleteDialog'
+import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
-  onDelete: (id: string) => void
-  onUpdate: (updated: CommonQuestion) => void
+  onDelete: () => void
+  onUpdate: () => void
+  hasLoadError?: boolean
+  scrollRootRef: RefObject<HTMLDivElement | null>
+  hasMore: boolean
+  isLoadingMore: boolean
+  isLoadMorePaused?: boolean
+  loadMoreError: boolean
+  onLoadMore: () => void | Promise<void>
 }
 
-export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTableProps) {
+export function QuestionTable({
+  questions,
+  onDelete,
+  onUpdate,
+  hasLoadError = false,
+  scrollRootRef,
+  hasMore,
+  isLoadingMore,
+  isLoadMorePaused = false,
+  loadMoreError,
+  onLoadMore,
+}: QuestionTableProps) {
   const [editTarget, setEditTarget] = useState<CommonQuestion | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<CommonQuestion | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -31,8 +51,8 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
     setIsDeleting(false)
     if (result.success) {
       toast.success('질문이 삭제되었습니다.')
-      onDelete(deleteTarget.id)
       setDeleteTarget(null)
+      onDelete()
     } else {
       toast.error(result.error ?? '질문 삭제에 실패했습니다.')
     }
@@ -40,8 +60,11 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
 
   return (
     <>
-      <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-        <div className="max-h-180 min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+      <div className="border-border/60 overflow-hidden rounded-lg border">
+        <div
+          ref={scrollRootRef}
+          className="max-h-140 w-full overflow-auto [scrollbar-gutter:stable]"
+        >
           <table className="w-full table-fixed text-sm">
             <colgroup>
               <col />
@@ -82,8 +105,10 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
                             status: question.isActive ? 'INACTIVE' : 'ACTIVE',
                           })
                           if (result.success) {
-                            toast.success(`질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`)
-                            onUpdate({ ...question, isActive: !question.isActive })
+                            toast.success(
+                              `질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`,
+                            )
+                            onUpdate()
                           } else {
                             toast.error(result.error ?? '상태 변경에 실패했습니다.')
                           }
@@ -129,9 +154,28 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
           </table>
 
           {questions.length === 0 && (
-            <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-              등록된 질문이 없습니다.
+            <div
+              className={cn(
+                'flex h-32 items-center justify-center text-sm',
+                hasLoadError ? 'text-destructive' : 'text-muted-foreground',
+              )}
+            >
+              {hasLoadError
+                ? '질문 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+                : '조건에 맞는 질문이 없습니다.'}
             </div>
+          )}
+
+          {hasLoadError ? null : (
+            <InfiniteScrollTrigger
+              rootRef={scrollRootRef}
+              hasMore={hasMore}
+              isLoading={isLoadingMore}
+              isPaused={isLoadMorePaused}
+              hasError={loadMoreError}
+              loadedCount={questions.length}
+              onLoadMore={onLoadMore}
+            />
           )}
         </div>
       </div>
@@ -141,9 +185,9 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
           question={editTarget}
           open={!!editTarget}
           onClose={() => setEditTarget(null)}
-          onSuccess={(updated) => {
-            onUpdate(updated)
+          onSuccess={() => {
             setEditTarget(null)
+            onUpdate()
           }}
         />
       )}

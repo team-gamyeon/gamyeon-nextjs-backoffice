@@ -3,15 +3,43 @@ import type {
   CreateQuestionRequest,
   CreateQuestionResponse,
   DeleteQuestionResponse,
+  QuestionListQuery,
   QuestionListResponse,
   UpdateQuestionRequest,
   UpdateQuestionResponse,
 } from '@/featured/questions/types'
 
-export async function getQuestions(): Promise<QuestionListResponse | null> {
+export async function getQuestions(
+  params: QuestionListQuery = {},
+): Promise<QuestionListResponse | null> {
   try {
-    return await serverApi.get<QuestionListResponse>('/api/v1/questions')
-  } catch {
+    const queryParams = Object.fromEntries(
+      Object.entries(params).filter(([, value]) => value !== undefined),
+    ) as Record<string, string | number | boolean>
+
+    const response = await serverApi.get<QuestionListResponse>('/api/v1/questions', {
+      params: queryParams,
+    })
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[questions.service] request completed', {
+        method: 'GET',
+        endpoint: '/api/v1/questions',
+        totalCount: response?.totalCount,
+        filteredCount: response?.filteredCount,
+        page: response?.page,
+        limit: response?.limit,
+        itemCount: response?.items?.length,
+      })
+    }
+
+    return response
+  } catch (error) {
+    console.error('[questions.service] request failed', {
+      method: 'GET',
+      endpoint: '/api/v1/questions',
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+    })
     return null
   }
 }
