@@ -5,8 +5,7 @@ import { getMembersPageAction } from '@/featured/members/actions/members.action'
 import { MEMBER_STATUS_QUERY_MAP, STATUS_MAP } from '@/featured/members/constants'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
-import { hasNextPage, mergeUniqueBy, toPaginationMeta } from '@/shared/lib/pagination'
-import { LIST_PAGE_SIZE } from '@/shared/lib/validation/listQuery'
+import { hasNextPage, hasNextPageAfterLoad, mergeUniqueBy } from '@/shared/lib/pagination'
 import type { Member, MemberFiltersState, MemberListQuery } from '@/featured/members/types'
 import type { PaginationMeta } from '@/shared/types/pagination'
 
@@ -14,14 +13,22 @@ interface UseMembersParams {
   initialMembers: Member[]
   initialMeta: PaginationMeta
   query: MemberListQuery
+  hasInitialLoadError?: boolean
 }
 
-export function useMembers({ initialMembers, initialMeta, query }: UseMembersParams) {
+export function useMembers({
+  initialMembers,
+  initialMeta,
+  query,
+  hasInitialLoadError,
+}: UseMembersParams) {
   const querySearch = query.search ?? ''
   const [search, setSearch] = useState(querySearch)
   const [members, setMembers] = useState(initialMembers)
   const [pagination, setPagination] = useState(initialMeta)
-  const [hasMore, setHasMore] = useState(() => hasNextPage(initialMeta))
+  const [hasMore, setHasMore] = useState(
+    () => !hasInitialLoadError && hasNextPage(initialMeta, initialMembers.length),
+  )
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [hasLoadError, setHasLoadError] = useState(false)
   const previousQuerySearchRef = useRef(querySearch)
@@ -33,8 +40,10 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
   const previousQueryKeyRef = useRef('')
   const queryKey = JSON.stringify([query.search, query.status, query.sortBy, query.sortOrder])
 
-  querySearchRef.current = querySearch
-  paginationRef.current = pagination
+  useEffect(() => {
+    querySearchRef.current = querySearch
+    paginationRef.current = pagination
+  }, [querySearch, pagination])
 
   const debouncedSearch = useDebounce(search, 300)
   const { isPending, updateQuery } = useListQueryNavigation()
@@ -53,7 +62,7 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
     cancelPendingLoad()
     setMembers(initialMembers)
     setPagination(initialMeta)
-    setHasMore(hasNextPage(initialMeta))
+    setHasMore(hasNextPage(initialMeta, initialMembers.length))
     scrollRootRef.current?.scrollTo({ top: 0 })
   }, [cancelPendingLoad, initialMembers, initialMeta, queryKey])
 
@@ -70,10 +79,7 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
     if (normalizedSearch === querySearchRef.current) return
 
     cancelPendingLoad()
-    updateQuery(
-      { search: normalizedSearch || undefined, page: undefined, limit: undefined },
-      { scroll: false },
-    )
+    updateQuery({ search: normalizedSearch || undefined }, { scroll: false })
   }, [cancelPendingLoad, debouncedSearch, updateQuery])
 
   const loadMore = useCallback(async () => {
@@ -85,13 +91,13 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
     setIsLoadingMore(true)
     setHasLoadError(false)
 
-    const nextPage = paginationRef.current.page + 1
+    const previousMeta = paginationRef.current
+    const nextPage = previousMeta.page + 1
 
     try {
       const result = await getMembersPageAction({
         ...query,
         page: nextPage,
-        limit: LIST_PAGE_SIZE,
       })
       if (requestToken !== requestTokenRef.current) return
 
@@ -104,9 +110,14 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
       setMembers((currentMembers) =>
         mergeUniqueBy(currentMembers, nextData.items, (member) => member.id),
       )
-      const nextMeta = toPaginationMeta(nextData)
+      const nextMeta = {
+        totalCount: nextData.totalCount,
+        filteredCount: nextData.filteredCount,
+        page: nextData.page,
+        limit: nextData.limit,
+      }
       setPagination(nextMeta)
-      setHasMore(hasNextPage(nextMeta, nextData.items.length))
+      setHasMore(hasNextPageAfterLoad(previousMeta.page, nextMeta, nextData.items.length))
     } catch {
       if (requestToken === requestTokenRef.current) setHasLoadError(true)
     } finally {
@@ -133,31 +144,34 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
 
     if (partial.status !== undefined) {
       cancelPendingLoad()
-      updateQuery(
-        {
-          status: partial.status === 'all' ? undefined : MEMBER_STATUS_QUERY_MAP[partial.status],
-          page: undefined,
-          limit: undefined,
-        },
-        { scroll: false },
-      )
+      // 'unknown'은 display-only 상태이므로 쿼리에 포함되지 않음
+      if (partial.status !== 'unknown') {
+        updateQuery(
+          {
+            status: partial.status === 'all' ? undefined : MEMBER_STATUS_QUERY_MAP[partial.status],
+          },
+          { scroll: false },
+        )
+      }
       return
     }
 
     if (partial.sortBy !== undefined) {
       cancelPendingLoad()
-      updateQuery({ sortBy: partial.sortBy, page: undefined, limit: undefined }, { scroll: false })
+      updateQuery({ sortBy: partial.sortBy }, { scroll: false })
       return
     }
 
     if (partial.sortOrder !== undefined) {
       cancelPendingLoad()
-      updateQuery(
-        { sortOrder: partial.sortOrder, page: undefined, limit: undefined },
-        { scroll: false },
-      )
+      updateQuery({ sortOrder: partial.sortOrder }, { scroll: false })
     }
   }
+
+  // InfiniteScrollTrigger는 hasMore/isLoading을 이미 스스로 본다.
+  // 여기서는 그쪽이 모르는 조건(네비게이션 진행 중, 검색어 미확정)만 알려준다.
+  // hasMore를 넣으면 "모든 항목을 불러왔습니다" 안내가 가려지므로 넣지 않는다.
+  const isPaused = isPending || search.trim() !== querySearch
 
   return {
     members,
@@ -166,6 +180,7 @@ export function useMembers({ initialMembers, initialMeta, query }: UseMembersPar
     isLoadingMore,
     hasLoadError,
     isPending,
+    isPaused,
     hasFilters: Boolean(query.search || query.status),
     filters,
     handleFilterChange,

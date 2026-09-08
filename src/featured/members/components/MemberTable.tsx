@@ -24,6 +24,7 @@ interface MemberTableProps {
   hasMore: boolean
   isLoadingMore: boolean
   hasLoadError: boolean
+  isPaused?: boolean
   onLoadMore: () => void | Promise<void>
 }
 
@@ -33,6 +34,7 @@ export function MemberTable({
   hasMore,
   isLoadingMore,
   hasLoadError,
+  isPaused,
   onLoadMore,
 }: MemberTableProps) {
   const [isMounted, setIsMounted] = useState(false)
@@ -166,6 +168,7 @@ export function MemberTable({
             hasMore={hasMore}
             isLoading={isLoadingMore}
             hasError={hasLoadError}
+            isPaused={isPaused}
             loadedCount={members.length}
             onLoadMore={onLoadMore}
           />

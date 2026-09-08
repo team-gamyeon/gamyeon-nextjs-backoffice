@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 export type ListQueryValue = string | number | boolean | null | undefined
 
 export interface ListQueryNavigationOptions {
-  resetPage?: boolean
   scroll?: boolean
 }
 
@@ -18,7 +17,6 @@ interface ListQuerySynchronizationResult {
 export function mergeListQueryParams(
   currentQuery: string,
   updates: Record<string, ListQueryValue>,
-  { resetPage = false }: Pick<ListQueryNavigationOptions, 'resetPage'> = {},
 ) {
   const nextParams = new URLSearchParams(currentQuery)
 
@@ -30,11 +28,6 @@ export function mergeListQueryParams(
 
     nextParams.set(key, String(value))
   })
-
-  if (resetPage) {
-    nextParams.delete('page')
-    nextParams.delete('limit')
-  }
 
   return nextParams.toString()
 }
@@ -86,9 +79,9 @@ export function useListQueryNavigation() {
   const updateQuery = useCallback(
     (
       updates: Record<string, ListQueryValue>,
-      { resetPage = false, scroll = false }: ListQueryNavigationOptions = {},
+      { scroll = false }: ListQueryNavigationOptions = {},
     ) => {
-      const query = mergeListQueryParams(intendedQueryRef.current, updates, { resetPage })
+      const query = mergeListQueryParams(intendedQueryRef.current, updates)
       intendedQueryRef.current = query
       internalQueryTargetsRef.current.add(query)
       const href = query ? `${pathname}?${query}` : pathname

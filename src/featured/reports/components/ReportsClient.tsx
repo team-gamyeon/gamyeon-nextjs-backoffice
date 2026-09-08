@@ -23,9 +23,10 @@ interface ReportsClientProps {
   initialReports: AnalysisReport[]
   meta: PaginationMeta
   query: GetReportsParams
+  hasLoadError?: boolean
 }
 
-export function ReportsClient({ initialReports, meta, query }: ReportsClientProps) {
+export function ReportsClient({ initialReports, meta, query, hasLoadError }: ReportsClientProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [reportDetail, setReportDetail] = useState<ApiReportDetail | null>(null)
   const [isLoadingDetail, setIsLoadingDetail] = useState(false)
@@ -43,12 +44,13 @@ export function ReportsClient({ initialReports, meta, query }: ReportsClientProp
     setSortOrder,
     resetFilters,
     isPending,
+    isPaused,
     isLoadingMore,
     loadMoreError,
     hasMore,
     loadMore,
     queryKey,
-  } = useReports(initialReports, meta, query)
+  } = useReports(initialReports, meta, query, hasLoadError)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -151,6 +153,7 @@ export function ReportsClient({ initialReports, meta, query }: ReportsClientProp
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           loadMoreError={loadMoreError}
+          isPaused={isPaused}
           onLoadMore={loadMore}
         />
       </div>

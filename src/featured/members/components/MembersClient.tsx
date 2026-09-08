@@ -11,22 +11,24 @@ interface MembersClientProps {
   initialMembers: Member[]
   meta: PaginationMeta
   query: MemberListQuery
+  hasLoadError?: boolean
 }
 
-export function MembersClient({ initialMembers, meta, query }: MembersClientProps) {
+export function MembersClient({ initialMembers, meta, query, hasLoadError }: MembersClientProps) {
   const {
     members,
     pagination,
     hasMore,
     isLoadingMore,
-    hasLoadError,
+    hasLoadError: loadMoreError,
     isPending,
+    isPaused,
     hasFilters,
     filters,
     handleFilterChange,
     loadMore,
     scrollRootRef,
-  } = useMembers({ initialMembers, initialMeta: meta, query })
+  } = useMembers({ initialMembers, initialMeta: meta, query, hasInitialLoadError: hasLoadError })
 
   return (
     <motion.div
@@ -61,7 +63,8 @@ export function MembersClient({ initialMembers, meta, query }: MembersClientProp
           scrollRootRef={scrollRootRef}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
-          hasLoadError={hasLoadError}
+          hasLoadError={loadMoreError}
+          isPaused={isPaused}
           onLoadMore={loadMore}
         />
       </div>

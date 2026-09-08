@@ -12,6 +12,7 @@ interface ReportsTableProps {
   hasMore: boolean
   isLoadingMore: boolean
   loadMoreError: boolean
+  isPaused?: boolean
   onLoadMore: () => void | Promise<void>
 }
 
@@ -22,6 +23,7 @@ export function ReportsTable({
   hasMore,
   isLoadingMore,
   loadMoreError,
+  isPaused,
   onLoadMore,
 }: ReportsTableProps) {
   return (
@@ -129,6 +131,7 @@ export function ReportsTable({
           hasMore={hasMore}
           isLoading={isLoadingMore}
           hasError={loadMoreError}
+          isPaused={isPaused}
           loadedCount={reports.length}
           onLoadMore={onLoadMore}
         />

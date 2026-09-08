@@ -1,7 +1,13 @@
 import { serverApi } from '@/shared/lib/api'
-import type { InterviewListQuery, InterviewListResponse } from '@/featured/interviews/types'
+import type { SafeListQuery } from '@/shared/lib/validation/listQuery'
+import type {
+  InterviewListResponse,
+  InterviewSortBy,
+  InterviewStatus,
+} from '@/featured/interviews/types'
 
-export async function getInterviews(query: InterviewListQuery) {
+// 액션에서 parseListQuery로 검증된 쿼리만 들어온다. limit은 그 단계에서 서버가 정한다.
+export async function getInterviews(query: SafeListQuery<InterviewStatus, InterviewSortBy>) {
   const params: Record<string, string | number> = {
     page: query.page,
     limit: query.limit,

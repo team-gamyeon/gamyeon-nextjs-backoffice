@@ -29,6 +29,7 @@ interface InterviewsTableProps {
   hasMore: boolean
   isLoading: boolean
   hasError: boolean
+  isPaused?: boolean
   onLoadMore: () => void | Promise<void>
 }
 
@@ -38,6 +39,7 @@ export function InterviewsTable({
   hasMore,
   isLoading,
   hasError,
+  isPaused,
   onLoadMore,
 }: InterviewsTableProps) {
   return (
@@ -126,6 +128,7 @@ export function InterviewsTable({
           hasMore={hasMore}
           isLoading={isLoading}
           hasError={hasError}
+          isPaused={isPaused}
           loadedCount={sessions.length}
           onLoadMore={onLoadMore}
         />

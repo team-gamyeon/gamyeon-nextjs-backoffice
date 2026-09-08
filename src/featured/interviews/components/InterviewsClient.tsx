@@ -19,9 +19,10 @@ interface InterviewsClientProps {
   initialSessions: InterviewSession[]
   meta: PaginationMeta
   query: InterviewListQuery
+  hasLoadError?: boolean
 }
 
-export function InterviewsClient({ initialSessions, meta, query }: InterviewsClientProps) {
+export function InterviewsClient({ initialSessions, meta, query, hasLoadError }: InterviewsClientProps) {
   const {
     sessions,
     meta: currentMeta,
@@ -38,8 +39,9 @@ export function InterviewsClient({ initialSessions, meta, query }: InterviewsCli
     sortOrder,
     setSortOrder,
     isPending,
+    isPaused,
     resetFilters,
-  } = useInterviews({ initialSessions, initialMeta: meta, query })
+  } = useInterviews({ initialSessions, initialMeta: meta, query, hasInitialLoadError: hasLoadError })
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const queryKey = [
     query.search,
@@ -151,6 +153,7 @@ export function InterviewsClient({ initialSessions, meta, query }: InterviewsCli
           hasMore={hasMore}
           isLoading={isLoadingMore}
           hasError={loadMoreError}
+          isPaused={isPaused}
           onLoadMore={loadMore}
         />
       </div>

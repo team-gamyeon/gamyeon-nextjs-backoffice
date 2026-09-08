@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getQuestionsAction } from '@/featured/questions/actions/questions.action'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
-import { hasNextPage, mergeUniqueBy, toPaginationMeta } from '@/shared/lib/pagination'
-import { LIST_PAGE_SIZE } from '@/shared/lib/validation/listQuery'
+import { hasNextPage, hasNextPageAfterLoad, mergeUniqueBy } from '@/shared/lib/pagination'
 import type {
   CommonQuestion,
   QuestionListQuery,
@@ -41,6 +40,9 @@ export function useQuestions({
   const [search, setSearch] = useState(querySearch)
   const [questions, setQuestions] = useState(initialQuestions)
   const [meta, setMeta] = useState(initialPagination)
+  const [hasMore, setHasMore] = useState(
+    () => !hasInitialLoadError && hasNextPage(initialPagination, initialQuestions.length),
+  )
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [loadMoreError, setLoadMoreError] = useState(false)
   const previousQuerySearchRef = useRef(querySearch)
@@ -50,12 +52,13 @@ export function useQuestions({
   const nextRequestIdRef = useRef(0)
   const activeRequestIdRef = useRef<number | null>(null)
 
-  querySearchRef.current = querySearch
+  useEffect(() => {
+    querySearchRef.current = querySearch
+  }, [querySearch])
 
   const debouncedSearch = useDebounce(search, 300)
   const activeTab: QuestionListStatus | 'all' = query.status ?? 'all'
   const isFiltered = Boolean(query.search || query.status || query.from || query.to)
-  const hasMore = !hasInitialLoadError && hasNextPage(meta)
 
   const cancelPendingLoadMore = useCallback(() => {
     queryGenerationRef.current += 1
@@ -77,7 +80,7 @@ export function useQuestions({
     if (normalizedSearch === querySearchRef.current) return
 
     cancelPendingLoadMore()
-    updateQuery({ search: normalizedSearch || undefined }, { resetPage: true })
+    updateQuery({ search: normalizedSearch || undefined })
   }, [cancelPendingLoadMore, debouncedSearch, updateQuery])
 
   useEffect(() => {
@@ -85,6 +88,7 @@ export function useQuestions({
     activeRequestIdRef.current = null
     setQuestions(initialQuestions)
     setMeta(initialPagination)
+    setHasMore(!hasInitialLoadError && hasNextPage(initialPagination, initialQuestions.length))
     setIsLoadingMore(false)
     setLoadMoreError(false)
     scrollRootRef.current?.scrollTo({ top: 0 })
@@ -104,7 +108,6 @@ export function useQuestions({
       const result = await getQuestionsAction({
         ...query,
         page: nextPage,
-        limit: LIST_PAGE_SIZE,
       })
 
       if (generation !== queryGenerationRef.current) return
@@ -117,7 +120,14 @@ export function useQuestions({
       setQuestions((currentQuestions) =>
         mergeUniqueBy(currentQuestions, nextData.items, (question) => question.id),
       )
-      setMeta(toPaginationMeta(nextData))
+      const nextMeta = {
+        totalCount: nextData.totalCount,
+        filteredCount: nextData.filteredCount,
+        page: nextData.page,
+        limit: nextData.limit,
+      }
+      setMeta(nextMeta)
+      setHasMore(hasNextPageAfterLoad(meta.page, nextMeta, nextData.items.length))
     } catch {
       if (generation === queryGenerationRef.current) setLoadMoreError(true)
     } finally {
@@ -130,7 +140,7 @@ export function useQuestions({
 
   const setActiveTab = (status: QuestionListStatus | 'all') => {
     cancelPendingLoadMore()
-    updateQuery({ status: status === 'all' ? undefined : status }, { resetPage: true })
+    updateQuery({ status: status === 'all' ? undefined : status })
   }
 
   const refreshQuestions = () => {
