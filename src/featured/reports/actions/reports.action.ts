@@ -1,13 +1,16 @@
 'use server'
 
 import { getReports, getReportDetail } from '@/featured/reports/services/reports.service'
-import type { ApiReportDetail, GetReportsParams, ReportListResponse } from '@/featured/reports/types'
+import { REPORT_LIST_QUERY_CONFIG } from '@/featured/reports/constants'
+import { parseListQuery } from '@/shared/lib/validation/listQuery'
+import type { ActionResult } from '@/shared/types/action'
+import type {
+  ApiReportDetail,
+  GetReportsParams,
+  ReportListResponse,
+} from '@/featured/reports/types'
 
-export interface GetReportsActionState {
-  success: boolean
-  data?: ReportListResponse
-  error?: string
-}
+export type GetReportsActionState = ActionResult<ReportListResponse>
 
 export interface GetReportDetailActionState {
   success: boolean
@@ -15,9 +18,14 @@ export interface GetReportDetailActionState {
   error?: string
 }
 
-export async function getReportsAction(params?: GetReportsParams): Promise<GetReportsActionState> {
+export async function getReportsAction(params?: unknown): Promise<GetReportsActionState> {
+  const parsed = parseListQuery(params, REPORT_LIST_QUERY_CONFIG)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error }
+  }
+
   try {
-    const data = await getReports(params)
+    const data = await getReports(parsed.data satisfies GetReportsParams)
     return { success: true, data }
   } catch (error: unknown) {
     const apiError = error as { message?: string }

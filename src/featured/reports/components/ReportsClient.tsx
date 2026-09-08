@@ -1,35 +1,59 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
+import { Button } from '@/shared/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { REPORT_SORT_OPTIONS, REPORT_STATUS_OPTIONS } from '@/featured/reports/constants'
 import { useReports } from '@/featured/reports/hooks/useReports'
 import { ReportsTable } from '@/featured/reports/components/ReportsTable'
 import { ReportDetailDialog } from '@/featured/reports/components/ReportDetailDialog'
 import { getReportDetailAction } from '@/featured/reports/actions/reports.action'
-import type { AnalysisReport, ApiReportDetail } from '@/featured/reports/types'
+import type { PaginationMeta, SortOrder } from '@/shared/types/pagination'
+import type {
+  AnalysisReport,
+  ApiReportDetail,
+  GetReportsParams,
+  ReportSortBy,
+} from '@/featured/reports/types'
 
 interface ReportsClientProps {
   initialReports: AnalysisReport[]
+  meta: PaginationMeta
+  query: GetReportsParams
 }
 
-export function ReportsClient({ initialReports }: ReportsClientProps) {
+export function ReportsClient({ initialReports, meta, query }: ReportsClientProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [reportDetail, setReportDetail] = useState<ApiReportDetail | null>(null)
   const [isLoadingDetail, setIsLoadingDetail] = useState(false)
 
   const {
+    reports,
+    meta: currentMeta,
     search,
     setSearch,
-    activeTab,
-    setActiveTab,
-    filtered,
-    totalCount,
-    completedCount,
-    analyzingCount,
-    failedCount,
-  } = useReports(initialReports)
+    status,
+    setStatus,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    resetFilters,
+    isPending,
+    isLoadingMore,
+    loadMoreError,
+    hasMore,
+    loadMore,
+    queryKey,
+  } = useReports(initialReports, meta, query)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    scrollContainerRef.current?.scrollTo({ top: 0 })
+  }, [queryKey])
 
   async function handleSelectReport(report: AnalysisReport) {
     setDialogOpen(true)
@@ -49,45 +73,38 @@ export function ReportsClient({ initialReports }: ReportsClientProps) {
       transition={{ duration: 0.3 }}
       className="space-y-4"
       suppressHydrationWarning
+      aria-busy={isPending || isLoadingMore}
     >
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm">
         <span className="text-muted-foreground">
-          전체 <span className="text-foreground mr-1 font-semibold">{totalCount}</span>개
-        </span>
-        <span className="text-muted-foreground">
-          완료{' '}
-          <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
-            {completedCount}
+          전체{' '}
+          <span className="text-foreground mr-1 font-semibold">
+            {currentMeta.totalCount.toLocaleString()}
           </span>
           개
         </span>
         <span className="text-muted-foreground">
-          분석 중 <span className="text-primary mr-1 font-semibold">{analyzingCount}</span>개
-        </span>
-        {failedCount > 0 && (
-          <span className="text-muted-foreground">
-            실패 <span className="text-destructive mr-1 font-semibold">{failedCount}</span>개
+          조회 결과{' '}
+          <span className="text-primary mr-1 font-semibold">
+            {currentMeta.filteredCount.toLocaleString()}
           </span>
-        )}
+          개
+        </span>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
+        <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
           <TabsList className="h-9">
             <TabsTrigger value="all" className="text-xs">
               전체
             </TabsTrigger>
-            <TabsTrigger value="COMPLETED" className="text-xs">
-              분석 완료
-            </TabsTrigger>
-            <TabsTrigger value="IN_PROGRESS" className="text-xs">
-              분석 중
-            </TabsTrigger>
-            <TabsTrigger value="FAILED" className="text-xs">
-              실패
-            </TabsTrigger>
+            {REPORT_STATUS_OPTIONS.map((option) => (
+              <TabsTrigger key={option.value} value={option.value} className="text-xs">
+                {option.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
 
@@ -97,9 +114,46 @@ export function ReportsClient({ initialReports }: ReportsClientProps) {
           placeholder="유저명 또는 인터뷰 ID 검색..."
           className="min-w-48 flex-1"
         />
+
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as ReportSortBy)}>
+          <SelectTrigger className="h-9 w-32" aria-label="정렬 기준">
+            <SelectValue placeholder="정렬 기준" />
+          </SelectTrigger>
+          <SelectContent>
+            {REPORT_SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as SortOrder)}>
+          <SelectTrigger className="h-9 w-28" aria-label="정렬 순서">
+            <SelectValue placeholder="정렬 순서" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">내림차순</SelectItem>
+            <SelectItem value="asc">오름차순</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button type="button" variant="outline" size="sm" className="h-9" onClick={resetFilters}>
+          초기화
+        </Button>
       </div>
 
-      <ReportsTable reports={filtered} onSelect={handleSelectReport} />
+      <div className={isPending ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+        <ReportsTable
+          reports={reports}
+          onSelect={handleSelectReport}
+          scrollRootRef={scrollContainerRef}
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          loadMoreError={loadMoreError}
+          onLoadMore={loadMore}
+        />
+      </div>
 
       <ReportDetailDialog
         report={reportDetail}
