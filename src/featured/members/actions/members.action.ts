@@ -18,20 +18,25 @@ export async function getMembersPageAction(query: unknown): Promise<GetMembersPa
     return { success: false, error: parsed.error }
   }
 
-  const result = await getUsers(parsed.data satisfies MemberListQuery)
+  try {
+    const result = await getUsers(parsed.data satisfies MemberListQuery)
 
-  if (!result) {
-    return { success: false, error: '회원 목록을 불러오지 못했습니다.' }
-  }
+    if (!result) {
+      return { success: false, error: '회원 목록을 불러오지 못했습니다.' }
+    }
 
-  return {
-    success: true,
-    data: {
-      totalCount: result.totalCount,
-      filteredCount: result.filteredCount,
-      page: result.page,
-      limit: result.limit,
-      items: result.items.map(mapApiUserToMember),
-    },
+    return {
+      success: true,
+      data: {
+        totalCount: result.totalCount,
+        filteredCount: result.filteredCount,
+        page: result.page,
+        limit: result.limit,
+        items: result.items.map(mapApiUserToMember),
+      },
+    }
+  } catch (error: unknown) {
+    const apiError = error as { message?: string }
+    return { success: false, error: apiError.message ?? '회원 목록을 불러오지 못했습니다.' }
   }
 }
