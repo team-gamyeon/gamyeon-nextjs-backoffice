@@ -21,7 +21,16 @@ const FUNNEL_DATA = [
   { step: '최종 완료', rate: 30, count: 372, color: 'oklch(0.62 0.15 25)' },
 ]
 
-function CustomTooltip({ active, payload }: { active?: boolean; payload?: any[] }) {
+interface FunnelTooltipPayload {
+  payload: (typeof FUNNEL_DATA)[number]
+}
+
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: FunnelTooltipPayload[]
+}
+
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   const data = payload[0].payload
   const previousRate = FUNNEL_DATA[FUNNEL_DATA.indexOf(data) - 1]?.rate
