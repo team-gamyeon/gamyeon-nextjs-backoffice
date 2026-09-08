@@ -1,76 +1,70 @@
-"use client";
+'use client'
 
-import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { MemberFilters } from "./MemberFilters";
-import { MemberTable } from "./MemberTable";
-import { useDebounce } from "@/shared/hooks/useDebounce";
-import type { Member, MemberFiltersState } from "@/featured/members/types";
+import { motion } from 'framer-motion'
+import { MemberFilters } from './MemberFilters'
+import { MemberTable } from './MemberTable'
+import { useMembers } from '@/featured/members/hooks/useMembers'
+import type { Member, MemberListQuery } from '@/featured/members/types'
+import type { PaginationMeta } from '@/shared/types/pagination'
 
 interface MembersClientProps {
-  initialMembers: Member[];
+  initialMembers: Member[]
+  meta: PaginationMeta
+  query: MemberListQuery
 }
 
-export function MembersClient({ initialMembers }: MembersClientProps) {
-  const [filters, setFilters] = useState<MemberFiltersState>({
-    search: "",
-    status: "all",
-    sortBy: "joinedAt",
-    sortOrder: "desc",
-  });
-
-  const debouncedSearch = useDebounce(filters.search, 200);
-
-  const filtered = useMemo(() => {
-    let result = [...initialMembers];
-
-    if (debouncedSearch) {
-      const query = debouncedSearch.toLowerCase();
-      result = result.filter(
-        (member) =>
-          member.nickname.toLowerCase().includes(query) ||
-          member.email.toLowerCase().includes(query)
-      );
-    }
-
-    if (filters.status !== "all") {
-      result = result.filter((member) => member.status === filters.status);
-    }
-
-    result.sort((memberA, memberB) => {
-      const memberAValue = memberA[filters.sortBy];
-      const memberBValue = memberB[filters.sortBy];
-      const sortMultiplier = filters.sortOrder === "desc" ? -1 : 1;
-      return memberAValue > memberBValue ? sortMultiplier : -sortMultiplier;
-    });
-
-    return result;
-  }, [initialMembers, debouncedSearch, filters.status, filters.sortBy, filters.sortOrder]);
-
-  const handleFilterChange = (partial: Partial<MemberFiltersState>) => {
-    setFilters((prev) => ({ ...prev, ...partial }));
-  };
+export function MembersClient({ initialMembers, meta, query }: MembersClientProps) {
+  const {
+    members,
+    pagination,
+    hasMore,
+    isLoadingMore,
+    hasLoadError,
+    isPending,
+    hasFilters,
+    filters,
+    handleFilterChange,
+    loadMore,
+    scrollRootRef,
+  } = useMembers({ initialMembers, initialMeta: meta, query })
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-1 min-h-0 flex-col gap-4"
+      className="space-y-4"
       suppressHydrationWarning
+      aria-busy={isPending || isLoadingMore}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          총{" "}
-          <span className="font-semibold text-foreground">{filtered.length}</span>
-          명의 회원
+        <p className="text-muted-foreground text-sm">
+          {hasFilters ? (
+            <>
+              검색 결과{' '}
+              <span className="text-foreground font-semibold">{pagination.filteredCount}</span>명
+              <span className="ml-1">/ 전체 {pagination.totalCount}명</span>
+            </>
+          ) : (
+            <>
+              총 <span className="text-foreground font-semibold">{pagination.totalCount}</span>명의
+              회원
+            </>
+          )}
         </p>
       </div>
 
       <MemberFilters filters={filters} onFilterChange={handleFilterChange} />
-      <div className="flex flex-1 min-h-0 flex-col py-4">
-        <MemberTable members={filtered} />
+      <div className={`py-4 transition-opacity ${isPending ? 'opacity-60' : 'opacity-100'}`}>
+        <MemberTable
+          members={members}
+          scrollRootRef={scrollRootRef}
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+          hasLoadError={hasLoadError}
+          onLoadMore={loadMore}
+        />
       </div>
     </motion.div>
-  );
+  )
 }
