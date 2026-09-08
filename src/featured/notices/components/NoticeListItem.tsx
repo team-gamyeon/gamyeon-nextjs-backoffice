@@ -44,8 +44,8 @@ export function NoticeListItem({
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.04 }}
-        className="border-border/60 bg-card rounded-lg border"
+        transition={{ delay: Math.min(index, 5) * 0.04 }}
+        className="border-border/60 bg-card rounded-lg border [contain-intrinsic-size:auto_72px] [content-visibility:auto]"
       >
         <div className="flex items-center justify-between gap-4 px-4 py-3">
           <button

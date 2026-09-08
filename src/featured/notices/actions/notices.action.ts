@@ -1,21 +1,47 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { getNotices, createNotice, updateNotice, deleteNotice } from '@/featured/notices/services/notices.service'
+import {
+  getNotices,
+  createNotice,
+  updateNotice,
+  deleteNotice,
+} from '@/featured/notices/services/notices.service'
+import { NOTICE_LIST_QUERY_CONFIG } from '@/featured/notices/constants'
 import { mapApiNoticeToNotice } from '@/shared/lib/utils/mappers'
-import type { Notice, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse, DeleteNoticeResponse } from '@/featured/notices/types'
+import { parseListQuery } from '@/shared/lib/validation/listQuery'
+import type { ActionResult } from '@/shared/types/action'
+import type {
+  NoticeListData,
+  GetNoticesParams,
+  CreateNoticeRequest,
+  CreateNoticeResponse,
+  UpdateNoticeRequest,
+  UpdateNoticeResponse,
+  DeleteNoticeResponse,
+} from '@/featured/notices/types'
 
-export interface GetNoticesActionState {
-  success: boolean
-  data?: Notice[]
-  error?: string
-}
+export type GetNoticesActionState = ActionResult<NoticeListData>
 
-export async function getNoticesAction(): Promise<GetNoticesActionState> {
+export async function getNoticesAction(params: unknown = {}): Promise<GetNoticesActionState> {
+  const parsed = parseListQuery(params, NOTICE_LIST_QUERY_CONFIG)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error }
+  }
+
   try {
-    const data = await getNotices()
-    const notices = (data?.items ?? []).map(mapApiNoticeToNotice)
-    return { success: true, data: notices }
+    const safeParams = parsed.data satisfies GetNoticesParams
+    const data = await getNotices(safeParams)
+    return {
+      success: true,
+      data: {
+        totalCount: data?.totalCount ?? 0,
+        filteredCount: data?.filteredCount ?? 0,
+        page: data?.page ?? safeParams.page,
+        limit: data?.limit ?? safeParams.limit,
+        items: (data?.items ?? []).map(mapApiNoticeToNotice),
+      },
+    }
   } catch (error: unknown) {
     const apiError = error as { message?: string }
     return { success: false, error: apiError.message ?? '공지사항 조회에 실패했습니다.' }
@@ -28,7 +54,9 @@ export interface CreateNoticeActionState {
   error?: string
 }
 
-export async function createNoticeAction(body: CreateNoticeRequest): Promise<CreateNoticeActionState> {
+export async function createNoticeAction(
+  body: CreateNoticeRequest,
+): Promise<CreateNoticeActionState> {
   try {
     const data = await createNotice(body)
     revalidatePath('/notices')
@@ -45,7 +73,10 @@ export interface UpdateNoticeActionState {
   error?: string
 }
 
-export async function updateNoticeAction(id: number, body: UpdateNoticeRequest): Promise<UpdateNoticeActionState> {
+export async function updateNoticeAction(
+  id: number,
+  body: UpdateNoticeRequest,
+): Promise<UpdateNoticeActionState> {
   try {
     const data = await updateNotice(id, body)
     revalidatePath('/notices')

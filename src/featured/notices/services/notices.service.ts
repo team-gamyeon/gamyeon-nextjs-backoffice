@@ -1,8 +1,25 @@
 import { serverApi } from '@/shared/lib/api'
-import type { NoticeListResponse, CreateNoticeRequest, CreateNoticeResponse, UpdateNoticeRequest, UpdateNoticeResponse, DeleteNoticeResponse } from '@/featured/notices/types'
+import type {
+  NoticeListResponse,
+  GetNoticesParams,
+  CreateNoticeRequest,
+  CreateNoticeResponse,
+  UpdateNoticeRequest,
+  UpdateNoticeResponse,
+  DeleteNoticeResponse,
+} from '@/featured/notices/types'
 
-export async function getNotices() {
-  return serverApi.get<NoticeListResponse>('/api/v1/notices', { cache: 'no-store' })
+export async function getNotices(params: GetNoticesParams = {}) {
+  const queryParams = Object.fromEntries(
+    Object.entries(params).filter(
+      (entry): entry is [string, string | number] => entry[1] !== undefined,
+    ),
+  )
+
+  return serverApi.get<NoticeListResponse>('/api/v1/notices', {
+    cache: 'no-store',
+    params: queryParams,
+  })
 }
 
 export async function createNotice(body: CreateNoticeRequest) {

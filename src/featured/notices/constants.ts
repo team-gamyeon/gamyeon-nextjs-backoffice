@@ -1,4 +1,5 @@
-import type { NoticeCategory } from '@/featured/notices/types'
+import type { ListQueryConfig } from '@/shared/lib/validation/listQuery'
+import type { NoticeCategory, NoticeSortBy, NoticeStatus } from '@/featured/notices/types'
 
 export const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: string }> = {
   NOTICE: {
@@ -22,3 +23,18 @@ export const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: str
     color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
   },
 }
+
+export const NOTICE_STATUSES = ['ACTIVE', 'INACTIVE'] as const satisfies readonly NoticeStatus[]
+
+export const NOTICE_SORT_FIELDS = [
+  'createdAt',
+  'updatedAt',
+] as const satisfies readonly NoticeSortBy[]
+
+export const NOTICE_LIST_QUERY_CONFIG = {
+  statuses: NOTICE_STATUSES,
+  sortFields: NOTICE_SORT_FIELDS,
+  defaultSortBy: 'createdAt',
+  defaultSortOrder: 'desc',
+  includeDateRange: true,
+} as const satisfies ListQueryConfig<NoticeStatus, NoticeSortBy>

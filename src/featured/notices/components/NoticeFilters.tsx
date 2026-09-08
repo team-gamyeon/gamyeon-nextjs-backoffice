@@ -4,21 +4,26 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { SearchInput } from '@/shared/components/SearchInput'
-
-type ActiveTab = 'all' | 'active' | 'inactive'
+import type { NoticeListTab } from '@/featured/notices/utils/noticeListQuery'
 
 interface NoticeFiltersProps {
-  activeTab: ActiveTab
+  activeTab: NoticeListTab
   search: string
-  onTabChange: (tab: ActiveTab) => void
+  onTabChange: (tab: NoticeListTab) => void
   onSearchChange: (value: string) => void
   onAdd: () => void
 }
 
-export function NoticeFilters({ activeTab, search, onTabChange, onSearchChange, onAdd }: NoticeFiltersProps) {
+export function NoticeFilters({
+  activeTab,
+  search,
+  onTabChange,
+  onSearchChange,
+  onAdd,
+}: NoticeFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as ActiveTab)}>
+      <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as NoticeListTab)}>
         <TabsList className="h-9">
           <TabsTrigger value="all" className="text-xs">
             전체
