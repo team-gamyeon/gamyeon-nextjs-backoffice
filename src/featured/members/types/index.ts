@@ -1,6 +1,9 @@
 import type { ListQueryParams, PaginatedData, SortOrder } from '@/shared/types/pagination'
 
-export type MemberStatus = 'active' | 'warning' | 'suspended' | 'withdrew'
+// 백엔드 유저 상태 코드. 유저 도메인의 주인인 members가 소유하고, 필요한 피처가 여기서 가져다 쓴다.
+export type ApiUserStatus = 'ACTIVE' | 'WARNED' | 'BANNED' | 'WITHDREW'
+
+export type MemberStatus = 'active' | 'warning' | 'suspended' | 'withdrew' | 'unknown'
 
 export interface Member {
   id: string
@@ -30,8 +33,7 @@ export interface MemberFiltersState {
   sortOrder: SortOrder
 }
 
-// API 응답 타입
-export type ApiUserStatus = 'ACTIVE' | 'WARNED' | 'BANNED' | 'WITHDREW'
+// Member 정렬 방식
 export type MemberSortBy = 'createdAt' | 'updatedAt'
 
 export interface MemberListQuery extends ListQueryParams {

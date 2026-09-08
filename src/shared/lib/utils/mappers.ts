@@ -23,7 +23,7 @@ export function mapApiUserToMember(user: ApiUser): Member {
     nickname: user.nickname,
     email: user.email,
     passwordHash: '',
-    status: STATUS_MAP[user.status] ?? 'active',
+    status: STATUS_MAP[user.status] ?? 'unknown',
     joinedAt: timeAgo(user.createdAt),
     lastActiveAt: timeAgo(user.updatedAt),
     sessionCount: 0,

@@ -28,7 +28,8 @@ export const STATUS_MAP: Record<ApiUserStatus, MemberStatus> = {
   WITHDREW: 'withdrew',
 }
 
-export const MEMBER_STATUS_QUERY_MAP: Record<MemberStatus, ApiUserStatus> = {
+// unknown은 display-only이므로 쿼리 맵에 포함되지 않음
+export const MEMBER_STATUS_QUERY_MAP: Record<Exclude<MemberStatus, 'unknown'>, ApiUserStatus> = {
   active: 'ACTIVE',
   warning: 'WARNED',
   suspended: 'BANNED',

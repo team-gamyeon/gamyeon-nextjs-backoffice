@@ -20,6 +20,7 @@ const STATUS_LABELS: Record<MemberFiltersState['status'], string> = {
   warning: '경고',
   suspended: '정지',
   withdrew: '탈퇴',
+  unknown: '알 수 없음',
 }
 
 const SORT_LABELS: Record<MemberFiltersState['sortBy'], string> = {

@@ -23,6 +23,11 @@ const statusConfig: Record<MemberStatus, { label: string; className: string }> =
     className:
       'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20',
   },
+  unknown: {
+    label: '알 수 없음',
+    className:
+      'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20',
+  },
 }
 
 interface MemberStatusBadgeProps {

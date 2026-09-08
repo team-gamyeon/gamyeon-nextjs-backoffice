@@ -1,10 +1,13 @@
 import type { ListQueryParams, PaginatedData, SortOrder } from '@/shared/types/pagination'
+import type { ApiUserStatus } from '@/featured/members/types'
 
 // API 응답 타입
 export type InterviewStatus = 'READY' | 'IN_PROGRESS' | 'PAUSED' | 'FINISHED'
 export type InterviewSortBy = 'createdAt' | 'startedAt' | 'durationSeconds'
 export type UserProvider = 'GOOGLE' | 'KAKAO'
-export type UserStatus = 'ACTIVE' | 'WARNED' | 'BANNED' | 'WITHDREW'
+
+// UserStatus는 ApiUserStatus의 별칭 (호환성 유지)
+export type UserStatus = ApiUserStatus
 
 export interface ApiInterviewUser {
   id: number
@@ -41,7 +44,6 @@ export interface InterviewListQuery extends ListQueryParams {
   sortBy: InterviewSortBy
   sortOrder: SortOrder
   page: number
-  limit: number
   from?: string
   to?: string
 }
