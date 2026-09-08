@@ -24,7 +24,14 @@ export const NOTICE_CATEGORY: Record<NoticeCategory, { label: string; color: str
   },
 }
 
-export const NOTICE_STATUSES = ['ACTIVE', 'INACTIVE'] as const satisfies readonly NoticeStatus[]
+export const NOTICE_STATUS_OPTIONS = [
+  { value: 'ACTIVE', label: '활성' },
+  { value: 'INACTIVE', label: '비활성' },
+] as const satisfies readonly { value: NoticeStatus; label: string }[]
+
+export const NOTICE_STATUSES = NOTICE_STATUS_OPTIONS.map(
+  ({ value }) => value,
+) satisfies readonly NoticeStatus[]
 
 export const NOTICE_SORT_FIELDS = [
   'createdAt',

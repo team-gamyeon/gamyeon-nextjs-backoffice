@@ -1,160 +1,113 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   deleteNoticeAction,
   getNoticesAction,
   updateNoticeAction,
 } from '@/featured/notices/actions/notices.action'
-import { buildNoticeListQuery, type NoticeListTab } from '@/featured/notices/utils/noticeListQuery'
-import { hasNextPage, mergeUniqueBy } from '@/shared/lib/pagination'
-import type { Notice, NoticeListData } from '@/featured/notices/types'
+import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
+import { useListResource, type ListPageResult } from '@/shared/hooks/useListResource'
+import { useListSearch } from '@/shared/hooks/useListSearch'
+import type { GetNoticesParams, Notice, NoticeStatus } from '@/featured/notices/types'
+import type { PaginationMeta } from '@/shared/types/pagination'
 
-const SEARCH_DEBOUNCE_MS = 350
+interface UseNoticesParams {
+  initialNotices: Notice[]
+  initialMeta: PaginationMeta
+  query: GetNoticesParams
+  hasInitialLoadError: boolean
+}
 
-export function useNotices(initialData: NoticeListData) {
-  const [notices, setNotices] = useState<Notice[]>(initialData.items)
-  const [totalCount, setTotalCount] = useState(initialData.totalCount)
-  const [filteredCount, setFilteredCount] = useState(initialData.filteredCount)
-  const [page, setPage] = useState(initialData.page)
-  const [hasMore, setHasMore] = useState(() => hasNextPage(initialData, initialData.items.length))
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [loadMoreError, setLoadMoreError] = useState(false)
-  const [search, setSearch] = useState('')
-  const [querySearch, setQuerySearch] = useState('')
-  const [activeTab, setActiveTab] = useState<NoticeListTab>('all')
+export function useNotices({
+  initialNotices,
+  initialMeta,
+  query,
+  hasInitialLoadError,
+}: UseNoticesParams) {
+  const router = useRouter()
+  const { isPending, updateQuery } = useListQueryNavigation()
+  const [isRefreshing, startRefresh] = useTransition()
+  const queryKey = [query.search, query.status, query.sortBy, query.sortOrder].join('|')
+
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Notice | undefined>(undefined)
-  const requestIdRef = useRef(0)
-  const isLoadingRef = useRef(false)
-  const querySearchRef = useRef('')
-  const searchRef = useRef('')
-  const activeTabRef = useRef<NoticeListTab>('all')
 
-  searchRef.current = search
+  const loadPage = useCallback(
+    async (page: number): Promise<ListPageResult<Notice>> => {
+      const result = await getNoticesAction({ ...query, page })
+      if (!result.success) return { ok: false }
 
-  const reload = useCallback(async (nextSearch: string, nextTab = activeTabRef.current) => {
-    const normalizedSearch = nextSearch.trim()
-    const previousSearch = querySearchRef.current
-    const previousTab = activeTabRef.current
-    const requestId = ++requestIdRef.current
-
-    querySearchRef.current = normalizedSearch
-    activeTabRef.current = nextTab
-    setQuerySearch(normalizedSearch)
-    setActiveTab(nextTab)
-    setIsRefreshing(true)
-    setIsLoadingMore(false)
-    setLoadMoreError(false)
-    isLoadingRef.current = true
-
-    let result: Awaited<ReturnType<typeof getNoticesAction>>
-    try {
-      result = await getNoticesAction(buildNoticeListQuery(normalizedSearch, nextTab, 1))
-    } catch {
-      result = { success: false, error: '공지사항을 불러오지 못했습니다.' }
-    }
-
-    if (requestId !== requestIdRef.current) return false
-
-    isLoadingRef.current = false
-    setIsRefreshing(false)
-
-    if (!result.success || !result.data) {
-      if (previousSearch !== normalizedSearch || previousTab !== nextTab) {
-        setNotices([])
-        setTotalCount(0)
-        setFilteredCount(0)
-        setPage(1)
+      const data = result.data
+      return {
+        ok: true,
+        items: data.items,
+        meta: {
+          totalCount: data.totalCount,
+          filteredCount: data.filteredCount,
+          page: data.page,
+          limit: data.limit,
+        },
       }
-      setHasMore(false)
-      toast.error(result.error ?? '공지사항을 불러오지 못했습니다.')
-      return false
-    }
+    },
+    [query],
+  )
 
-    setNotices(result.data.items)
-    setTotalCount(result.data.totalCount)
-    setFilteredCount(result.data.filteredCount)
-    setPage(result.data.page)
-    setHasMore(hasNextPage(result.data, result.data.items.length))
+  const {
+    items,
+    meta,
+    hasMore,
+    isLoadingMore,
+    loadMoreError,
+    loadMore,
+    invalidate,
+    scrollRootRef,
+  } = useListResource<Notice>({
+    initialItems: initialNotices,
+    initialMeta,
+    hasInitialLoadError,
+    queryKey,
+    getKey: (notice) => notice.id,
+    loadPage,
+    isPaused: isPending,
+  })
+
+  const { search, setSearch, isSearchPending } = useListSearch(query.search ?? '', (nextSearch) => {
+    invalidate()
+    updateQuery({ search: nextSearch }, { scroll: false })
+  })
+
+  const activeTab: NoticeStatus | 'all' = query.status ?? 'all'
+
+  const setActiveTab = (status: NoticeStatus | 'all') => {
+    invalidate()
+    updateQuery({ status: status === 'all' ? undefined : status })
+  }
+
+  /** 등록·수정·삭제 후 서버 데이터를 다시 받아 목록을 갱신한다. */
+  const refresh = () => {
+    invalidate()
     setExpandedId(null)
-    return true
-  }, [])
-
-  useEffect(() => {
-    const normalizedSearch = search.trim()
-    if (normalizedSearch === querySearch) return
-
-    const timer = window.setTimeout(() => {
-      void reload(normalizedSearch)
-    }, SEARCH_DEBOUNCE_MS)
-
-    return () => window.clearTimeout(timer)
-  }, [querySearch, reload, search])
-
-  const loadMore = useCallback(async () => {
-    if (isLoadingRef.current || !hasMore) return
-
-    const nextPage = page + 1
-    const requestId = ++requestIdRef.current
-    isLoadingRef.current = true
-    setIsLoadingMore(true)
-    setLoadMoreError(false)
-
-    let result: Awaited<ReturnType<typeof getNoticesAction>>
-    try {
-      result = await getNoticesAction(
-        buildNoticeListQuery(querySearchRef.current, activeTabRef.current, nextPage),
-      )
-    } catch {
-      result = { success: false, error: '추가 공지사항을 불러오지 못했습니다.' }
-    }
-
-    if (requestId !== requestIdRef.current) return
-
-    isLoadingRef.current = false
-    setIsLoadingMore(false)
-
-    if (!result.success || !result.data) {
-      setLoadMoreError(true)
-      toast.error(result.error ?? '추가 공지사항을 불러오지 못했습니다.')
-      return
-    }
-
-    const data = result.data
-    setNotices((current) => mergeUniqueBy(current, data.items, (notice) => notice.id))
-    setTotalCount(data.totalCount)
-    setFilteredCount(data.filteredCount)
-    setPage(data.page)
-    setHasMore(hasNextPage(data, data.items.length))
-  }, [hasMore, page])
-
-  const { activeCount, inactiveCount } = useMemo(() => {
-    let active = 0
-    let inactive = 0
-    for (const notice of notices) {
-      if (notice.isActive) active += 1
-      else inactive += 1
-    }
-    return { activeCount: active, inactiveCount: inactive }
-  }, [notices])
+    startRefresh(() => router.refresh())
+  }
 
   const handleToggle = async (id: string) => {
-    const target = notices.find((notice) => notice.id === id)
+    const target = items.find((notice) => notice.id === id)
     if (!target) return
 
-    const nextStatus = target.isActive ? 'INACTIVE' : 'ACTIVE'
-    const result = await updateNoticeAction(Number(id), { status: nextStatus })
+    const result = await updateNoticeAction(Number(id), {
+      status: target.isActive ? 'INACTIVE' : 'ACTIVE',
+    })
     if (!result.success) {
       toast.error('상태 변경에 실패했습니다.')
       return
     }
 
     toast.success(`공지사항이 ${target.isActive ? '비활성화' : '활성화'}되었습니다.`)
-    await reload(querySearchRef.current, activeTabRef.current)
+    refresh()
   }
 
   const handleDelete = async (id: string) => {
@@ -165,8 +118,7 @@ export function useNotices(initialData: NoticeListData) {
     }
 
     toast.success('공지사항이 삭제되었습니다.')
-    if (expandedId === id) setExpandedId(null)
-    await reload(querySearchRef.current, activeTabRef.current)
+    refresh()
   }
 
   const handleEdit = (notice: Notice) => {
@@ -179,33 +131,35 @@ export function useNotices(initialData: NoticeListData) {
     setDialogOpen(true)
   }
 
-  const handleSave = async () => {
-    await reload(querySearchRef.current, activeTabRef.current)
+  const handleSave = () => {
+    refresh()
   }
 
-  const handleTabChange = useCallback(
-    (nextTab: NoticeListTab) => {
-      if (nextTab === activeTabRef.current) return
-      void reload(searchRef.current, nextTab)
-    },
-    [reload],
-  )
+  const { activeCount, inactiveCount } = useMemo(() => {
+    let active = 0
+    let inactive = 0
+    for (const notice of items) {
+      if (notice.isActive) active += 1
+      else inactive += 1
+    }
+    return { activeCount: active, inactiveCount: inactive }
+  }, [items])
 
   return {
-    notices,
-    totalCount,
-    filteredCount,
+    notices: items,
+    totalCount: meta.totalCount,
+    filteredCount: meta.filteredCount,
     hasMore,
-    isRefreshing,
     isLoadingMore,
     loadMoreError,
-    isSearchPending: search.trim() !== querySearch,
     loadMore,
+    scrollRootRef,
+    isPaused: isPending || isRefreshing || isSearchPending,
+    isFiltered: Boolean(query.search || query.status),
     search,
     setSearch,
-    querySearch,
     activeTab,
-    setActiveTab: handleTabChange,
+    setActiveTab,
     expandedId,
     setExpandedId,
     dialogOpen,

@@ -4,12 +4,13 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { SearchInput } from '@/shared/components/SearchInput'
-import type { NoticeListTab } from '@/featured/notices/utils/noticeListQuery'
+import { NOTICE_STATUS_OPTIONS } from '@/featured/notices/constants'
+import type { NoticeStatus } from '@/featured/notices/types'
 
 interface NoticeFiltersProps {
-  activeTab: NoticeListTab
+  activeTab: NoticeStatus | 'all'
   search: string
-  onTabChange: (tab: NoticeListTab) => void
+  onTabChange: (tab: NoticeStatus | 'all') => void
   onSearchChange: (value: string) => void
   onAdd: () => void
 }
@@ -23,17 +24,16 @@ export function NoticeFilters({
 }: NoticeFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as NoticeListTab)}>
+      <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as NoticeStatus | 'all')}>
         <TabsList className="h-9">
           <TabsTrigger value="all" className="text-xs">
             전체
           </TabsTrigger>
-          <TabsTrigger value="active" className="text-xs">
-            활성
-          </TabsTrigger>
-          <TabsTrigger value="inactive" className="text-xs">
-            비활성
-          </TabsTrigger>
+          {NOTICE_STATUS_OPTIONS.map((option) => (
+            <TabsTrigger key={option.value} value={option.value} className="text-xs">
+              {option.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
 

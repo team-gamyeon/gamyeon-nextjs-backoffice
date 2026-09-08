@@ -1,28 +1,35 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { NoticeDialog } from '@/featured/notices/components/NoticeDialog'
 import { NoticeFilters } from '@/featured/notices/components/NoticeFilters'
 import { NoticeListItem } from '@/featured/notices/components/NoticeListItem'
 import { useNotices } from '@/featured/notices/hooks/useNotices'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
-import type { NoticeListData } from '@/featured/notices/types'
+import type { GetNoticesParams, Notice } from '@/featured/notices/types'
+import type { PaginationMeta } from '@/shared/types/pagination'
 
-export function NoticesClient({ initialData }: { initialData: NoticeListData }) {
+interface NoticesClientProps {
+  initialNotices: Notice[]
+  meta: PaginationMeta
+  query: GetNoticesParams
+  hasLoadError: boolean
+}
+
+export function NoticesClient({ initialNotices, meta, query, hasLoadError }: NoticesClientProps) {
   const {
     notices,
     totalCount,
     filteredCount,
     hasMore,
-    isRefreshing,
     isLoadingMore,
     loadMoreError,
-    isSearchPending,
     loadMore,
+    scrollRootRef,
+    isPaused,
+    isFiltered,
     search,
     setSearch,
-    querySearch,
     activeTab,
     setActiveTab,
     expandedId,
@@ -37,12 +44,12 @@ export function NoticesClient({ initialData }: { initialData: NoticeListData }) 
     handleEdit,
     handleAdd,
     handleSave,
-  } = useNotices(initialData)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    scrollContainerRef.current?.scrollTo({ top: 0 })
-  }, [activeTab, querySearch])
+  } = useNotices({
+    initialNotices,
+    initialMeta: meta,
+    query,
+    hasInitialLoadError: hasLoadError,
+  })
 
   return (
     <motion.div
@@ -50,12 +57,13 @@ export function NoticesClient({ initialData }: { initialData: NoticeListData }) 
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="space-y-4"
+      aria-busy={isPaused}
     >
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <span className="text-muted-foreground">
           전체 <span className="text-foreground mr-1 font-semibold">{totalCount}</span>개
         </span>
-        {(querySearch || activeTab !== 'all') && (
+        {isFiltered && (
           <span className="text-muted-foreground">
             검색 결과 <span className="text-foreground mr-1 font-semibold">{filteredCount}</span>개
           </span>
@@ -81,12 +89,22 @@ export function NoticesClient({ initialData }: { initialData: NoticeListData }) 
       />
 
       <div
-        ref={scrollContainerRef}
+        ref={scrollRootRef}
         data-testid="notices-scroll-container"
         className="border-border/60 h-150 overflow-y-auto rounded-lg border p-2 [scrollbar-gutter:stable]"
       >
-        {notices.length === 0 && !isRefreshing && !isSearchPending && (
-          <p className="text-muted-foreground py-10 text-center text-sm">공지사항이 없습니다.</p>
+        {notices.length === 0 && !isPaused && (
+          <p
+            className={
+              hasLoadError
+                ? 'text-destructive py-10 text-center text-sm'
+                : 'text-muted-foreground py-10 text-center text-sm'
+            }
+          >
+            {hasLoadError
+              ? '공지사항을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+              : '공지사항이 없습니다.'}
+          </p>
         )}
         <div className="space-y-2">
           {notices.map((notice, index) => (
@@ -104,10 +122,10 @@ export function NoticesClient({ initialData }: { initialData: NoticeListData }) 
         </div>
 
         <InfiniteScrollTrigger
-          rootRef={scrollContainerRef}
+          rootRef={scrollRootRef}
           hasMore={hasMore}
           isLoading={isLoadingMore}
-          isPaused={isSearchPending || isRefreshing}
+          isPaused={isPaused}
           hasError={loadMoreError}
           loadedCount={notices.length}
           onLoadMore={loadMore}
