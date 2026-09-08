@@ -32,14 +32,17 @@ export async function getNoticesAction(params: unknown = {}): Promise<GetNotices
   try {
     const safeParams = parsed.data satisfies GetNoticesParams
     const data = await getNotices(safeParams)
+    if (!data) {
+      return { success: false, error: '공지사항 목록 응답 데이터가 없습니다.' }
+    }
     return {
       success: true,
       data: {
-        totalCount: data?.totalCount ?? 0,
-        filteredCount: data?.filteredCount ?? 0,
-        page: data?.page ?? safeParams.page,
-        limit: data?.limit ?? safeParams.limit,
-        items: (data?.items ?? []).map(mapApiNoticeToNotice),
+        totalCount: data.totalCount,
+        filteredCount: data.filteredCount,
+        page: data.page ?? safeParams.page,
+        limit: data.limit ?? safeParams.limit,
+        items: data.items.map(mapApiNoticeToNotice),
       },
     }
   } catch (error: unknown) {

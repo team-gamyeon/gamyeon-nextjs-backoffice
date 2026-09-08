@@ -16,6 +16,9 @@ export async function getInterviewsAction(query: unknown): Promise<GetInterviews
 
   try {
     const data = await getInterviews(parsed.data satisfies InterviewListQuery)
+    if (!data) {
+      return { success: false, error: '면접 목록 응답 데이터가 없습니다.' }
+    }
     return { success: true, data }
   } catch (error: unknown) {
     const apiError = error as { message?: string }

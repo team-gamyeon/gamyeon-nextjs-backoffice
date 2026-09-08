@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { NetworkError } from './types'
+import { ApiError, NetworkError } from './types'
 import type { RequestConfig } from './types'
 import { buildUrl, parseApiResponse } from './_utils'
 
@@ -96,7 +96,9 @@ async function serverFetch<T>(
 
   if (res.status === 401) {
     const newAccessToken = await tryRefresh(cookieStore)
-    if (!newAccessToken) return null as T // redirect('/login')
+    if (!newAccessToken) {
+      throw new ApiError(401, { message: '인증이 만료되었습니다. 다시 로그인해 주세요.' })
+    }
 
     try {
       res = await doFetch(newAccessToken)

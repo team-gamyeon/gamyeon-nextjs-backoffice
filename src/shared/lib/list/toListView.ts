@@ -33,6 +33,19 @@ export function toListView<T>(
   }
 
   const data = result.data
+  if (!data) {
+    return {
+      items: [],
+      meta: {
+        totalCount: 0,
+        filteredCount: 0,
+        page: fallbackMeta.page,
+        limit: fallbackMeta.limit,
+      },
+      loadError: '목록 응답 데이터가 없습니다.',
+    }
+  }
+
   return {
     items: data.items,
     meta: {

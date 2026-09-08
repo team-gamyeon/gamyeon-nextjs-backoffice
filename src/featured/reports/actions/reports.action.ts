@@ -26,6 +26,9 @@ export async function getReportsAction(params?: unknown): Promise<GetReportsActi
 
   try {
     const data = await getReports(parsed.data satisfies GetReportsParams)
+    if (!data) {
+      return { success: false, error: '리포트 목록 응답 데이터가 없습니다.' }
+    }
     return { success: true, data }
   } catch (error: unknown) {
     const apiError = error as { message?: string }
