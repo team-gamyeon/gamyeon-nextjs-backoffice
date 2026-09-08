@@ -1,5 +1,8 @@
+import type { ListQueryParams, PaginatedData, SortOrder } from '@/shared/types/pagination'
+
 // API 응답 타입
 export type InterviewStatus = 'READY' | 'IN_PROGRESS' | 'PAUSED' | 'FINISHED'
+export type InterviewSortBy = 'createdAt' | 'startedAt' | 'durationSeconds'
 export type UserProvider = 'GOOGLE' | 'KAKAO'
 export type UserStatus = 'ACTIVE' | 'WARNED' | 'BANNED' | 'WITHDREW'
 
@@ -27,26 +30,29 @@ export interface ApiInterview {
   totalPausedSeconds: string | number
   createdAt: string
   updatedAt: string
-  user: ApiInterviewUser
+  user: ApiInterviewUser | null
 }
 
-export interface InterviewListResponse {
-  totalCount: number
-  filteredCount: number
+export type InterviewListResponse = PaginatedData<ApiInterview>
+
+export interface InterviewListQuery extends ListQueryParams {
+  status?: InterviewStatus
+  search?: string
+  sortBy: InterviewSortBy
+  sortOrder: SortOrder
   page: number
   limit: number
-  items: ApiInterview[]
+  from?: string
+  to?: string
 }
 
 // UI 타입
-export type SessionStatus = 'completed' | 'in_progress' | 'abandoned'
-
 export interface InterviewSession {
   id: string
   userId: string
   userNickname: string
   intvTitle: string
-  status: SessionStatus
+  status: InterviewStatus
   questionCount: number
   answeredCount: number
   score?: number
@@ -59,8 +65,7 @@ export interface InterviewSession {
 
 export interface SessionFiltersState {
   search: string
-  status: SessionStatus | 'all'
-  jobCategory: string
-  sortBy: 'startedAt' | 'score' | 'durationSec'
-  sortOrder: 'asc' | 'desc'
+  status: InterviewStatus | 'all'
+  sortBy: InterviewSortBy
+  sortOrder: SortOrder
 }

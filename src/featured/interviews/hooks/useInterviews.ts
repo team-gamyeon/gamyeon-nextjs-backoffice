@@ -1,83 +1,178 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import type { InterviewSession, SessionStatus } from '@/featured/interviews/types'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDebounce } from '@/shared/hooks/useDebounce'
+import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
+import { hasNextPage, mergeUniqueBy, toPaginationMeta } from '@/shared/lib/pagination'
+import { LIST_PAGE_SIZE } from '@/shared/lib/validation/listQuery'
+import { getInterviewsAction } from '@/featured/interviews/actions/interviews.action'
+import { mapApiInterviewToSession } from '@/featured/interviews/utils/mapApiInterviewToSession'
+import type { PaginationMeta, SortOrder } from '@/shared/types/pagination'
+import type {
+  InterviewListQuery,
+  InterviewSession,
+  InterviewSortBy,
+  InterviewStatus,
+} from '@/featured/interviews/types'
 
-export type InterviewSortBy = 'endedAt' | 'createdAt' | 'score'
+interface UseInterviewsParams {
+  initialSessions: InterviewSession[]
+  initialMeta: PaginationMeta
+  query: InterviewListQuery
+}
 
-export function useInterviews(initialSessions: InterviewSession[]) {
-  const [search, setSearch] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState<SessionStatus | 'all'>('all')
-  const [sortBy, setSortBy] = useState<InterviewSortBy>('createdAt')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+export function useInterviews({ initialSessions, initialMeta, query }: UseInterviewsParams) {
+  const querySearch = query.search ?? ''
+  const [sessions, setSessions] = useState(initialSessions)
+  const [meta, setMeta] = useState(initialMeta)
+  const [hasMore, setHasMore] = useState(() => hasNextPage(initialMeta, initialSessions.length))
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState(false)
+  const [search, setSearchState] = useState(querySearch)
+  const querySearchRef = useRef(querySearch)
+  const searchRef = useRef(search)
+  const searchWasEditedRef = useRef(false)
+  const requestIdRef = useRef(0)
+  const isLoadingMoreRef = useRef(false)
+  const debouncedSearch = useDebounce(search, 300)
+  const { isPending, updateQuery } = useListQueryNavigation()
 
-  const abandonedCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'abandoned').length,
-    [initialSessions],
-  )
-  const completedCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'completed').length,
-    [initialSessions],
-  )
-  const inProgressCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'in_progress').length,
-    [initialSessions],
-  )
+  querySearchRef.current = querySearch
+  searchRef.current = search
 
-  const resetFilters = () => {
-    setSearch('')
-    setSelectedStatus('all')
-    setSortBy('createdAt')
-    setSortOrder('desc')
-  }
+  const invalidateLoadMore = useCallback(() => {
+    requestIdRef.current += 1
+    isLoadingMoreRef.current = false
+    setIsLoadingMore(false)
+    setLoadMoreError(false)
+  }, [])
 
-  const filtered = useMemo(() => {
-    const result = initialSessions.filter((session) => {
-      if (
-        search &&
-        !session.userNickname.toLowerCase().includes(search.toLowerCase()) &&
-        !session.id.includes(search)
-      )
-        return false
-      if (selectedStatus !== 'all' && session.status !== selectedStatus) return false
-      return true
-    })
+  useEffect(() => {
+    requestIdRef.current += 1
+    isLoadingMoreRef.current = false
+    setSessions(initialSessions)
+    setMeta(initialMeta)
+    setHasMore(hasNextPage(initialMeta, initialSessions.length))
+    setIsLoadingMore(false)
+    setLoadMoreError(false)
+  }, [initialMeta, initialSessions])
 
-    return [...result].sort((a, b) => {
-      let aVal: string | number = ''
-      let bVal: string | number = ''
+  useEffect(() => {
+    if (!searchWasEditedRef.current) setSearchState(querySearch)
+  }, [querySearch])
 
-      if (sortBy === 'createdAt') {
-        aVal = a.createdAt
-        bVal = b.createdAt
-      } else if (sortBy === 'endedAt') {
-        aVal = a.endedAt ?? ''
-        bVal = b.endedAt ?? ''
-      } else if (sortBy === 'score') {
-        aVal = a.score ?? 0
-        bVal = b.score ?? 0
+  useEffect(() => {
+    if (!searchWasEditedRef.current) return
+
+    const normalizedSearch = debouncedSearch.trim()
+    if (normalizedSearch === querySearchRef.current) {
+      if (searchRef.current.trim() === normalizedSearch) searchWasEditedRef.current = false
+      return
+    }
+
+    searchWasEditedRef.current = false
+    invalidateLoadMore()
+    updateQuery({ search: normalizedSearch || undefined }, { resetPage: true, scroll: false })
+  }, [debouncedSearch, invalidateLoadMore, updateQuery])
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMoreRef.current || isPending || !hasMore) return
+
+    const requestId = ++requestIdRef.current
+    const nextPage = meta.page + 1
+    isLoadingMoreRef.current = true
+    setIsLoadingMore(true)
+    setLoadMoreError(false)
+
+    try {
+      const result = await getInterviewsAction({
+        ...query,
+        page: nextPage,
+        limit: LIST_PAGE_SIZE,
+      })
+
+      if (requestId !== requestIdRef.current) return
+
+      if (!result.success || !result.data) {
+        setLoadMoreError(true)
+        return
       }
 
-      if (aVal < bVal) return sortOrder === 'desc' ? 1 : -1
-      if (aVal > bVal) return sortOrder === 'desc' ? -1 : 1
-      return 0
-    })
-  }, [initialSessions, search, selectedStatus, sortBy, sortOrder])
+      const data = result.data
+      const incoming = data.items.map(mapApiInterviewToSession)
+      setSessions((current) => mergeUniqueBy(current, incoming, (session) => session.id))
+      const nextMeta = toPaginationMeta(data)
+      setMeta(nextMeta)
+      setHasMore(hasNextPage(nextMeta, incoming.length))
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return
+      console.error('[useInterviews] Failed to load the next page', error)
+      setLoadMoreError(true)
+    } finally {
+      if (requestId === requestIdRef.current) {
+        isLoadingMoreRef.current = false
+        setIsLoadingMore(false)
+      }
+    }
+  }, [hasMore, isPending, meta.page, query])
+
+  const setSearch = (value: string) => {
+    searchWasEditedRef.current = true
+    setSearchState(value)
+  }
+
+  const setSelectedStatus = (status: InterviewStatus | 'all') => {
+    invalidateLoadMore()
+    updateQuery({ status: status === 'all' ? undefined : status }, { resetPage: true })
+  }
+
+  const setSortBy = (sortBy: InterviewSortBy) => {
+    invalidateLoadMore()
+    updateQuery({ sortBy }, { resetPage: true })
+  }
+
+  const setSortOrder = (sortOrder: SortOrder) => {
+    invalidateLoadMore()
+    updateQuery({ sortOrder }, { resetPage: true })
+  }
+
+  const resetFilters = () => {
+    invalidateLoadMore()
+    searchWasEditedRef.current = false
+    setSearchState('')
+    updateQuery(
+      {
+        search: undefined,
+        status: undefined,
+        sortBy: undefined,
+        sortOrder: undefined,
+        page: undefined,
+        limit: undefined,
+        from: undefined,
+        to: undefined,
+      },
+      { resetPage: true },
+    )
+  }
 
   return {
+    sessions,
+    meta,
+    hasMore,
+    isLoadingMore,
+    loadMoreError,
+    loadMore,
     search,
     setSearch,
-    selectedStatus,
+    selectedStatus: query.status ?? 'all',
     setSelectedStatus,
-    sortBy,
+    sortBy: query.sortBy,
     setSortBy,
-    sortOrder,
+    sortOrder: query.sortOrder,
     setSortOrder,
-    filtered,
-    totalCount: initialSessions.length,
-    completedCount,
-    inProgressCount,
-    abandonedCount,
+    isPending,
     resetFilters,
   }
 }
+
+export type { InterviewSortBy }
