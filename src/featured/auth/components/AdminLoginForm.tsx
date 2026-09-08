@@ -23,30 +23,38 @@ export function AdminLoginForm() {
   const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isSuccess, setIsSuccess] = useState(false)
+  const isSuccess = state?.success === true
 
+  /* eslint-disable react-hooks/set-state-in-effect -- 브라우저 저장값은 hydration 이후에만 복원할 수 있다. */
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY)
-    if (saved) {
-      const { email, password } = JSON.parse(saved)
-      setEmail(email ?? '')
-      setPassword(password ?? '')
+    if (!saved) return
+
+    try {
+      const value = JSON.parse(saved) as { email?: unknown }
+      const savedEmail = typeof value.email === 'string' ? value.email : ''
+      localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email: savedEmail }))
+      setEmail(savedEmail)
       setRememberMe(true)
+    } catch {
+      localStorage.removeItem(REMEMBER_KEY)
     }
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
-    if (state?.success) {
-      if (rememberMe) {
-        localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email, password }))
-      } else {
-        localStorage.removeItem(REMEMBER_KEY)
-      }
-      setAuthenticated(true)
-      setIsSuccess(true)
-      setTimeout(() => router.push('/dashboard'), 800)
+    if (!isSuccess) return
+
+    if (rememberMe) {
+      localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email }))
+    } else {
+      localStorage.removeItem(REMEMBER_KEY)
     }
-  }, [state, router, rememberMe, email, password, setAuthenticated])
+
+    setAuthenticated(true)
+    const redirectTimer = window.setTimeout(() => router.push('/dashboard'), 800)
+    return () => window.clearTimeout(redirectTimer)
+  }, [email, isSuccess, rememberMe, router, setAuthenticated])
 
   return (
     <div className="bg-muted/20 flex min-h-screen items-center justify-center px-4">
@@ -107,6 +115,7 @@ export function AdminLoginForm() {
                     type="email"
                     placeholder="admin@interviewai.kr"
                     className="pl-10"
+                    autoComplete="username"
                     required
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -124,6 +133,7 @@ export function AdminLoginForm() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="비밀번호를 입력하세요"
                     className="pr-10 pl-10"
+                    autoComplete="current-password"
                     required
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
@@ -147,7 +157,7 @@ export function AdminLoginForm() {
                   className="accent-primary h-4 w-4 cursor-pointer"
                 />
                 <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
-                  로그인 정보 저장
+                  아이디 저장
                 </Label>
               </div>
 
