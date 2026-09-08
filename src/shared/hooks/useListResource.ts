@@ -80,28 +80,40 @@ export function useListResource<T>({
 
   // 동시 호출 차단. state.isLoading은 다음 렌더에야 반영되므로 래치가 따로 필요하다.
   const inFlightRef = useRef(false)
-  const { hasMore, generation } = state
+  const { hasMore, generation, loadError } = state
   const currentPage = state.meta.page
 
   const loadMore = useCallback(async () => {
-    if (inFlightRef.current || isPaused || !hasMore) return
+    const isInitialRetry = loadError === 'initial'
+    if (inFlightRef.current || isPaused || (!hasMore && !isInitialRetry)) return
+
+    const mode = isInitialRetry ? 'replace' : 'append'
+    const page = isInitialRetry ? currentPage : currentPage + 1
 
     inFlightRef.current = true
     dispatch({ type: 'loadStarted' })
 
     try {
-      const result = await loadPage(currentPage + 1)
+      const result = await loadPage(page)
       if (!result.ok) {
-        dispatch({ type: 'loadFailed', generation })
+        dispatch({
+          type: 'loadFailed',
+          generation,
+          loadError: isInitialRetry ? 'initial' : 'loadMore',
+        })
         return
       }
-      dispatch({ type: 'pageLoaded', generation, items: result.items, meta: result.meta })
+      dispatch({ type: 'pageLoaded', generation, items: result.items, meta: result.meta, mode })
     } catch {
-      dispatch({ type: 'loadFailed', generation })
+      dispatch({
+        type: 'loadFailed',
+        generation,
+        loadError: isInitialRetry ? 'initial' : 'loadMore',
+      })
     } finally {
       inFlightRef.current = false
     }
-  }, [currentPage, generation, hasMore, isPaused, loadPage])
+  }, [currentPage, generation, hasMore, isPaused, loadError, loadPage])
 
   /**
    * 필터를 바꾸기 직전에 호출한다. 진행 중이던 다음 페이지 요청의 응답을
@@ -117,7 +129,7 @@ export function useListResource<T>({
     meta: state.meta,
     hasMore: state.hasMore,
     isLoadingMore: state.isLoading,
-    loadMoreError: state.hasError,
+    loadMoreError: state.loadError !== null,
     loadMore,
     invalidate,
     scrollRootRef,
