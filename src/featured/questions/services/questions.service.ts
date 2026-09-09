@@ -12,36 +12,27 @@ import type {
 export async function getQuestions(
   params: QuestionListQuery = {},
 ): Promise<QuestionListResponse | null> {
-  try {
-    const queryParams = Object.fromEntries(
-      Object.entries(params).filter(([, value]) => value !== undefined),
-    ) as Record<string, string | number | boolean>
+  const queryParams = Object.fromEntries(
+    Object.entries(params).filter(([, value]) => value !== undefined),
+  ) as Record<string, string | number | boolean>
 
-    const response = await serverApi.get<QuestionListResponse>('/api/v1/questions', {
-      params: queryParams,
-    })
+  const response = await serverApi.get<QuestionListResponse>('/api/v1/questions', {
+    params: queryParams,
+  })
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[questions.service] request completed', {
-        method: 'GET',
-        endpoint: '/api/v1/questions',
-        totalCount: response?.totalCount,
-        filteredCount: response?.filteredCount,
-        page: response?.page,
-        limit: response?.limit,
-        itemCount: response?.items?.length,
-      })
-    }
-
-    return response
-  } catch (error) {
-    console.error('[questions.service] request failed', {
+  if (process.env.NODE_ENV === 'development') {
+    console.debug('[questions.service] request completed', {
       method: 'GET',
       endpoint: '/api/v1/questions',
-      errorName: error instanceof Error ? error.name : 'UnknownError',
+      totalCount: response?.totalCount,
+      filteredCount: response?.filteredCount,
+      page: response?.page,
+      limit: response?.limit,
+      itemCount: response?.items?.length,
     })
-    return null
   }
+
+  return response
 }
 
 export async function createQuestion(body: CreateQuestionRequest) {
