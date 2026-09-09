@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { getQuestionsAction } from '@/featured/questions/actions/questions.action'
 import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
@@ -28,6 +28,7 @@ export function useQuestions({
 }: UseQuestionsParams) {
   const router = useRouter()
   const { isPending, updateQuery } = useListQueryNavigation()
+  const [isRefreshing, startRefresh] = useTransition()
   const queryKey = [
     query.search,
     query.status,
@@ -89,9 +90,10 @@ export function useQuestions({
     updateQuery({ status: status === 'all' ? undefined : status })
   }
 
+  /** 등록·수정·삭제 후 서버 데이터를 다시 받아 목록을 갱신한다. */
   const refreshQuestions = () => {
     invalidate()
-    router.refresh()
+    startRefresh(() => router.refresh())
   }
 
   return {
@@ -108,7 +110,7 @@ export function useQuestions({
     initialLoadFailed,
     hasMore,
     loadMore,
-    isPaused: isPending || isSearchPending,
+    isPaused: isPending || isRefreshing || isSearchPending,
     refreshQuestions,
     scrollRootRef,
   }

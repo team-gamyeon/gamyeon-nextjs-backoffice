@@ -118,9 +118,11 @@ export function useListResource<T>({
   /**
    * 필터를 바꾸기 직전에 호출한다. 진행 중이던 다음 페이지 요청의 응답을
    * 새 목록에 섞이지 않게 버린다.
+   *
+   * 여기서 inFlightRef를 풀면 안 된다. 응답은 버려도 요청 자체는 아직 날아가는 중이라,
+   * 래치를 풀면 같은 페이지를 한 번 더 부를 수 있다. 래치는 loadMore의 finally가 푼다.
    */
   const invalidate = useCallback(() => {
-    inFlightRef.current = false
     dispatch({ type: 'invalidate' })
   }, [])
 
