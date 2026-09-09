@@ -2,8 +2,20 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@/shared/hooks/useDebounce'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 
 export const LIST_SEARCH_DEBOUNCE_MS = 300
+
+/**
+ * 서버가 받아들이는 형태로 검색어를 다듬는다.
+ *
+ * 길이를 여기서 자르지 않으면 화면이 잠긴다. 서버는 100자를 넘는 검색어를 조용히
+ * 버리므로 committedSearch는 빈 값이 되는데, 입력값은 그대로라 isSearchPending이
+ * 영원히 참이 되어 무한 스크롤과 재시도가 모두 멈춘다.
+ */
+function normalizeSearch(value: string): string {
+  return value.trim().slice(0, MAX_LIST_SEARCH_LENGTH)
+}
 
 /**
  * 검색어 입력값과 URL에 확정된 검색어를 잇는다.
@@ -38,7 +50,7 @@ export function useListSearch(
   }, [committedSearch])
 
   useEffect(() => {
-    const normalizedSearch = debouncedSearch.trim()
+    const normalizedSearch = normalizeSearch(debouncedSearch)
     if (normalizedSearch === committedRef.current) return
     commitRef.current(normalizedSearch || undefined)
   }, [debouncedSearch])
@@ -47,6 +59,6 @@ export function useListSearch(
     search,
     setSearch,
     /** 입력값이 아직 URL에 반영되지 않은 상태 */
-    isSearchPending: search.trim() !== committedSearch,
+    isSearchPending: normalizeSearch(search) !== committedSearch,
   }
 }

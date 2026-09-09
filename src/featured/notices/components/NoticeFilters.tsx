@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 import { NOTICE_STATUS_OPTIONS } from '@/featured/notices/constants'
 import type { NoticeStatus } from '@/featured/notices/types'
 
@@ -42,6 +43,7 @@ export function NoticeFilters({
         onChange={onSearchChange}
         placeholder="공지사항 제목 검색..."
         className="min-w-48 flex-1"
+        maxLength={MAX_LIST_SEARCH_LENGTH}
       />
 
       <Button size="sm" className="h-9 cursor-pointer gap-1.5" onClick={onAdd}>

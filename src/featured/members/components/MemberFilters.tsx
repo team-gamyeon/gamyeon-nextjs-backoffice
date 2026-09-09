@@ -3,6 +3,7 @@
 import { Filter, ArrowUpDown } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,7 @@ export function MemberFilters({ filters, onFilterChange }: MemberFiltersProps) {
         onChange={(value) => onFilterChange({ search: value })}
         placeholder="닉네임 또는 이메일 검색..."
         className="min-w-52 flex-1"
+        maxLength={MAX_LIST_SEARCH_LENGTH}
       />
 
       <DropdownMenu>

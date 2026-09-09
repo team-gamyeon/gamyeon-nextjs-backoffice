@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { Button } from '@/shared/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 import { REPORT_SORT_OPTIONS, REPORT_STATUS_OPTIONS } from '@/featured/reports/constants'
 import { useReports } from '@/featured/reports/hooks/useReports'
 import { ReportsTable } from '@/featured/reports/components/ReportsTable'
@@ -111,6 +112,7 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
           onChange={setSearch}
           placeholder="유저명 또는 인터뷰 ID 검색..."
           className="min-w-48 flex-1"
+          maxLength={MAX_LIST_SEARCH_LENGTH}
         />
 
         <Select value={sortBy} onValueChange={(value) => setSortBy(value as ReportSortBy)}>

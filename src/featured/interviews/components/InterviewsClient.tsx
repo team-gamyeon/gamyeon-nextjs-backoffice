@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { Button } from '@/shared/ui/button'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 import { useInterviews, type InterviewSortBy } from '@/featured/interviews/hooks/useInterviews'
 import { INTERVIEW_SORT_OPTIONS, INTERVIEW_STATUS_OPTIONS } from '@/featured/interviews/constants'
 import { InterviewsTable } from '@/featured/interviews/components/InterviewsTable'
@@ -82,6 +83,7 @@ export function InterviewsClient({
           onChange={setSearch}
           placeholder="닉네임 또는 세션 ID 검색..."
           className="min-w-52 flex-1"
+          maxLength={MAX_LIST_SEARCH_LENGTH}
         />
 
         <Select

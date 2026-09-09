@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { QuestionTable } from './QuestionTable'
 import { QuestionDialog } from './QuestionDialog'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 import type { CommonQuestion, QuestionListQuery } from '@/featured/questions/types'
 import type { PaginationMeta } from '@/shared/types/pagination'
 
@@ -109,6 +110,7 @@ export function QuestionsClient({
           onChange={setSearch}
           placeholder="질문 내용 검색..."
           className="min-w-48 flex-1"
+          maxLength={MAX_LIST_SEARCH_LENGTH}
         />
 
         <Button
