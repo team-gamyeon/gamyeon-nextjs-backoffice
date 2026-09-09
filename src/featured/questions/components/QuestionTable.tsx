@@ -18,8 +18,11 @@ import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
-  onDelete: () => void
-  onUpdate: () => void
+  /** 상태 토글 결과를 목록에 반영한다. 서버 재조회 없이 해당 항목만 교체된다. */
+  onToggled: (question: CommonQuestion) => void
+  onRemoved: (id: string) => void
+  /** 다이얼로그 수정은 갱신된 항목을 알 수 없어 서버에서 다시 받는다. */
+  onEdited: () => void
   initialLoadFailed: boolean
   scrollRootRef: RefObject<HTMLDivElement | null>
   hasMore: boolean
@@ -31,8 +34,9 @@ interface QuestionTableProps {
 
 export function QuestionTable({
   questions,
-  onDelete,
-  onUpdate,
+  onToggled,
+  onRemoved,
+  onEdited,
   initialLoadFailed,
   scrollRootRef,
   hasMore,
@@ -52,8 +56,9 @@ export function QuestionTable({
     setIsDeleting(false)
     if (result.success) {
       toast.success('질문이 삭제되었습니다.')
+      const removedId = deleteTarget.id
       setDeleteTarget(null)
-      onDelete()
+      onRemoved(removedId)
     } else {
       toast.error(result.error ?? '질문 삭제에 실패했습니다.')
     }
@@ -109,7 +114,7 @@ export function QuestionTable({
                             toast.success(
                               `질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`,
                             )
-                            onUpdate()
+                            onToggled({ ...question, isActive: !question.isActive })
                           } else {
                             toast.error(result.error ?? '상태 변경에 실패했습니다.')
                           }
@@ -182,7 +187,7 @@ export function QuestionTable({
           onClose={() => setEditTarget(null)}
           onSuccess={() => {
             setEditTarget(null)
-            onUpdate()
+            onEdited()
           }}
         />
       )}

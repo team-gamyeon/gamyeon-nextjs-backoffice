@@ -67,17 +67,9 @@ export async function updateQuestionAction(
   id: string,
   body: { content?: string; status?: QuestionStatus },
 ): Promise<UpdateQuestionActionState> {
-  return toActionResult(async () => {
-    const data = await updateQuestion(id, body)
-    revalidatePath('/questions')
-    return data
-  }, '질문 수정에 실패했습니다.')
+  return toActionResult(() => updateQuestion(id, body), '질문 수정에 실패했습니다.')
 }
 
 export async function deleteQuestionAction(id: string): Promise<DeleteQuestionActionState> {
-  return toActionResult(async () => {
-    const data = await deleteQuestion(id)
-    revalidatePath('/questions')
-    return data
-  }, '질문 삭제에 실패했습니다.')
+  return toActionResult(() => deleteQuestion(id), '질문 삭제에 실패했습니다.')
 }

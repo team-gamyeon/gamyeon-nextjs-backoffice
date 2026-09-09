@@ -42,6 +42,8 @@ export function QuestionsClient({
     isLoadingMore,
     loadMoreError,
     initialLoadFailed,
+    updateItem,
+    removeItem,
     hasMore,
     loadMore,
     refreshQuestions,
@@ -129,8 +131,9 @@ export function QuestionsClient({
       <div className="py-4 transition-opacity" aria-busy={isSearchPending || isLoadingMore}>
         <QuestionTable
           questions={loadedQuestions}
-          onDelete={refreshQuestions}
-          onUpdate={refreshQuestions}
+          onToggled={updateItem}
+          onRemoved={removeItem}
+          onEdited={refreshQuestions}
           initialLoadFailed={initialLoadFailed}
           scrollRootRef={scrollRootRef}
           hasMore={hasMore}

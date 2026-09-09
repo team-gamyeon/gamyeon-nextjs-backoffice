@@ -65,6 +65,8 @@ export function useNotices({
     initialLoadFailed,
     loadMore,
     invalidate,
+    updateItem,
+    removeItem,
     scrollRootRef,
   } = useListResource<Notice>({
     initialItems: initialNotices,
@@ -108,7 +110,7 @@ export function useNotices({
     }
 
     toast.success(`공지사항이 ${target.isActive ? '비활성화' : '활성화'}되었습니다.`)
-    refresh()
+    updateItem({ ...target, isActive: !target.isActive })
   }
 
   const handleDelete = async (id: string) => {
@@ -119,7 +121,8 @@ export function useNotices({
     }
 
     toast.success('공지사항이 삭제되었습니다.')
-    refresh()
+    setExpandedId((currentId) => (currentId === id ? null : currentId))
+    removeItem(id)
   }
 
   const handleEdit = (notice: Notice) => {

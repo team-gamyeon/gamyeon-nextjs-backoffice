@@ -27,6 +27,10 @@ export type ListResourceEvent<T> =
       mode: 'replace' | 'append'
     }
   | { type: 'loadFailed'; generation: number; loadError: 'initial' | 'loadMore' }
+  // 서버 재조회 없이 목록 안의 한 항목만 갈아끼우거나 빼낸다.
+  // 재조회하면 불러온 페이지가 전부 1페이지로 되돌아가기 때문이다.
+  | { type: 'itemUpdated'; item: T }
+  | { type: 'itemRemoved'; key: PropertyKey }
 
 export function createInitialListResourceState<T>(
   items: T[],
@@ -94,6 +98,31 @@ export function createListResourceReducer<T>(getKey: (item: T) => PropertyKey) {
       case 'loadFailed':
         if (event.generation !== state.generation) return state
         return { ...state, isLoading: false, loadError: event.loadError }
+
+      case 'itemUpdated': {
+        const targetKey = getKey(event.item)
+        if (!state.items.some((item) => getKey(item) === targetKey)) return state
+
+        return {
+          ...state,
+          items: state.items.map((item) => (getKey(item) === targetKey ? event.item : item)),
+        }
+      }
+
+      case 'itemRemoved': {
+        const items = state.items.filter((item) => getKey(item) !== event.key)
+        if (items.length === state.items.length) return state
+
+        return {
+          ...state,
+          items,
+          meta: {
+            ...state.meta,
+            totalCount: Math.max(0, state.meta.totalCount - 1),
+            filteredCount: Math.max(0, state.meta.filteredCount - 1),
+          },
+        }
+      }
 
       default:
         return state

@@ -67,6 +67,8 @@ export function useQuestions({
     initialLoadFailed,
     loadMore,
     invalidate,
+    updateItem,
+    removeItem,
     scrollRootRef,
   } = useListResource<CommonQuestion>({
     initialItems: initialQuestions,
@@ -112,6 +114,8 @@ export function useQuestions({
     loadMore,
     isPaused: isPending || isRefreshing || isSearchPending,
     refreshQuestions,
+    updateItem,
+    removeItem,
     scrollRootRef,
   }
 }

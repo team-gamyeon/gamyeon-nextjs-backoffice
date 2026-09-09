@@ -65,17 +65,9 @@ export async function updateNoticeAction(
   id: number,
   body: UpdateNoticeRequest,
 ): Promise<UpdateNoticeActionState> {
-  return toActionResult(async () => {
-    const data = await updateNotice(id, body)
-    revalidatePath('/notices')
-    return data
-  }, '공지사항 수정에 실패했습니다.')
+  return toActionResult(() => updateNotice(id, body), '공지사항 수정에 실패했습니다.')
 }
 
 export async function deleteNoticeAction(id: number): Promise<DeleteNoticeActionState> {
-  return toActionResult(async () => {
-    const data = await deleteNotice(id)
-    revalidatePath('/notices')
-    return data
-  }, '공지사항 삭제에 실패했습니다.')
+  return toActionResult(() => deleteNotice(id), '공지사항 삭제에 실패했습니다.')
 }

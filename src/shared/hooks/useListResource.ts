@@ -54,6 +54,8 @@ export function useListResource<T>({
   )
 
   // 서버에서 새 데이터가 내려오면(필터 변경, router.refresh) 목록을 갈아끼운다.
+  // 이때 불러온 페이지가 모두 첫 페이지로 되돌아가므로 스크롤도 함께 올린다.
+  // 그러지 않으면 목록이 짧아진 만큼 화면이 튄다.
   const isFirstDataRef = useRef(true)
   useEffect(() => {
     if (isFirstDataRef.current) {
@@ -66,6 +68,7 @@ export function useListResource<T>({
       meta: initialMeta,
       hasError: hasInitialLoadError,
     })
+    scrollRootRef.current?.scrollTo({ top: 0 })
   }, [initialItems, initialMeta, hasInitialLoadError])
 
   // 필터가 바뀐 경우에만 스크롤을 되돌린다. 단순 새로고침에는 위치를 유지한다.
@@ -126,6 +129,23 @@ export function useListResource<T>({
     dispatch({ type: 'invalidate' })
   }, [])
 
+  /**
+   * 서버 재조회 없이 목록 안의 한 항목만 반영한다.
+   *
+   * router.refresh()를 쓰면 불러온 페이지가 전부 첫 페이지로 되돌아간다.
+   * 무엇이 바뀌었는지 이미 아는 수정·삭제에는 재조회가 필요 없다.
+   *
+   * 대신 정렬 기준 필드가 바뀌면 실제 정렬 위치와 어긋난 채로 남는다.
+   * 다음 필터 변경이나 재조회 때 정리된다.
+   */
+  const updateItem = useCallback((item: T) => {
+    dispatch({ type: 'itemUpdated', item })
+  }, [])
+
+  const removeItem = useCallback((key: PropertyKey) => {
+    dispatch({ type: 'itemRemoved', key })
+  }, [])
+
   return {
     items: state.items,
     meta: state.meta,
@@ -139,6 +159,8 @@ export function useListResource<T>({
     initialLoadFailed: state.loadError === 'initial',
     loadMore,
     invalidate,
+    updateItem,
+    removeItem,
     scrollRootRef,
   }
 }
