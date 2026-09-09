@@ -9,21 +9,9 @@ export interface Member {
   id: string
   nickname: string
   email: string
-  passwordHash: string
   status: MemberStatus
   joinedAt: string
   lastActiveAt: string
-  sessionCount: number
-  sanctionHistory: Sanction[]
-}
-
-export interface Sanction {
-  id: string
-  type: 'warning' | 'suspended'
-  reason: string
-  adminNote: string
-  createdAt: string
-  expiresAt?: string
 }
 
 export interface MemberFiltersState {

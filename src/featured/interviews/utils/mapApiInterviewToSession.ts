@@ -8,8 +8,6 @@ export function mapApiInterviewToSession(interview: ApiInterview): InterviewSess
     userNickname: interview.user?.nickname?.trim() || '알 수 없음',
     intvTitle: interview.title,
     status: interview.status,
-    questionCount: 0,
-    answeredCount: 0,
     durationSec: Number(interview.durationSeconds),
     startedAt: interview.startedAt ? timeAgo(interview.startedAt) : null,
     pausedAt: interview.pausedAt ? timeAgo(interview.pausedAt) : null,

@@ -54,11 +54,10 @@ export function MemberTable({
         >
           <table className="w-full table-fixed text-sm">
             <colgroup>
+              <col className="w-[20%]" />
+              <col className="w-[30%]" />
               <col className="w-[15%]" />
-              <col className="w-[25%]" />
               <col className="w-[15%]" />
-              <col className="w-[15%]" />
-              <col className="w-[10%]" />
               <col className="w-[10%]" />
               <col className="w-16" />
             </colgroup>
@@ -70,7 +69,6 @@ export function MemberTable({
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">
                   마지막 활동
                 </th>
-                <th className="text-muted-foreground px-6 py-4 text-center font-medium">세션 수</th>
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">상태</th>
                 <th className="px-6 py-4" />
               </tr>
@@ -85,9 +83,6 @@ export function MemberTable({
                   </td>
                   <td className="text-muted-foreground truncate px-6 py-3 text-center">
                     {member.lastActiveAt}
-                  </td>
-                  <td className="truncate px-6 py-3 text-center font-medium">
-                    {member.sessionCount}
                   </td>
                   <td className="truncate px-6 py-3 text-center">
                     <div className="flex justify-center">

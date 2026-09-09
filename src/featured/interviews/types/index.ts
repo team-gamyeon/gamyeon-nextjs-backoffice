@@ -55,8 +55,6 @@ export interface InterviewSession {
   userNickname: string
   intvTitle: string
   status: InterviewStatus
-  questionCount: number
-  answeredCount: number
   score?: number
   durationSec: number
   startedAt: string | null
