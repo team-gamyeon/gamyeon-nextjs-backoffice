@@ -13,13 +13,14 @@ import {
 } from '@/featured/questions/actions/questions.action'
 import { QuestionDeleteDialog } from './QuestionDeleteDialog'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
   onDelete: () => void
   onUpdate: () => void
-  hasLoadError?: boolean
+  initialLoadFailed: boolean
   scrollRootRef: RefObject<HTMLDivElement | null>
   hasMore: boolean
   isLoadingMore: boolean
@@ -32,7 +33,7 @@ export function QuestionTable({
   questions,
   onDelete,
   onUpdate,
-  hasLoadError = false,
+  initialLoadFailed,
   scrollRootRef,
   hasMore,
   isLoadingMore,
@@ -154,29 +155,23 @@ export function QuestionTable({
           </table>
 
           {questions.length === 0 && (
-            <div
-              className={cn(
-                'flex h-32 items-center justify-center text-sm',
-                hasLoadError ? 'text-destructive' : 'text-muted-foreground',
-              )}
-            >
-              {hasLoadError
-                ? '질문 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-                : '조건에 맞는 질문이 없습니다.'}
-            </div>
-          )}
-
-          {hasLoadError ? null : (
-            <InfiniteScrollTrigger
-              rootRef={scrollRootRef}
-              hasMore={hasMore}
-              isLoading={isLoadingMore}
-              isPaused={isLoadMorePaused}
-              hasError={loadMoreError}
-              loadedCount={questions.length}
-              onLoadMore={onLoadMore}
+            <ListEmptyState
+              hasError={initialLoadFailed}
+              errorMessage="질문 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+              emptyMessage="조건에 맞는 질문이 없습니다."
             />
           )}
+
+          {/* 조회 실패 시에도 렌더한다. 재시도 버튼이 이 안에 있다. */}
+          <InfiniteScrollTrigger
+            rootRef={scrollRootRef}
+            hasMore={hasMore}
+            isLoading={isLoadingMore}
+            isPaused={isLoadMorePaused}
+            hasError={loadMoreError}
+            loadedCount={questions.length}
+            onLoadMore={onLoadMore}
+          />
         </div>
       </div>
 

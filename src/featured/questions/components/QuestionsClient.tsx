@@ -40,6 +40,7 @@ export function QuestionsClient({
     isPaused,
     isLoadingMore,
     loadMoreError,
+    initialLoadFailed,
     hasMore,
     loadMore,
     refreshQuestions,
@@ -60,7 +61,7 @@ export function QuestionsClient({
       suppressHydrationWarning
     >
       {/* Stats */}
-      {hasLoadError ? null : (
+      {initialLoadFailed ? null : (
         <div className="flex items-center gap-4 text-sm">
           <span className="text-muted-foreground">
             전체{' '}
@@ -128,7 +129,7 @@ export function QuestionsClient({
           questions={loadedQuestions}
           onDelete={refreshQuestions}
           onUpdate={refreshQuestions}
-          hasLoadError={hasLoadError}
+          initialLoadFailed={initialLoadFailed}
           scrollRootRef={scrollRootRef}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}

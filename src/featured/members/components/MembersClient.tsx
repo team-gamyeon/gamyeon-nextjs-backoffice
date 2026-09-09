@@ -21,6 +21,7 @@ export function MembersClient({ initialMembers, meta, query, hasLoadError }: Mem
     hasMore,
     isLoadingMore,
     hasLoadError: loadMoreError,
+    initialLoadFailed,
     isPending,
     isPaused,
     hasFilters,
@@ -64,6 +65,7 @@ export function MembersClient({ initialMembers, meta, query, hasLoadError }: Mem
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           hasLoadError={loadMoreError}
+          initialLoadFailed={initialLoadFailed}
           isPaused={isPaused}
           onLoadMore={loadMore}
         />

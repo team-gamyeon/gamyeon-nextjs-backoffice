@@ -47,6 +47,7 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
     isPaused,
     isLoadingMore,
     loadMoreError,
+    initialLoadFailed,
     hasMore,
     loadMore,
     scrollRootRef,
@@ -148,6 +149,7 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
           loadMoreError={loadMoreError}
+          initialLoadFailed={initialLoadFailed}
           isPaused={isPaused}
           onLoadMore={loadMore}
         />

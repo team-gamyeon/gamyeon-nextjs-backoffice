@@ -6,6 +6,7 @@ import { NoticeFilters } from '@/featured/notices/components/NoticeFilters'
 import { NoticeListItem } from '@/featured/notices/components/NoticeListItem'
 import { useNotices } from '@/featured/notices/hooks/useNotices'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import type { GetNoticesParams, Notice } from '@/featured/notices/types'
 import type { PaginationMeta } from '@/shared/types/pagination'
 
@@ -24,6 +25,7 @@ export function NoticesClient({ initialNotices, meta, query, hasLoadError }: Not
     hasMore,
     isLoadingMore,
     loadMoreError,
+    initialLoadFailed,
     loadMore,
     scrollRootRef,
     isPaused,
@@ -94,17 +96,11 @@ export function NoticesClient({ initialNotices, meta, query, hasLoadError }: Not
         className="border-border/60 h-150 overflow-y-auto rounded-lg border p-2 [scrollbar-gutter:stable]"
       >
         {notices.length === 0 && !isPaused && (
-          <p
-            className={
-              hasLoadError
-                ? 'text-destructive py-10 text-center text-sm'
-                : 'text-muted-foreground py-10 text-center text-sm'
-            }
-          >
-            {hasLoadError
-              ? '공지사항을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-              : '공지사항이 없습니다.'}
-          </p>
+          <ListEmptyState
+            hasError={initialLoadFailed}
+            errorMessage="공지사항을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+            emptyMessage="공지사항이 없습니다."
+          />
         )}
         <div className="space-y-2">
           {notices.map((notice, index) => (

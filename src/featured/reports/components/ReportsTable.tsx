@@ -1,6 +1,7 @@
 import { FileText, AlertCircle } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import { StatusBadge, ScoreBadge } from '@/featured/reports/components/ReportBadges'
 import type { RefObject } from 'react'
 import type { AnalysisReport } from '@/featured/reports/types'
@@ -12,6 +13,7 @@ interface ReportsTableProps {
   hasMore: boolean
   isLoadingMore: boolean
   loadMoreError: boolean
+  initialLoadFailed: boolean
   isPaused?: boolean
   onLoadMore: () => void | Promise<void>
 }
@@ -23,6 +25,7 @@ export function ReportsTable({
   hasMore,
   isLoadingMore,
   loadMoreError,
+  initialLoadFailed,
   isPaused,
   onLoadMore,
 }: ReportsTableProps) {
@@ -121,9 +124,11 @@ export function ReportsTable({
         </table>
 
         {reports.length === 0 && (
-          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-            검색 결과가 없습니다.
-          </div>
+          <ListEmptyState
+            hasError={initialLoadFailed}
+            errorMessage="리포트 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+            emptyMessage="검색 결과가 없습니다."
+          />
         )}
 
         <InfiniteScrollTrigger

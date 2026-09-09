@@ -130,6 +130,11 @@ export function useListResource<T>({
     hasMore: state.hasMore,
     isLoadingMore: state.isLoading,
     loadMoreError: state.loadError !== null,
+    /**
+     * 첫 페이지를 못 받아왔다. 목록이 빈 이유가 "결과 없음"이 아니라 "조회 실패"라는 뜻.
+     * 재시도가 성공하면 자동으로 false가 된다.
+     */
+    initialLoadFailed: state.loadError === 'initial',
     loadMore,
     invalidate,
     scrollRootRef,

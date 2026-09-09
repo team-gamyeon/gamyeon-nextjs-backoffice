@@ -16,6 +16,7 @@ import {
 import { MemberStatusBadge } from './MemberStatusBadge'
 import { SanctionDialog } from './SanctionDialog'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import type { Member } from '@/featured/members/types'
 
 interface MemberTableProps {
@@ -24,6 +25,7 @@ interface MemberTableProps {
   hasMore: boolean
   isLoadingMore: boolean
   hasLoadError: boolean
+  initialLoadFailed: boolean
   isPaused?: boolean
   onLoadMore: () => void | Promise<void>
 }
@@ -34,6 +36,7 @@ export function MemberTable({
   hasMore,
   isLoadingMore,
   hasLoadError,
+  initialLoadFailed,
   isPaused,
   onLoadMore,
 }: MemberTableProps) {
@@ -149,9 +152,11 @@ export function MemberTable({
           </table>
 
           {members.length === 0 && (
-            <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-              검색 결과가 없습니다.
-            </div>
+            <ListEmptyState
+              hasError={initialLoadFailed}
+              errorMessage="회원 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+              emptyMessage="검색 결과가 없습니다."
+            />
           )}
           <InfiniteScrollTrigger
             rootRef={scrollRootRef}

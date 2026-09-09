@@ -2,6 +2,7 @@ import type { RefObject } from 'react'
 import { motion } from 'framer-motion'
 import { Badge } from '@/shared/ui/badge'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import { formatDuration } from '@/shared/lib/utils/formatDuration'
 import type { InterviewSession } from '@/featured/interviews/types'
 
@@ -29,6 +30,7 @@ interface InterviewsTableProps {
   hasMore: boolean
   isLoading: boolean
   hasError: boolean
+  initialLoadFailed: boolean
   isPaused?: boolean
   onLoadMore: () => void | Promise<void>
 }
@@ -39,6 +41,7 @@ export function InterviewsTable({
   hasMore,
   isLoading,
   hasError,
+  initialLoadFailed,
   isPaused,
   onLoadMore,
 }: InterviewsTableProps) {
@@ -119,9 +122,11 @@ export function InterviewsTable({
         </table>
 
         {sessions.length === 0 && (
-          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-            검색 결과가 없습니다.
-          </div>
+          <ListEmptyState
+            hasError={initialLoadFailed}
+            errorMessage="면접 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+            emptyMessage="검색 결과가 없습니다."
+          />
         )}
         <InfiniteScrollTrigger
           rootRef={scrollContainerRef}

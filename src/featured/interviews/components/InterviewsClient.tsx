@@ -33,6 +33,7 @@ export function InterviewsClient({
     hasMore,
     isLoadingMore,
     loadMoreError,
+    initialLoadFailed,
     loadMore,
     search,
     setSearch,
@@ -150,6 +151,7 @@ export function InterviewsClient({
           hasMore={hasMore}
           isLoading={isLoadingMore}
           hasError={loadMoreError}
+          initialLoadFailed={initialLoadFailed}
           isPaused={isPaused}
           onLoadMore={loadMore}
         />
