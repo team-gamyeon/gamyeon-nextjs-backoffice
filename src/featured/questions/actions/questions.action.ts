@@ -11,13 +11,17 @@ import { QUESTION_LIST_QUERY_CONFIG } from '@/featured/questions/constants'
 import { mapApiQuestionToCommon } from '@/shared/lib/utils/mappers'
 import { toActionResult } from '@/shared/lib/action/toActionResult'
 import { parseListQuery } from '@/shared/lib/validation/listQuery'
+import {
+  parseCreateQuestionInput,
+  parseQuestionId,
+  parseUpdateQuestionInput,
+} from '@/featured/questions/validation/questionActionInput'
 import type { ActionResult } from '@/shared/types/action'
 import type {
   CreateQuestionResponse,
   DeleteQuestionResponse,
   QuestionListData,
   QuestionListQuery,
-  QuestionStatus,
   UpdateQuestionResponse,
 } from '@/featured/questions/types'
 
@@ -50,26 +54,46 @@ export async function getQuestionsAction(params: unknown): Promise<GetQuestionsA
 }
 
 export async function createQuestionAction(
-  _prevState: CreateQuestionActionState | null,
-  formData: FormData,
+  _prevState: unknown,
+  formData: unknown,
 ): Promise<CreateQuestionActionState> {
-  const content = formData.get('content') as string
-  const status = formData.get('status') as 'ACTIVE' | 'INACTIVE'
+  const parsed = parseCreateQuestionInput(formData)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error }
+  }
 
   return toActionResult(async () => {
-    const data = await createQuestion({ content, status })
+    const data = await createQuestion(parsed.data)
     revalidatePath('/questions')
     return data
   }, '질문 생성에 실패했습니다.')
 }
 
 export async function updateQuestionAction(
-  id: string,
-  body: { content?: string; status?: QuestionStatus },
+  id: unknown,
+  body: unknown,
 ): Promise<UpdateQuestionActionState> {
-  return toActionResult(() => updateQuestion(id, body), '질문 수정에 실패했습니다.')
+  const parsedId = parseQuestionId(id)
+  if (!parsedId.success) {
+    return { success: false, error: parsedId.error }
+  }
+
+  const parsedBody = parseUpdateQuestionInput(body)
+  if (!parsedBody.success) {
+    return { success: false, error: parsedBody.error }
+  }
+
+  return toActionResult(
+    () => updateQuestion(parsedId.data, parsedBody.data),
+    '질문 수정에 실패했습니다.',
+  )
 }
 
-export async function deleteQuestionAction(id: string): Promise<DeleteQuestionActionState> {
-  return toActionResult(() => deleteQuestion(id), '질문 삭제에 실패했습니다.')
+export async function deleteQuestionAction(id: unknown): Promise<DeleteQuestionActionState> {
+  const parsedId = parseQuestionId(id)
+  if (!parsedId.success) {
+    return { success: false, error: parsedId.error }
+  }
+
+  return toActionResult(() => deleteQuestion(parsedId.data), '질문 삭제에 실패했습니다.')
 }

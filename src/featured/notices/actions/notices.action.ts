@@ -11,13 +11,16 @@ import { NOTICE_LIST_QUERY_CONFIG } from '@/featured/notices/constants'
 import { mapApiNoticeToNotice } from '@/shared/lib/utils/mappers'
 import { toActionResult } from '@/shared/lib/action/toActionResult'
 import { parseListQuery } from '@/shared/lib/validation/listQuery'
+import {
+  parseCreateNoticeInput,
+  parseNoticeId,
+  parseUpdateNoticeInput,
+} from '@/featured/notices/validation/noticeActionInput'
 import type { ActionResult } from '@/shared/types/action'
 import type {
   NoticeListData,
   GetNoticesParams,
-  CreateNoticeRequest,
   CreateNoticeResponse,
-  UpdateNoticeRequest,
   UpdateNoticeResponse,
   DeleteNoticeResponse,
 } from '@/featured/notices/types'
@@ -51,23 +54,44 @@ export async function getNoticesAction(params: unknown = {}): Promise<GetNotices
   }, '공지사항 조회에 실패했습니다.')
 }
 
-export async function createNoticeAction(
-  body: CreateNoticeRequest,
-): Promise<CreateNoticeActionState> {
+export async function createNoticeAction(body: unknown): Promise<CreateNoticeActionState> {
+  const parsed = parseCreateNoticeInput(body)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error }
+  }
+
   return toActionResult(async () => {
-    const data = await createNotice(body)
+    const data = await createNotice(parsed.data)
     revalidatePath('/notices')
     return data
   }, '공지사항 생성에 실패했습니다.')
 }
 
 export async function updateNoticeAction(
-  id: number,
-  body: UpdateNoticeRequest,
+  id: unknown,
+  body: unknown,
 ): Promise<UpdateNoticeActionState> {
-  return toActionResult(() => updateNotice(id, body), '공지사항 수정에 실패했습니다.')
+  const parsedId = parseNoticeId(id)
+  if (!parsedId.success) {
+    return { success: false, error: parsedId.error }
+  }
+
+  const parsedBody = parseUpdateNoticeInput(body)
+  if (!parsedBody.success) {
+    return { success: false, error: parsedBody.error }
+  }
+
+  return toActionResult(
+    () => updateNotice(parsedId.data, parsedBody.data),
+    '공지사항 수정에 실패했습니다.',
+  )
 }
 
-export async function deleteNoticeAction(id: number): Promise<DeleteNoticeActionState> {
-  return toActionResult(() => deleteNotice(id), '공지사항 삭제에 실패했습니다.')
+export async function deleteNoticeAction(id: unknown): Promise<DeleteNoticeActionState> {
+  const parsedId = parseNoticeId(id)
+  if (!parsedId.success) {
+    return { success: false, error: parsedId.error }
+  }
+
+  return toActionResult(() => deleteNotice(parsedId.data), '공지사항 삭제에 실패했습니다.')
 }

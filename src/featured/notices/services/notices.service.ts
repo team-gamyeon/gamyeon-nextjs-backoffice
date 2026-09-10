@@ -27,9 +27,12 @@ export async function createNotice(body: CreateNoticeRequest) {
 }
 
 export async function updateNotice(id: number, body: UpdateNoticeRequest) {
-  return serverApi.patch<UpdateNoticeResponse>(`/api/v1/notices/${id}`, body)
+  return serverApi.patch<UpdateNoticeResponse>(
+    `/api/v1/notices/${encodeURIComponent(String(id))}`,
+    body,
+  )
 }
 
 export async function deleteNotice(id: number) {
-  return serverApi.delete<DeleteNoticeResponse>(`/api/v1/notices/${id}`)
+  return serverApi.delete<DeleteNoticeResponse>(`/api/v1/notices/${encodeURIComponent(String(id))}`)
 }

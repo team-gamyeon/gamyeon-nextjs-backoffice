@@ -40,9 +40,12 @@ export async function createQuestion(body: CreateQuestionRequest) {
 }
 
 export async function updateQuestion(id: string, body: UpdateQuestionRequest) {
-  return serverApi.patch<UpdateQuestionResponse>(`/api/v1/questions/${id}`, body)
+  return serverApi.patch<UpdateQuestionResponse>(
+    `/api/v1/questions/${encodeURIComponent(id)}`,
+    body,
+  )
 }
 
 export async function deleteQuestion(id: string) {
-  return serverApi.delete<DeleteQuestionResponse>(`/api/v1/questions/${id}`)
+  return serverApi.delete<DeleteQuestionResponse>(`/api/v1/questions/${encodeURIComponent(id)}`)
 }
