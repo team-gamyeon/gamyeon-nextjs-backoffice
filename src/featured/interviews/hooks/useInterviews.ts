@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
 import { useListResource, type ListPageResult } from '@/shared/hooks/useListResource'
 import { useListSearch } from '@/shared/hooks/useListSearch'
+import { countBy } from '@/shared/lib/countBy'
 import { getInterviewsAction } from '@/featured/interviews/actions/interviews.action'
 import { mapApiInterviewToSession } from '@/featured/interviews/utils/mapApiInterviewToSession'
 import type { PaginationMeta, SortOrder } from '@/shared/types/pagination'
@@ -82,6 +83,8 @@ export function useInterviews({
     updateQuery({ search: nextSearch }, { scroll: false })
   })
 
+  const statusCounts = useMemo(() => countBy(items, (session) => session.status), [items])
+
   const changeQuery = (updates: Parameters<typeof updateQuery>[0]) => {
     invalidate()
     updateQuery(updates)
@@ -108,6 +111,7 @@ export function useInterviews({
 
   return {
     sessions: items,
+    statusCounts,
     meta,
     hasMore,
     isLoadingMore,

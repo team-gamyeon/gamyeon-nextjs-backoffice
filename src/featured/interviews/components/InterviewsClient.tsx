@@ -30,6 +30,7 @@ export function InterviewsClient({
 }: InterviewsClientProps) {
   const {
     sessions,
+    statusCounts,
     meta: currentMeta,
     hasMore,
     isLoadingMore,
@@ -69,11 +70,21 @@ export function InterviewsClient({
           건
         </span>
         <span className="text-muted-foreground">
-          조회 결과{' '}
-          <span className="text-foreground mr-1 font-semibold">{currentMeta.filteredCount}</span>건
+          불러옴 <span className="text-foreground mr-1 font-semibold">{sessions.length}</span>건
         </span>
         <span className="text-muted-foreground">
-          불러옴 <span className="text-foreground mr-1 font-semibold">{sessions.length}</span>건
+          완료{' '}
+          <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
+            {statusCounts.FINISHED ?? 0}
+          </span>
+          건
+        </span>
+        <span className="text-muted-foreground">
+          일시중지{' '}
+          <span className="text-destructive mr-1 font-semibold">{statusCounts.PAUSED ?? 0}</span>건
+        </span>
+        <span className="text-muted-foreground">
+          대기 <span className="mr-1 font-semibold text-gray-500">{statusCounts.READY ?? 0}</span>건
         </span>
       </div>
 

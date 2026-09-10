@@ -34,6 +34,7 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
 
   const {
     reports,
+    statusCounts,
     meta: currentMeta,
     search,
     setSearch,
@@ -84,11 +85,22 @@ export function ReportsClient({ initialReports, meta, query, hasLoadError }: Rep
           개
         </span>
         <span className="text-muted-foreground">
-          조회 결과{' '}
-          <span className="text-primary mr-1 font-semibold">
-            {currentMeta.filteredCount.toLocaleString()}
+          불러옴{' '}
+          <span className="text-foreground mr-1 font-semibold">
+            {reports.length.toLocaleString()}
           </span>
           개
+        </span>
+        <span className="text-muted-foreground">
+          분석 완료{' '}
+          <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
+            {statusCounts.COMPLETED ?? 0}
+          </span>
+          개
+        </span>
+        <span className="text-muted-foreground">
+          실패{' '}
+          <span className="text-destructive mr-1 font-semibold">{statusCounts.FAILED ?? 0}</span>개
         </span>
       </div>
 

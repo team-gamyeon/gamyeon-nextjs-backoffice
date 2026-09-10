@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
 import { useListResource, type ListPageResult } from '@/shared/hooks/useListResource'
 import { useListSearch } from '@/shared/hooks/useListSearch'
+import { countBy } from '@/shared/lib/countBy'
 import { mapApiReportToAnalysisReport } from '@/shared/lib/utils/mappers'
 import { getReportsAction } from '@/featured/reports/actions/reports.action'
 import type { PaginationMeta, SortOrder } from '@/shared/types/pagination'
@@ -68,6 +69,8 @@ export function useReports(
     updateQuery({ search: nextSearch })
   })
 
+  const statusCounts = useMemo(() => countBy(items, (report) => report.status), [items])
+
   const changeQuery = (updates: Parameters<typeof updateQuery>[0]) => {
     invalidate()
     updateQuery(updates)
@@ -90,6 +93,7 @@ export function useReports(
 
   return {
     reports: items,
+    statusCounts,
     meta,
     search,
     setSearch,
