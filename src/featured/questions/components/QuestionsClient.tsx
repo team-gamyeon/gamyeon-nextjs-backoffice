@@ -37,13 +37,16 @@ export function QuestionsClient({
     activeTab,
     setActiveTab,
     isFiltered,
+    activeCount,
+    inactiveCount,
     isPending: isSearchPending,
     isPaused,
     isLoadingMore,
     loadMoreError,
     initialLoadFailed,
-    updateItem,
-    removeItem,
+    handleToggle,
+    pendingToggleIds,
+    deleteItem,
     hasMore,
     loadMore,
     refreshQuestions,
@@ -83,11 +86,10 @@ export function QuestionsClient({
             </span>
           ) : null}
           <span className="text-muted-foreground">
-            불러옴{' '}
-            <span className="text-foreground mr-1 font-semibold">
-              {loadedQuestions.length.toLocaleString()}
-            </span>
-            개
+            활성 <span className="text-primary mr-1 font-semibold">{activeCount}</span>개
+          </span>
+          <span className="text-muted-foreground">
+            비활성 <span className="mr-1 font-semibold text-gray-500">{inactiveCount}</span>개
           </span>
         </div>
       )}
@@ -131,8 +133,9 @@ export function QuestionsClient({
       <div className="py-4 transition-opacity" aria-busy={isSearchPending || isLoadingMore}>
         <QuestionTable
           questions={loadedQuestions}
-          onToggled={updateItem}
-          onRemoved={removeItem}
+          onToggle={handleToggle}
+          pendingToggleIds={pendingToggleIds}
+          onRemoved={deleteItem}
           onEdited={refreshQuestions}
           initialLoadFailed={initialLoadFailed}
           scrollRootRef={scrollRootRef}

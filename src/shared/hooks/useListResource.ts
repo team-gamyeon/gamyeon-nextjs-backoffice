@@ -83,18 +83,19 @@ export function useListResource<T>({
 
   // 동시 호출 차단. state.isLoading은 다음 렌더에야 반영되므로 래치가 따로 필요하다.
   const inFlightRef = useRef(false)
-  const { hasMore, generation, loadError } = state
+  const { hasMore, generation, loadError, needsReconcile, shouldAutoReconcile } = state
   const currentPage = state.meta.page
 
   const loadMore = useCallback(async () => {
     const isInitialRetry = loadError === 'initial'
-    if (inFlightRef.current || isPaused || (!hasMore && !isInitialRetry)) return
+    const isReconciling = needsReconcile && !isInitialRetry
+    if (inFlightRef.current || isPaused || (!hasMore && !isInitialRetry && !isReconciling)) return
 
-    const mode = isInitialRetry ? 'replace' : 'append'
-    const page = isInitialRetry ? currentPage : currentPage + 1
+    const mode = isInitialRetry ? 'replace' : isReconciling ? 'reconcile' : 'append'
+    const page = isInitialRetry || isReconciling ? currentPage : currentPage + 1
 
     inFlightRef.current = true
-    dispatch({ type: 'loadStarted' })
+    dispatch({ type: 'loadStarted', mode })
 
     try {
       const result = await loadPage(page)
@@ -115,8 +116,19 @@ export function useListResource<T>({
       })
     } finally {
       inFlightRef.current = false
+      // mutation으로 generation이 바뀌어 응답이 버려졌더라도 자동 보충을 시작할 수 있게
+      // 물리적인 요청 종료를 reducer에 알린다.
+      dispatch({ type: 'requestSettled' })
     }
-  }, [currentPage, generation, hasMore, isPaused, loadError, loadPage])
+  }, [currentPage, generation, hasMore, isPaused, loadError, loadPage, needsReconcile])
+
+  // 로컬 삭제/필터 이탈 직후 한 번만 현재 마지막 페이지를 보충한다.
+  // 실패하면 자동으로 반복하지 않고 다음 loadMore 호출이 같은 페이지를 재시도한다.
+  useEffect(() => {
+    if (shouldAutoReconcile && !state.isLoading) {
+      void loadMore()
+    }
+  }, [loadMore, shouldAutoReconcile, state.isLoading])
 
   /**
    * 필터를 바꾸기 직전에 호출한다. 진행 중이던 다음 페이지 요청의 응답을
@@ -130,20 +142,19 @@ export function useListResource<T>({
   }, [])
 
   /**
-   * 서버 재조회 없이 목록 안의 한 항목만 반영한다.
-   *
-   * router.refresh()를 쓰면 불러온 페이지가 전부 첫 페이지로 되돌아간다.
-   * 무엇이 바뀌었는지 이미 아는 수정·삭제에는 재조회가 필요 없다.
-   *
-   * 대신 정렬 기준 필드가 바뀌면 실제 정렬 위치와 어긋난 채로 남는다.
-   * 다음 필터 변경이나 재조회 때 정리된다.
+   * 서버 재조회 없이 목록 안의 한 항목을 교체한다.
+   * 정렬 기준 필드가 바뀌면 실제 정렬 위치와 어긋날 수 있으므로 소비자가 재조회를 선택한다.
    */
   const updateItem = useCallback((item: T) => {
     dispatch({ type: 'itemUpdated', item })
   }, [])
 
-  const removeItem = useCallback((key: PropertyKey) => {
-    dispatch({ type: 'itemRemoved', key })
+  const deleteItem = useCallback((key: PropertyKey) => {
+    dispatch({ type: 'itemDeleted', key })
+  }, [])
+
+  const excludeItem = useCallback((key: PropertyKey) => {
+    dispatch({ type: 'itemExcluded', key })
   }, [])
 
   return {
@@ -160,7 +171,8 @@ export function useListResource<T>({
     loadMore,
     invalidate,
     updateItem,
-    removeItem,
+    deleteItem,
+    excludeItem,
     scrollRootRef,
   }
 }

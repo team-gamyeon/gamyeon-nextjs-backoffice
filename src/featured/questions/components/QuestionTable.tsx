@@ -7,10 +7,7 @@ import { toast } from 'sonner'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { QuestionDialog } from './QuestionDialog'
-import {
-  deleteQuestionAction,
-  updateQuestionAction,
-} from '@/featured/questions/actions/questions.action'
+import { deleteQuestionAction } from '@/featured/questions/actions/questions.action'
 import { QuestionDeleteDialog } from './QuestionDeleteDialog'
 import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
 import { ListEmptyState } from '@/shared/components/ListEmptyState'
@@ -18,8 +15,8 @@ import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
-  /** 상태 토글 결과를 목록에 반영한다. 서버 재조회 없이 해당 항목만 교체된다. */
-  onToggled: (question: CommonQuestion) => void
+  onToggle: (id: string) => Promise<void>
+  pendingToggleIds: ReadonlySet<string>
   onRemoved: (id: string) => void
   /** 다이얼로그 수정은 갱신된 항목을 알 수 없어 서버에서 다시 받는다. */
   onEdited: () => void
@@ -34,7 +31,8 @@ interface QuestionTableProps {
 
 export function QuestionTable({
   questions,
-  onToggled,
+  onToggle,
+  pendingToggleIds,
   onRemoved,
   onEdited,
   initialLoadFailed,
@@ -106,21 +104,12 @@ export function QuestionTable({
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
-                        onClick={async () => {
-                          const result = await updateQuestionAction(question.id, {
-                            status: question.isActive ? 'INACTIVE' : 'ACTIVE',
-                          })
-                          if (result.success) {
-                            toast.success(
-                              `질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`,
-                            )
-                            onToggled({ ...question, isActive: !question.isActive })
-                          } else {
-                            toast.error(result.error ?? '상태 변경에 실패했습니다.')
-                          }
-                        }}
+                        type="button"
+                        onClick={() => onToggle(question.id)}
+                        disabled={pendingToggleIds.has(question.id)}
+                        aria-busy={pendingToggleIds.has(question.id)}
                         className={cn(
-                          'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
+                          'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
                           question.isActive
                             ? 'bg-primary/10 text-primary hover:bg-primary/20'
                             : 'bg-muted text-muted-foreground hover:bg-muted/60',

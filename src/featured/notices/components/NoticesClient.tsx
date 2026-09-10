@@ -41,6 +41,7 @@ export function NoticesClient({ initialNotices, meta, query, hasLoadError }: Not
     editTarget,
     activeCount,
     inactiveCount,
+    pendingToggleIds,
     handleToggle,
     handleDelete,
     handleEdit,
@@ -71,14 +72,10 @@ export function NoticesClient({ initialNotices, meta, query, hasLoadError }: Not
           </span>
         )}
         <span className="text-muted-foreground">
-          불러옴 <span className="text-foreground mr-1 font-semibold">{notices.length}</span>개
+          활성 <span className="text-primary mr-1 font-semibold">{activeCount}</span>개
         </span>
         <span className="text-muted-foreground">
-          활성(불러온 항목) <span className="text-primary mr-1 font-semibold">{activeCount}</span>개
-        </span>
-        <span className="text-muted-foreground">
-          비활성(불러온 항목){' '}
-          <span className="mr-1 font-semibold text-gray-500">{inactiveCount}</span>개
+          비활성 <span className="mr-1 font-semibold text-gray-500">{inactiveCount}</span>개
         </span>
       </div>
 
@@ -109,6 +106,7 @@ export function NoticesClient({ initialNotices, meta, query, hasLoadError }: Not
               notice={notice}
               index={index}
               isExpanded={expandedId === notice.id}
+              isTogglePending={pendingToggleIds.has(notice.id)}
               onToggleExpand={() => setExpandedId(expandedId === notice.id ? null : notice.id)}
               onToggle={handleToggle}
               onEdit={handleEdit}

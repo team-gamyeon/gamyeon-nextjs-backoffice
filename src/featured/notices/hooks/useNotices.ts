@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState, useTransition } from 'react'
+import { useCallback, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -11,6 +11,7 @@ import {
 import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
 import { useListResource, type ListPageResult } from '@/shared/hooks/useListResource'
 import { useListSearch } from '@/shared/hooks/useListSearch'
+import { countBy } from '@/shared/lib/countBy'
 import type { GetNoticesParams, Notice, NoticeStatus } from '@/featured/notices/types'
 import type { PaginationMeta } from '@/shared/types/pagination'
 
@@ -30,11 +31,23 @@ export function useNotices({
   const router = useRouter()
   const { isPending, updateQuery } = useListQueryNavigation()
   const [isRefreshing, startRefresh] = useTransition()
-  const queryKey = [query.search, query.status, query.sortBy, query.sortOrder].join('|')
+  const queryKey = [
+    query.search,
+    query.status,
+    query.sortBy,
+    query.sortOrder,
+    query.from,
+    query.to,
+  ].join('|')
+  const latestQueryKeyRef = useRef(queryKey)
+  latestQueryKeyRef.current = queryKey
+  const queryChangeEpochRef = useRef(0)
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Notice | undefined>(undefined)
+  const pendingToggleIdsRef = useRef(new Set<string>())
+  const [pendingToggleIds, setPendingToggleIds] = useState<ReadonlySet<string>>(() => new Set())
 
   const loadPage = useCallback(
     async (page: number): Promise<ListPageResult<Notice>> => {
@@ -66,7 +79,8 @@ export function useNotices({
     loadMore,
     invalidate,
     updateItem,
-    removeItem,
+    excludeItem,
+    deleteItem,
     scrollRootRef,
   } = useListResource<Notice>({
     initialItems: initialNotices,
@@ -79,6 +93,7 @@ export function useNotices({
   })
 
   const { search, setSearch, isSearchPending } = useListSearch(query.search ?? '', (nextSearch) => {
+    queryChangeEpochRef.current += 1
     invalidate()
     updateQuery({ search: nextSearch }, { scroll: false })
   })
@@ -86,31 +101,64 @@ export function useNotices({
   const activeTab: NoticeStatus | 'all' = query.status ?? 'all'
 
   const setActiveTab = (status: NoticeStatus | 'all') => {
+    queryChangeEpochRef.current += 1
     invalidate()
     updateQuery({ status: status === 'all' ? undefined : status })
   }
 
-  /** 등록·수정·삭제 후 서버 데이터를 다시 받아 목록을 갱신한다. */
-  const refresh = () => {
+  const revalidateNotices = () => {
     invalidate()
-    setExpandedId(null)
     startRefresh(() => router.refresh())
   }
 
+  /** 등록·수정·삭제 후 서버 데이터를 다시 받아 목록을 갱신한다. */
+  const refresh = () => {
+    setExpandedId(null)
+    revalidateNotices()
+  }
+
   const handleToggle = async (id: string) => {
+    if (pendingToggleIdsRef.current.has(id)) return
+
     const target = items.find((notice) => notice.id === id)
     if (!target) return
 
-    const result = await updateNoticeAction(Number(id), {
-      status: target.isActive ? 'INACTIVE' : 'ACTIVE',
-    })
-    if (!result.success) {
-      toast.error('상태 변경에 실패했습니다.')
-      return
-    }
+    const requestQueryKey = queryKey
+    const requestQueryChangeEpoch = queryChangeEpochRef.current
+    const nextStatus: NoticeStatus = target.isActive ? 'INACTIVE' : 'ACTIVE'
+    pendingToggleIdsRef.current.add(id)
+    setPendingToggleIds(new Set(pendingToggleIdsRef.current))
 
-    toast.success(`공지사항이 ${target.isActive ? '비활성화' : '활성화'}되었습니다.`)
-    updateItem({ ...target, isActive: !target.isActive })
+    try {
+      const result = await updateNoticeAction(Number(id), { status: nextStatus })
+      if (!result.success) {
+        toast.error('상태 변경에 실패했습니다.')
+        return
+      }
+
+      toast.success(`공지사항이 ${target.isActive ? '비활성화' : '활성화'}되었습니다.`)
+
+      // 요청 중 필터나 정렬이 바뀌었다면 새 목록에 이전 쿼리의 항목을 덮어쓰지 않는다.
+      if (
+        queryChangeEpochRef.current !== requestQueryChangeEpoch ||
+        latestQueryKeyRef.current !== requestQueryKey
+      ) {
+        revalidateNotices()
+        return
+      }
+
+      if (query.status && query.status !== nextStatus) {
+        setExpandedId((currentId) => (currentId === id ? null : currentId))
+        excludeItem(id)
+        return
+      }
+
+      updateItem({ ...target, isActive: !target.isActive })
+      revalidateNotices()
+    } finally {
+      pendingToggleIdsRef.current.delete(id)
+      setPendingToggleIds(new Set(pendingToggleIdsRef.current))
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -122,7 +170,7 @@ export function useNotices({
 
     toast.success('공지사항이 삭제되었습니다.')
     setExpandedId((currentId) => (currentId === id ? null : currentId))
-    removeItem(id)
+    deleteItem(id)
   }
 
   const handleEdit = (notice: Notice) => {
@@ -139,15 +187,10 @@ export function useNotices({
     refresh()
   }
 
-  const { activeCount, inactiveCount } = useMemo(() => {
-    let active = 0
-    let inactive = 0
-    for (const notice of items) {
-      if (notice.isActive) active += 1
-      else inactive += 1
-    }
-    return { activeCount: active, inactiveCount: inactive }
-  }, [items])
+  const statusCounts = useMemo(
+    () => countBy(items, (notice) => (notice.isActive ? 'active' : 'inactive')),
+    [items],
+  )
 
   return {
     notices: items,
@@ -170,8 +213,9 @@ export function useNotices({
     dialogOpen,
     setDialogOpen,
     editTarget,
-    activeCount,
-    inactiveCount,
+    activeCount: statusCounts.active ?? 0,
+    inactiveCount: statusCounts.inactive ?? 0,
+    pendingToggleIds,
     handleToggle,
     handleDelete,
     handleEdit,
