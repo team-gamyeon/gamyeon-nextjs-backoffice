@@ -2,19 +2,41 @@
 
 import { motion } from 'framer-motion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
-import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { SearchInput } from '@/shared/components/SearchInput'
+import { MAX_LIST_SEARCH_LENGTH } from '@/shared/lib/validation/listQuery'
 import { useInterviews, type InterviewSortBy } from '@/featured/interviews/hooks/useInterviews'
+import { INTERVIEW_SORT_OPTIONS, INTERVIEW_STATUS_OPTIONS } from '@/featured/interviews/constants'
 import { InterviewsTable } from '@/featured/interviews/components/InterviewsTable'
-import type { InterviewSession, SessionStatus } from '@/featured/interviews/types'
+import type { PaginationMeta, SortOrder } from '@/shared/types/pagination'
+import type {
+  InterviewListQuery,
+  InterviewSession,
+  InterviewStatus,
+} from '@/featured/interviews/types'
 
 interface InterviewsClientProps {
   initialSessions: InterviewSession[]
+  meta: PaginationMeta
+  query: InterviewListQuery
+  hasLoadError?: boolean
 }
 
-export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
+export function InterviewsClient({
+  initialSessions,
+  meta,
+  query,
+  hasLoadError,
+}: InterviewsClientProps) {
   const {
+    sessions,
+    statusCounts,
+    meta: currentMeta,
+    hasMore,
+    isLoadingMore,
+    loadMoreError,
+    initialLoadFailed,
+    loadMore,
     search,
     setSearch,
     selectedStatus,
@@ -23,13 +45,16 @@ export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
     setSortBy,
     sortOrder,
     setSortOrder,
-    filtered,
-    totalCount,
-    completedCount,
-    inProgressCount,
-    abandonedCount,
+    isPending,
+    isPaused,
     resetFilters,
-  } = useInterviews(initialSessions)
+    scrollRootRef,
+  } = useInterviews({
+    initialSessions,
+    initialMeta: meta,
+    query,
+    hasInitialLoadError: hasLoadError,
+  })
 
   return (
     <motion.div
@@ -37,88 +62,113 @@ export function InterviewsClient({ initialSessions }: InterviewsClientProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="space-y-4"
+      aria-busy={isPending}
     >
-      <div className="border-destructive/20 bg-destructive/5 flex items-center gap-3 rounded-lg border px-4 py-3">
-        <Badge variant="destructive" className="text-xs">
-          중단
-        </Badge>
-        <p className="text-muted-foreground text-sm">
-          현재 <span className="text-foreground font-semibold">{abandonedCount}</span>
-          건의 중단된 면접이 있습니다. 중단 원인을 확인하고 서비스 품질을 개선하세요.
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="flex items-center gap-4 text-sm">
+      <div className="flex flex-wrap items-center gap-4 text-sm">
         <span className="text-muted-foreground">
-          총 <span className="text-foreground mr-1 font-semibold">{totalCount}</span>건
+          전체 <span className="text-foreground mr-1 font-semibold">{currentMeta.totalCount}</span>
+          건
+        </span>
+        <span className="text-muted-foreground">
+          불러옴 <span className="text-foreground mr-1 font-semibold">{sessions.length}</span>건
         </span>
         <span className="text-muted-foreground">
           완료{' '}
           <span className="mr-1 font-semibold text-green-600 dark:text-green-400">
-            {completedCount}
+            {statusCounts.FINISHED ?? 0}
           </span>
           건
         </span>
         <span className="text-muted-foreground">
-          진행 중 <span className="text-primary mr-1 font-semibold">{inProgressCount}</span>건
+          일시중지{' '}
+          <span className="text-destructive mr-1 font-semibold">{statusCounts.PAUSED ?? 0}</span>건
         </span>
         <span className="text-muted-foreground">
-          중단 <span className="text-destructive mr-1 font-semibold">{abandonedCount}</span>건
+          대기 <span className="mr-1 font-semibold text-gray-500">{statusCounts.READY ?? 0}</span>건
         </span>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <SearchInput
           value={search}
           onChange={setSearch}
           placeholder="닉네임 또는 세션 ID 검색..."
           className="min-w-52 flex-1"
+          maxLength={MAX_LIST_SEARCH_LENGTH}
         />
 
         <Select
           value={selectedStatus}
-          onValueChange={(value) => setSelectedStatus(value as SessionStatus | 'all')}
+          onValueChange={(value) => setSelectedStatus(value as InterviewStatus | 'all')}
+          disabled={isPending}
         >
-          <SelectTrigger className="h-9 w-28">
+          <SelectTrigger className="h-9 w-32">
             <SelectValue placeholder="상태" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">전체</SelectItem>
-            <SelectItem value="abandoned">중단</SelectItem>
-            <SelectItem value="in_progress">진행 중</SelectItem>
-            <SelectItem value="completed">완료</SelectItem>
+            {INTERVIEW_STATUS_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value as InterviewSortBy)}>
-          <SelectTrigger className="h-9 w-32">
+        <Select
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as InterviewSortBy)}
+          disabled={isPending}
+        >
+          <SelectTrigger className="h-9 w-36">
             <SelectValue placeholder="정렬 기준" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="createdAt">생성일 순</SelectItem>
-            <SelectItem value="endedAt">완료일 순</SelectItem>
-            <SelectItem value="score">점수 순</SelectItem>
+            {INTERVIEW_SORT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
-        <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}>
+        <Select
+          value={sortOrder}
+          onValueChange={(value) => setSortOrder(value as SortOrder)}
+          disabled={isPending}
+        >
           <SelectTrigger className="h-9 w-28">
             <SelectValue placeholder="정렬 순서" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="desc">최신순</SelectItem>
-            <SelectItem value="asc">오래된순</SelectItem>
+            <SelectItem value="desc">내림차순</SelectItem>
+            <SelectItem value="asc">오름차순</SelectItem>
           </SelectContent>
         </Select>
 
-        <Button variant="outline" size="sm" className="h-9" onClick={resetFilters}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-9"
+          onClick={resetFilters}
+          disabled={isPending}
+        >
           초기화
         </Button>
       </div>
 
-      <InterviewsTable sessions={filtered} />
+      <div className={isPending ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+        <InterviewsTable
+          sessions={sessions}
+          scrollContainerRef={scrollRootRef}
+          hasMore={hasMore}
+          isLoading={isLoadingMore}
+          hasError={loadMoreError}
+          initialLoadFailed={initialLoadFailed}
+          isPaused={isPaused}
+          onLoadMore={loadMore}
+        />
+      </div>
     </motion.div>
   )
 }

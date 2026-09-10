@@ -1,4 +1,6 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { SESSION_EXPIRED_REDIRECT } from '@/shared/constants/auth'
 import { NetworkError } from './types'
 import type { RequestConfig } from './types'
 import { buildUrl, parseApiResponse } from './_utils'
@@ -79,7 +81,6 @@ async function serverFetch<T>(
       throw new NetworkError()
     }
     const { data, error } = await parseApiResponse<T>(res)
-    console.log('[serverApi]', method, endpoint, { status: res.status, data, error })
     if (error) throw error
     return data as T
   }
@@ -96,7 +97,8 @@ async function serverFetch<T>(
 
   if (res.status === 401) {
     const newAccessToken = await tryRefresh(cookieStore)
-    if (!newAccessToken) return null as T // redirect('/login')
+    // 갱신 실패 = 세션이 죽었다. 목록 에러로 남겨두면 로그인으로 돌아갈 길이 없다.
+    if (!newAccessToken) redirect(SESSION_EXPIRED_REDIRECT)
 
     try {
       res = await doFetch(newAccessToken)

@@ -6,10 +6,17 @@ interface SearchInputProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
-  className?: string 
+  className?: string
+  maxLength?: number
 }
 
-export function SearchInput({ value, onChange, placeholder, className }: SearchInputProps) {
+export function SearchInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+  maxLength,
+}: SearchInputProps) {
   return (
     <div className={`relative ${className}`}>
       <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -17,6 +24,7 @@ export function SearchInput({ value, onChange, placeholder, className }: SearchI
         placeholder={placeholder}
         className="h-9 pl-9"
         value={value}
+        maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
       />
     </div>

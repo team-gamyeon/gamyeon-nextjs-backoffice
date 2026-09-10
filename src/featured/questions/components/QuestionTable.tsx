@@ -1,25 +1,48 @@
 'use client'
 
 import { useState } from 'react'
+import type { RefObject } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { QuestionDialog } from './QuestionDialog'
-import {
-  deleteQuestionAction,
-  updateQuestionAction,
-} from '@/featured/questions/actions/questions.action'
+import { deleteQuestionAction } from '@/featured/questions/actions/questions.action'
 import { QuestionDeleteDialog } from './QuestionDeleteDialog'
+import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import type { CommonQuestion } from '@/featured/questions/types'
 
 interface QuestionTableProps {
   questions: CommonQuestion[]
-  onDelete: (id: string) => void
-  onUpdate: (updated: CommonQuestion) => void
+  onToggle: (id: string) => Promise<void>
+  pendingToggleIds: ReadonlySet<string>
+  onRemoved: (id: string) => void
+  /** 다이얼로그 수정은 갱신된 항목을 알 수 없어 서버에서 다시 받는다. */
+  onEdited: () => void
+  initialLoadFailed: boolean
+  scrollRootRef: RefObject<HTMLDivElement | null>
+  hasMore: boolean
+  isLoadingMore: boolean
+  isLoadMorePaused?: boolean
+  loadMoreError: boolean
+  onLoadMore: () => void | Promise<void>
 }
 
-export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTableProps) {
+export function QuestionTable({
+  questions,
+  onToggle,
+  pendingToggleIds,
+  onRemoved,
+  onEdited,
+  initialLoadFailed,
+  scrollRootRef,
+  hasMore,
+  isLoadingMore,
+  isLoadMorePaused = false,
+  loadMoreError,
+  onLoadMore,
+}: QuestionTableProps) {
   const [editTarget, setEditTarget] = useState<CommonQuestion | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<CommonQuestion | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -31,8 +54,9 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
     setIsDeleting(false)
     if (result.success) {
       toast.success('질문이 삭제되었습니다.')
-      onDelete(deleteTarget.id)
+      const removedId = deleteTarget.id
       setDeleteTarget(null)
+      onRemoved(removedId)
     } else {
       toast.error(result.error ?? '질문 삭제에 실패했습니다.')
     }
@@ -40,8 +64,11 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
 
   return (
     <>
-      <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-        <div className="max-h-180 min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+      <div className="border-border/60 overflow-hidden rounded-lg border">
+        <div
+          ref={scrollRootRef}
+          className="max-h-140 w-full overflow-auto [scrollbar-gutter:stable]"
+        >
           <table className="w-full table-fixed text-sm">
             <colgroup>
               <col />
@@ -77,19 +104,12 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
-                        onClick={async () => {
-                          const result = await updateQuestionAction(question.id, {
-                            status: question.isActive ? 'INACTIVE' : 'ACTIVE',
-                          })
-                          if (result.success) {
-                            toast.success(`질문이 ${question.isActive ? '비활성화' : '활성화'}되었습니다.`)
-                            onUpdate({ ...question, isActive: !question.isActive })
-                          } else {
-                            toast.error(result.error ?? '상태 변경에 실패했습니다.')
-                          }
-                        }}
+                        type="button"
+                        onClick={() => onToggle(question.id)}
+                        disabled={pendingToggleIds.has(question.id)}
+                        aria-busy={pendingToggleIds.has(question.id)}
                         className={cn(
-                          'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
+                          'inline-flex h-7 w-20 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
                           question.isActive
                             ? 'bg-primary/10 text-primary hover:bg-primary/20'
                             : 'bg-muted text-muted-foreground hover:bg-muted/60',
@@ -129,10 +149,23 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
           </table>
 
           {questions.length === 0 && (
-            <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-              등록된 질문이 없습니다.
-            </div>
+            <ListEmptyState
+              hasError={initialLoadFailed}
+              errorMessage="질문 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+              emptyMessage="조건에 맞는 질문이 없습니다."
+            />
           )}
+
+          {/* 조회 실패 시에도 렌더한다. 재시도 버튼이 이 안에 있다. */}
+          <InfiniteScrollTrigger
+            rootRef={scrollRootRef}
+            hasMore={hasMore}
+            isLoading={isLoadingMore}
+            isPaused={isLoadMorePaused}
+            hasError={loadMoreError}
+            loadedCount={questions.length}
+            onLoadMore={onLoadMore}
+          />
         </div>
       </div>
 
@@ -141,9 +174,9 @@ export function QuestionTable({ questions, onDelete, onUpdate }: QuestionTablePr
           question={editTarget}
           open={!!editTarget}
           onClose={() => setEditTarget(null)}
-          onSuccess={(updated) => {
-            onUpdate(updated)
+          onSuccess={() => {
             setEditTarget(null)
+            onEdited()
           }}
         />
       )}
