@@ -1,50 +1,43 @@
-export type MemberStatus = "active" | "warning" | "suspended";
+import type { ListQueryParams, PaginatedData, SortOrder } from '@/shared/types/pagination'
+
+// 백엔드 유저 상태 코드. 유저 도메인의 주인인 members가 소유하고, 필요한 피처가 여기서 가져다 쓴다.
+export type ApiUserStatus = 'ACTIVE' | 'WARNED' | 'BANNED' | 'WITHDREW'
+
+export type MemberStatus = 'active' | 'warning' | 'suspended' | 'withdrew' | 'unknown'
 
 export interface Member {
-  id: string;
-  nickname: string;
-  email: string;
-  passwordHash: string;
-  status: MemberStatus;
-  joinedAt: string;
-  lastActiveAt: string;
-  sessionCount: number;
-  sanctionHistory: Sanction[];
-}
-
-export interface Sanction {
-  id: string;
-  type: "warning" | "suspended";
-  reason: string;
-  adminNote: string;
-  createdAt: string;
-  expiresAt?: string;
+  id: string
+  nickname: string
+  email: string
+  status: MemberStatus
+  joinedAt: string
+  lastActiveAt: string
 }
 
 export interface MemberFiltersState {
-  search: string;
-  status: MemberStatus | "all";
-  sortBy: "joinedAt" | "lastActiveAt" | "sessionCount";
-  sortOrder: "asc" | "desc";
+  search: string
+  status: MemberStatus | 'all'
+  sortBy: MemberSortBy
+  sortOrder: SortOrder
 }
 
-// API 응답 타입
-export type ApiUserStatus = "ACTIVE" | "WARNING" | "SUSPENDED";
+// Member 정렬 방식
+export type MemberSortBy = 'createdAt' | 'updatedAt'
+
+export interface MemberListQuery extends ListQueryParams {
+  status?: ApiUserStatus
+  sortBy?: MemberSortBy
+  sortOrder?: SortOrder
+}
 
 export interface ApiUser {
-  id: number;
-  nickname: string;
-  email: string;
-  provider: string;
-  status: ApiUserStatus;
-  createdAt: string;
-  updatedAt: string;
+  id: number
+  nickname: string
+  email: string
+  provider: string
+  status: ApiUserStatus
+  createdAt: string
+  updatedAt: string
 }
 
-export interface UserListResponse {
-  totalCount: number;
-  filteredCount: number;
-  page: number;
-  limit: number;
-  items: ApiUser[];
-}
+export type UserListResponse = PaginatedData<ApiUser>

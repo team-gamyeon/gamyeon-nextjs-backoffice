@@ -1,83 +1,136 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import type { InterviewSession, SessionStatus } from '@/featured/interviews/types'
+import { useCallback, useMemo } from 'react'
+import { useListQueryNavigation } from '@/shared/hooks/useListQueryNavigation'
+import { useListResource, type ListPageResult } from '@/shared/hooks/useListResource'
+import { useListSearch } from '@/shared/hooks/useListSearch'
+import { countBy } from '@/shared/lib/countBy'
+import { getInterviewsAction } from '@/featured/interviews/actions/interviews.action'
+import { mapApiInterviewToSession } from '@/featured/interviews/utils/mapApiInterviewToSession'
+import type { PaginationMeta, SortOrder } from '@/shared/types/pagination'
+import type {
+  InterviewListQuery,
+  InterviewSession,
+  InterviewSortBy,
+  InterviewStatus,
+} from '@/featured/interviews/types'
 
-export type InterviewSortBy = 'endedAt' | 'createdAt' | 'score'
+interface UseInterviewsParams {
+  initialSessions: InterviewSession[]
+  initialMeta: PaginationMeta
+  query: InterviewListQuery
+  hasInitialLoadError?: boolean
+}
 
-export function useInterviews(initialSessions: InterviewSession[]) {
-  const [search, setSearch] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState<SessionStatus | 'all'>('all')
-  const [sortBy, setSortBy] = useState<InterviewSortBy>('createdAt')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+export function useInterviews({
+  initialSessions,
+  initialMeta,
+  query,
+  hasInitialLoadError = false,
+}: UseInterviewsParams) {
+  const { isPending, updateQuery } = useListQueryNavigation()
+  const queryKey = [
+    query.search,
+    query.status,
+    query.sortBy,
+    query.sortOrder,
+    query.from,
+    query.to,
+  ].join('|')
 
-  const abandonedCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'abandoned').length,
-    [initialSessions],
+  const loadPage = useCallback(
+    async (page: number): Promise<ListPageResult<InterviewSession>> => {
+      const result = await getInterviewsAction({ ...query, page })
+      if (!result.success) return { ok: false }
+
+      const data = result.data
+      return {
+        ok: true,
+        items: data.items.map(mapApiInterviewToSession),
+        meta: {
+          totalCount: data.totalCount,
+          filteredCount: data.filteredCount,
+          page: data.page,
+          limit: data.limit,
+        },
+      }
+    },
+    [query],
   )
-  const completedCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'completed').length,
-    [initialSessions],
-  )
-  const inProgressCount = useMemo(
-    () => initialSessions.filter((session) => session.status === 'in_progress').length,
-    [initialSessions],
-  )
+
+  const {
+    items,
+    meta,
+    hasMore,
+    isLoadingMore,
+    loadMoreError,
+    initialLoadFailed,
+    loadMore,
+    invalidate,
+    scrollRootRef,
+  } = useListResource<InterviewSession>({
+    initialItems: initialSessions,
+    initialMeta,
+    hasInitialLoadError,
+    queryKey,
+    getKey: (session) => session.id,
+    loadPage,
+    isPaused: isPending,
+  })
+
+  const { search, setSearch, isSearchPending } = useListSearch(query.search ?? '', (nextSearch) => {
+    invalidate()
+    updateQuery({ search: nextSearch }, { scroll: false })
+  })
+
+  const statusCounts = useMemo(() => countBy(items, (session) => session.status), [items])
+
+  const changeQuery = (updates: Parameters<typeof updateQuery>[0]) => {
+    invalidate()
+    updateQuery(updates)
+  }
+
+  const setSelectedStatus = (status: InterviewStatus | 'all') =>
+    changeQuery({ status: status === 'all' ? undefined : status })
+
+  const setSortBy = (sortBy: InterviewSortBy) => changeQuery({ sortBy })
+
+  const setSortOrder = (sortOrder: SortOrder) => changeQuery({ sortOrder })
 
   const resetFilters = () => {
     setSearch('')
-    setSelectedStatus('all')
-    setSortBy('createdAt')
-    setSortOrder('desc')
+    changeQuery({
+      search: undefined,
+      status: undefined,
+      sortBy: undefined,
+      sortOrder: undefined,
+      from: undefined,
+      to: undefined,
+    })
   }
 
-  const filtered = useMemo(() => {
-    const result = initialSessions.filter((session) => {
-      if (
-        search &&
-        !session.userNickname.toLowerCase().includes(search.toLowerCase()) &&
-        !session.id.includes(search)
-      )
-        return false
-      if (selectedStatus !== 'all' && session.status !== selectedStatus) return false
-      return true
-    })
-
-    return [...result].sort((a, b) => {
-      let aVal: string | number = ''
-      let bVal: string | number = ''
-
-      if (sortBy === 'createdAt') {
-        aVal = a.createdAt
-        bVal = b.createdAt
-      } else if (sortBy === 'endedAt') {
-        aVal = a.endedAt ?? ''
-        bVal = b.endedAt ?? ''
-      } else if (sortBy === 'score') {
-        aVal = a.score ?? 0
-        bVal = b.score ?? 0
-      }
-
-      if (aVal < bVal) return sortOrder === 'desc' ? 1 : -1
-      if (aVal > bVal) return sortOrder === 'desc' ? -1 : 1
-      return 0
-    })
-  }, [initialSessions, search, selectedStatus, sortBy, sortOrder])
-
   return {
+    sessions: items,
+    statusCounts,
+    meta,
+    hasMore,
+    isLoadingMore,
+    loadMoreError,
+    initialLoadFailed,
+    loadMore,
+    scrollRootRef,
     search,
     setSearch,
-    selectedStatus,
+    selectedStatus: query.status ?? 'all',
     setSelectedStatus,
-    sortBy,
+    sortBy: query.sortBy,
     setSortBy,
-    sortOrder,
+    sortOrder: query.sortOrder,
     setSortOrder,
-    filtered,
-    totalCount: initialSessions.length,
-    completedCount,
-    inProgressCount,
-    abandonedCount,
+    isPending,
+    isPaused: isPending || isSearchPending,
     resetFilters,
   }
 }
+
+export type { InterviewSortBy }

@@ -1,6 +1,16 @@
+import type { ListQueryParams, PaginatedData } from '@/shared/types/pagination'
+
 // API 응답 타입
 export type NoticeCategory = 'NOTICE' | 'UPDATE' | 'GUIDE' | 'EVENT' | 'MAINTENANCE'
 export type NoticeStatus = 'ACTIVE' | 'INACTIVE'
+export type NoticeSortBy = 'createdAt' | 'updatedAt'
+
+export interface GetNoticesParams extends ListQueryParams {
+  status?: NoticeStatus
+  sortBy?: NoticeSortBy
+  from?: string
+  to?: string
+}
 
 export interface CreateNoticeRequest {
   title: string
@@ -40,13 +50,7 @@ export interface ApiNotice {
   updatedAt: string
 }
 
-export interface NoticeListResponse {
-  totalCount: number
-  filteredCount: number
-  page: number
-  limit: number
-  items: ApiNotice[]
-}
+export type NoticeListResponse = PaginatedData<ApiNotice>
 
 export interface DeleteNoticeResponse {
   id: number
@@ -62,3 +66,5 @@ export interface Notice {
   createdAt: string
   updatedAt: string
 }
+
+export type NoticeListData = PaginatedData<Notice>

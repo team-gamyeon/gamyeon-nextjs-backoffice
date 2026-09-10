@@ -1,15 +1,23 @@
+import type { RefObject } from 'react'
 import { motion } from 'framer-motion'
 import { Badge } from '@/shared/ui/badge'
+import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import { formatDuration } from '@/shared/lib/utils/formatDuration'
 import type { InterviewSession } from '@/featured/interviews/types'
 
 const STATUS_LABEL: Record<
   InterviewSession['status'],
-  { label: string; variant: 'destructive' | 'default' | 'secondary'; className?: string }
+  {
+    label: string
+    variant: 'destructive' | 'default' | 'secondary' | 'outline'
+    className?: string
+  }
 > = {
-  abandoned: { label: '중단', variant: 'destructive' },
-  in_progress: { label: '진행 중', variant: 'default' },
-  completed: {
+  READY: { label: '대기', variant: 'outline' },
+  IN_PROGRESS: { label: '진행 중', variant: 'default' },
+  PAUSED: { label: '일시중지', variant: 'destructive' },
+  FINISHED: {
     label: '완료',
     variant: 'secondary',
     className: 'bg-green-600 text-white dark:bg-green-400 dark:text-white',
@@ -18,12 +26,31 @@ const STATUS_LABEL: Record<
 
 interface InterviewsTableProps {
   sessions: InterviewSession[]
+  scrollContainerRef: RefObject<HTMLDivElement | null>
+  hasMore: boolean
+  isLoading: boolean
+  hasError: boolean
+  initialLoadFailed: boolean
+  isPaused?: boolean
+  onLoadMore: () => void | Promise<void>
 }
 
-export function InterviewsTable({ sessions }: InterviewsTableProps) {
+export function InterviewsTable({
+  sessions,
+  scrollContainerRef,
+  hasMore,
+  isLoading,
+  hasError,
+  initialLoadFailed,
+  isPaused,
+  onLoadMore,
+}: InterviewsTableProps) {
   return (
     <div className="border-border/60 overflow-hidden rounded-lg border">
-      <div className="max-h-140 w-full overflow-auto [scrollbar-gutter:stable]">
+      <div
+        ref={scrollContainerRef}
+        className="max-h-140 w-full overflow-auto [scrollbar-gutter:stable]"
+      >
         <table className="w-full min-w-200 text-sm">
           <thead className="bg-muted sticky top-0 z-10">
             <tr>
@@ -51,12 +78,12 @@ export function InterviewsTable({ sessions }: InterviewsTableProps) {
             </tr>
           </thead>
           <tbody className="divide-border/40 bg-background divide-y">
-            {sessions.map((session, index) => (
+            {sessions.map((session) => (
               <motion.tr
                 key={session.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.04 }}
+                transition={{ duration: 0.15 }}
                 className="hover:bg-muted/30 transition-colors"
               >
                 <td className="truncate px-6 py-3 text-center">
@@ -95,10 +122,21 @@ export function InterviewsTable({ sessions }: InterviewsTableProps) {
         </table>
 
         {sessions.length === 0 && (
-          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-            검색 결과가 없습니다.
-          </div>
+          <ListEmptyState
+            hasError={initialLoadFailed}
+            errorMessage="면접 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+            emptyMessage="검색 결과가 없습니다."
+          />
         )}
+        <InfiniteScrollTrigger
+          rootRef={scrollContainerRef}
+          hasMore={hasMore}
+          isLoading={isLoading}
+          hasError={hasError}
+          isPaused={isPaused}
+          loadedCount={sessions.length}
+          onLoadMore={onLoadMore}
+        />
       </div>
     </div>
   )

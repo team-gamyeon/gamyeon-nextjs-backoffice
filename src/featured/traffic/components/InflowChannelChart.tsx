@@ -47,6 +47,10 @@ export function InflowChannelChartContent({ data }: InflowChannelChartProps) {
     )
   }
 
+  return <InflowChannelDonut data={data} />
+}
+
+function InflowChannelDonut({ data }: InflowChannelChartProps) {
   const total = data.reduce((sum, item) => sum + item.totalUsers, 0)
 
   const chartData = data.map((item, index) => ({

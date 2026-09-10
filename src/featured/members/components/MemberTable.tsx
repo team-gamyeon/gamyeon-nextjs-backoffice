@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import type { RefObject } from 'react'
 import { motion } from 'framer-motion'
 import { MoreHorizontal, Shield, ShieldOff } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
@@ -14,39 +15,49 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { MemberStatusBadge } from './MemberStatusBadge'
 import { SanctionDialog } from './SanctionDialog'
+import { InfiniteScrollTrigger } from '@/shared/components/InfiniteScrollTrigger'
+import { ListEmptyState } from '@/shared/components/ListEmptyState'
 import type { Member } from '@/featured/members/types'
 
 interface MemberTableProps {
   members: Member[]
+  scrollRootRef: RefObject<HTMLDivElement | null>
+  hasMore: boolean
+  isLoadingMore: boolean
+  hasLoadError: boolean
+  initialLoadFailed: boolean
+  isPaused?: boolean
+  onLoadMore: () => void | Promise<void>
 }
 
-export function MemberTable({ members }: MemberTableProps) {
-  const [isMounted, setIsMounted] = useState(false)
-
+export function MemberTable({
+  members,
+  scrollRootRef,
+  hasMore,
+  isLoadingMore,
+  hasLoadError,
+  initialLoadFailed,
+  isPaused,
+  onLoadMore,
+}: MemberTableProps) {
   const [sanctionTarget, setSanctionTarget] = useState<{
     member: Member
     type: 'warning' | 'suspended' | 'release'
   } | null>(null)
 
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  if (!isMounted) {
-    return null
-  }
-
   return (
     <>
-      <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-lg border">
-        <div className="max-h-180 min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+      <div className="border-border/60 overflow-hidden rounded-lg border">
+        <div
+          ref={scrollRootRef}
+          className="max-h-140 w-full overflow-auto [scrollbar-gutter:stable]"
+        >
           <table className="w-full table-fixed text-sm">
             <colgroup>
+              <col className="w-[20%]" />
+              <col className="w-[30%]" />
               <col className="w-[15%]" />
-              <col className="w-[25%]" />
               <col className="w-[15%]" />
-              <col className="w-[15%]" />
-              <col className="w-[10%]" />
               <col className="w-[10%]" />
               <col className="w-16" />
             </colgroup>
@@ -58,7 +69,6 @@ export function MemberTable({ members }: MemberTableProps) {
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">
                   마지막 활동
                 </th>
-                <th className="text-muted-foreground px-6 py-4 text-center font-medium">세션 수</th>
                 <th className="text-muted-foreground px-6 py-4 text-center font-medium">상태</th>
                 <th className="px-6 py-4" />
               </tr>
@@ -73,9 +83,6 @@ export function MemberTable({ members }: MemberTableProps) {
                   </td>
                   <td className="text-muted-foreground truncate px-6 py-3 text-center">
                     {member.lastActiveAt}
-                  </td>
-                  <td className="truncate px-6 py-3 text-center font-medium">
-                    {member.sessionCount}
                   </td>
                   <td className="truncate px-6 py-3 text-center">
                     <div className="flex justify-center">
@@ -99,34 +106,32 @@ export function MemberTable({ members }: MemberTableProps) {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() =>
-                              setSanctionTarget({
-                                member,
-                                type: 'warning',
-                              })
+                              member.status !== 'withdrew' &&
+                              setSanctionTarget({ member, type: 'warning' })
                             }
-                            className="gap-2 text-amber-600 focus:text-amber-600"
+                            disabled={member.status === 'withdrew'}
+                            className="gap-2 text-amber-600 focus:text-amber-600 disabled:pointer-events-none disabled:opacity-40"
                           >
                             <Shield className="h-4 w-4" />
                             경고 처분
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
-                              setSanctionTarget({
-                                member,
-                                type: 'suspended',
-                              })
+                              member.status !== 'withdrew' &&
+                              setSanctionTarget({ member, type: 'suspended' })
                             }
-                            className="text-destructive focus:text-destructive gap-2"
+                            disabled={member.status === 'withdrew'}
+                            className="text-destructive focus:text-destructive gap-2 disabled:pointer-events-none disabled:opacity-40"
                           >
                             <ShieldOff className="h-4 w-4" />
                             정지 처분
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
-                              member.status !== 'active' &&
+                              (member.status === 'warning' || member.status === 'suspended') &&
                               setSanctionTarget({ member, type: 'release' })
                             }
-                            disabled={member.status === 'active'}
+                            disabled={member.status !== 'warning' && member.status !== 'suspended'}
                             className="gap-2 text-green-600 focus:text-green-600 disabled:pointer-events-none disabled:opacity-40"
                           >
                             <ShieldOff className="h-4 w-4" />
@@ -142,10 +147,21 @@ export function MemberTable({ members }: MemberTableProps) {
           </table>
 
           {members.length === 0 && (
-            <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">
-              검색 결과가 없습니다.
-            </div>
+            <ListEmptyState
+              hasError={initialLoadFailed}
+              errorMessage="회원 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+              emptyMessage="검색 결과가 없습니다."
+            />
           )}
+          <InfiniteScrollTrigger
+            rootRef={scrollRootRef}
+            hasMore={hasMore}
+            isLoading={isLoadingMore}
+            hasError={hasLoadError}
+            isPaused={isPaused}
+            loadedCount={members.length}
+            onLoadMore={onLoadMore}
+          />
         </div>
       </div>
 

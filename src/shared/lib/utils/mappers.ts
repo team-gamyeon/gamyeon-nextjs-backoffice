@@ -3,31 +3,7 @@ import { STATUS_MAP } from '@/featured/members/constants'
 import type { ApiNotice, Notice } from '@/featured/notices/types'
 import type { ApiUser, Member } from '@/featured/members/types'
 import type { ApiQuestion, CommonQuestion } from '@/featured/questions/types'
-import type { ApiInterview, InterviewSession, InterviewStatus, SessionStatus } from '@/featured/interviews/types'
 import type { ApiReport, AnalysisReport } from '@/featured/reports/types'
-
-function mapInterviewStatus(status: InterviewStatus): SessionStatus {
-  if (status === 'FINISHED') return 'completed'
-  if (status === 'IN_PROGRESS') return 'in_progress'
-  return 'abandoned'
-}
-
-export function mapApiInterviewToSession(interview: ApiInterview): InterviewSession {
-  return {
-    id: String(interview.id),
-    userId: String(interview.userId),
-    userNickname: interview.user.nickname,
-    intvTitle: interview.title,
-    status: mapInterviewStatus(interview.status),
-    questionCount: 0,
-    answeredCount: 0,
-    durationSec: Number(interview.durationSeconds),
-    startedAt: interview.startedAt ? timeAgo(interview.startedAt) : null,
-    pausedAt: interview.pausedAt ? timeAgo(interview.pausedAt) : null,
-    createdAt: timeAgo(interview.createdAt),
-    endedAt: interview.finishedAt ? timeAgo(interview.finishedAt) : undefined,
-  }
-}
 
 export function mapApiNoticeToNotice(notice: ApiNotice): Notice {
   return {
@@ -46,12 +22,9 @@ export function mapApiUserToMember(user: ApiUser): Member {
     id: String(user.id),
     nickname: user.nickname,
     email: user.email,
-    passwordHash: '',
-    status: STATUS_MAP[user.status] ?? 'active',
+    status: STATUS_MAP[user.status] ?? 'unknown',
     joinedAt: timeAgo(user.createdAt),
     lastActiveAt: timeAgo(user.updatedAt),
-    sessionCount: 0,
-    sanctionHistory: [],
   }
 }
 

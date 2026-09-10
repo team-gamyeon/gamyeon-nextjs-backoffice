@@ -12,6 +12,7 @@ interface NoticeListItemProps {
   notice: Notice
   index: number
   isExpanded: boolean
+  isTogglePending: boolean
   onToggleExpand: () => void
   onToggle: (id: string) => Promise<void>
   onEdit: (notice: Notice) => void
@@ -22,6 +23,7 @@ export function NoticeListItem({
   notice,
   index,
   isExpanded,
+  isTogglePending,
   onToggleExpand,
   onToggle,
   onEdit,
@@ -44,8 +46,8 @@ export function NoticeListItem({
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.04 }}
-        className="border-border/60 bg-card rounded-lg border"
+        transition={{ delay: Math.min(index, 5) * 0.04 }}
+        className="border-border/60 bg-card rounded-lg border [contain-intrinsic-size:auto_72px] [content-visibility:auto]"
       >
         <div className="flex items-center justify-between gap-4 px-4 py-3">
           <button
@@ -75,8 +77,10 @@ export function NoticeListItem({
             <button
               type="button"
               onClick={() => onToggle(notice.id)}
+              disabled={isTogglePending}
+              aria-busy={isTogglePending}
               className={cn(
-                'inline-flex h-7 w-20 shrink-0 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors',
+                'inline-flex h-7 w-20 shrink-0 cursor-pointer items-center justify-center rounded-full text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
                 notice.isActive
                   ? 'bg-primary/10 text-primary hover:bg-primary/20'
                   : 'bg-muted text-muted-foreground hover:bg-muted/60',

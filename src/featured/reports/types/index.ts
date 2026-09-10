@@ -1,7 +1,8 @@
+import type { ListQueryParams, PaginatedData } from '@/shared/types/pagination'
+
 // API 타입
 export type ReportStatus = 'COMPLETED' | 'IN_PROGRESS' | 'FAILED'
 export type ReportSortBy = 'completedAt' | 'createdAt' | 'score'
-export type SortOrder = 'asc' | 'desc'
 
 export interface ApiReportUser {
   id: string
@@ -44,21 +45,11 @@ export interface ApiReportDetail extends ApiReport {
   questionResults: ApiQuestionResult[]
 }
 
-export interface ReportListResponse {
-  totalCount: number
-  filteredCount: number
-  page: number
-  limit: number
-  items: ApiReport[]
-}
+export type ReportListResponse = PaginatedData<ApiReport>
 
-export interface GetReportsParams {
+export interface GetReportsParams extends ListQueryParams {
   status?: ReportStatus
-  search?: string
   sortBy?: ReportSortBy
-  sortOrder?: SortOrder
-  page?: number
-  limit?: number
 }
 
 // UI 타입

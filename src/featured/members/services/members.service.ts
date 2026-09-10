@@ -1,10 +1,10 @@
 import { serverApi } from '@/shared/lib/api'
-import type { UserListResponse } from '@/featured/members/types'
+import type { MemberListQuery, UserListResponse } from '@/featured/members/types'
 
-export async function getUsers(): Promise<UserListResponse | null> {
-  try {
-    return await serverApi.get<UserListResponse>('/api/v1/users')
-  } catch {
-    return null
-  }
+export async function getUsers(query: MemberListQuery = {}): Promise<UserListResponse | null> {
+  const params = Object.fromEntries(
+    Object.entries(query).filter(([, value]) => value !== undefined),
+  )
+
+  return serverApi.get<UserListResponse>('/api/v1/users', { params })
 }
