@@ -145,7 +145,7 @@ export function SurvivalRateChart({ data }: SurvivalRateChartProps) {
                 <LabelList
                   dataKey="rate"
                   position="top"
-                  formatter={(value: number) => `${value}%`}
+                  formatter={(value) => (value == null ? '' : `${value}%`)}
                   style={{ fontSize: 11, fontWeight: 600, fill: 'oklch(0.4 0.02 180)' }}
                 />
               </Bar>
