@@ -96,7 +96,7 @@ export function DauChart({ signupTrend }: Props) {
                   const item = weekData.find((weekDataItem) => weekDataItem.date === label);
                   return item ? `${item.day} (${item.date})` : label;
                 }}
-                formatter={(value: number) => [`${value.toLocaleString()}명`, "신규 가입"]}
+                formatter={(value) => [`${value?.toLocaleString() ?? ""}명`, "신규 가입"]}
               />
               <Area
                 type="monotone"

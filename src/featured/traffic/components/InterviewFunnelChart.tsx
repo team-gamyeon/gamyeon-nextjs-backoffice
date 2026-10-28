@@ -109,7 +109,7 @@ export function InterviewFunnelChart() {
                 <LabelList
                   dataKey="rate"
                   position="right"
-                  formatter={(value: number) => `${value}%`}
+                  formatter={(value) => (value == null ? '' : `${value}%`)}
                   style={{ fontSize: 12, fontWeight: 600, fill: 'oklch(0.4 0.02 180)' }}
                 />
               </Bar>
